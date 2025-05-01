@@ -1,0 +1,6 @@
+@Initiative.Api_HostAddress = http://localhost:5192
+
+POST {{Initiative.Api_HostAddress}}/admin/
+Accept: application/json
+
+###
