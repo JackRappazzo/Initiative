@@ -7,6 +7,7 @@ namespace Initiative.Api.Services
     {
 
         UserManager<InitiativeUser> userManager;
+
         public UserRegistrationService(UserManager<InitiativeUser> userManager)
         {
             this.userManager = userManager;
