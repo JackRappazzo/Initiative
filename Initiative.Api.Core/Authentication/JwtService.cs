@@ -3,14 +3,22 @@ using System.Security.Claims;
 using System.Text;
 using Initiative.Api.Core;
 using Initiative.Api.Core.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Initiative.Api.Core.Authentication
 {
-    public class JwtService
+    public class JwtService : IJwtService
     {
 
-        public JwtService() { }
+        protected JwtSettings jwtSettings;
+        protected ICredentialsFactory credentialsFactory;
+
+        public JwtService(IOptions<JwtSettings> settings, ICredentialsFactory securityKeyFactory)
+        {
+            this.jwtSettings = settings.Value;
+            this.credentialsFactory = securityKeyFactory;
+        }
 
         public static string GetSecret(EnvironmentType environment)
         {
@@ -24,7 +32,7 @@ namespace Initiative.Api.Core.Authentication
             }
         }
 
-        public string GenerateToken(InitiativeUser user, JwtSettings settings)
+        public string GenerateToken(InitiativeUser user)
         {
 
             var claims = new[]
@@ -34,13 +42,12 @@ namespace Initiative.Api.Core.Authentication
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.Secret));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var credentials = credentialsFactory.Create(jwtSettings.Secret);
 
             var token = new JwtSecurityToken(
-                issuer: settings.Issuer,
-                audience: settings.Audience,
-                expires: DateTime.Now + TimeSpan.FromMinutes(settings.ExpiresInMinutes),
+                issuer: jwtSettings.Issuer,
+                audience: jwtSettings.Audience,
+                expires: DateTime.Now + TimeSpan.FromMinutes(jwtSettings.ExpiresInMinutes),
                 claims: claims,
                 signingCredentials: credentials);
 
