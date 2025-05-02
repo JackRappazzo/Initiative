@@ -8,6 +8,5 @@ namespace Initiative.Api.Core.Identity
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? LastLogin { get; set; }
-        public string EmailAddress { get; set; }
     }
 }
