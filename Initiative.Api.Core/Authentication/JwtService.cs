@@ -11,12 +11,12 @@ namespace Initiative.Api.Core.Authentication
     public class JwtService : IJwtService
     {
 
-        protected JwtSettings jwtSettings;
+        protected IOptions<JwtSettings> jwtSettingsContainer;
         protected ICredentialsFactory credentialsFactory;
 
         public JwtService(IOptions<JwtSettings> settings, ICredentialsFactory securityKeyFactory)
         {
-            this.jwtSettings = settings.Value;
+            this.jwtSettingsContainer = settings;
             this.credentialsFactory = securityKeyFactory;
         }
 
@@ -40,9 +40,12 @@ namespace Initiative.Api.Core.Authentication
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
-            };
+            }; 
+            
+            var jwtSettings = jwtSettingsContainer.Value;
 
             var credentials = credentialsFactory.Create(jwtSettings.Secret);
+            
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings.Issuer,

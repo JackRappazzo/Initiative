@@ -26,7 +26,7 @@ namespace Initiative.Api.Services
             if (await userManager.FindByEmailAsync(email) != null)
                 return (false, "Email exists");
 
-            var user = new InitiativeUser() { DisplayName = displayName, EmailAddress = email };
+            var user = new InitiativeUser() { DisplayName = displayName, Email = email };
             var result = await userManager.CreateAsync(user, password);
 
             if (!result.Succeeded)
