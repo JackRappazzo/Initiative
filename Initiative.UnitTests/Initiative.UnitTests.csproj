@@ -29,11 +29,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Api\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Initiative.Api.Core\Initiative.Api.Core.csproj" />
+    <ProjectReference Include="..\Initiative.Api\Initiative.Api.csproj" />
   </ItemGroup>
 
 </Project>

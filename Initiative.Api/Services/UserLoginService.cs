@@ -19,7 +19,7 @@ namespace Initiative.Api.Services
         {
             if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password))
             {
-                var user = await userManager.FindByNameAsync(email);
+                var user = await userManager.FindByEmailAsync(email);
 
                 if (user == null)
                 {
