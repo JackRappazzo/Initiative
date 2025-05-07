@@ -5,12 +5,14 @@ interface AuthContextType {
   token: string | null;
   login: (token: string) => void;
   logout: () => void;
+  isLoggedIn: () => boolean;
 }
 
 export const AuthContext = createContext<AuthContextType>({
   token: null,
   login: () => {},
   logout: () => {},
+  isLoggedIn: () => {return false;}
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -26,8 +28,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
   };
 
+  const isLoggedIn = () => {
+    return token != null && token !== "";
+  }
+
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ token, isLoggedIn, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

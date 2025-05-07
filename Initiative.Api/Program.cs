@@ -11,10 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
-
-var app = builder.Build();
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+    });
+});
 
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 builder.Services.AddScoped<IUserLoginService, UserLoginService>();
@@ -27,11 +33,14 @@ builder.Services.AddIdentityMongoDbProvider<InitiativeUser, DefaultRole>(identit
     identityOptions.Password.RequireNonAlphanumeric = true;
     identityOptions.Password.RequiredUniqueChars = 1;
     identityOptions.Password.RequiredLength = 6;
+    identityOptions.User.RequireUniqueEmail = true;
+    identityOptions.User.AllowedUserNameCharacters = null;
 }, 
 mongoOptions =>
 {
     mongoOptions.ConnectionString = "mongodb://localhost:27017/Initiative";
 });
+
 
 // Register JwtSettings from environment variables
 builder.Services.Configure<JwtSettings>(options =>
@@ -43,7 +52,14 @@ builder.Services.Configure<JwtSettings>(options =>
 });
 
 
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+
 // Configure the HTTP request pipeline.
+
+app.UseCors("AllowFrontend");
 
 app.UseHttpsRedirection();
 

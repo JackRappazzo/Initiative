@@ -3,37 +3,36 @@ import { useState, useContext, FormEvent } from "react";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
 import { AdminClient } from "../api/adminClient";
-import { LoginResponse } from "../api/messages/LoginResponse";
 import { collapseTextChangeRangesAcrossMultipleVersions } from "typescript";
 
 
 
-const LoginForm = () => {
-  const { login } = useContext(AuthContext);
+const RegisterForm = () => {
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const adminClient = new AdminClient();
 
-  const handleLogin = async (e: FormEvent) => {
+  const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
 
     
     try {
-      const res = await adminClient.Login(email,password);
-      login(res.token);
+      const res = await adminClient.Register(displayName, email,password);
     } catch (err) {
       console.error(err);
-      alert("Login failed");
+      alert("Registration failed");
     }
   };
 
   return (
-    <form onSubmit={handleLogin}>
+    <form onSubmit={handleRegister}>
+      <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Display Name" />
       <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
       <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
-      <button type="submit">Log In</button>
+      <button type="submit">Register</button>
     </form>
   );
 };
 
-export default LoginForm;
+export default RegisterForm;

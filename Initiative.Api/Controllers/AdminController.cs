@@ -9,7 +9,7 @@ using Initiative.Api.Core.Authentication;
 
 namespace Initiative.Api.Controllers
 {
-    [Route("api/admin")]
+    [Route("api/[controller]")]
     [ApiController]
     public class AdminController : ControllerBase
     {
@@ -25,8 +25,8 @@ namespace Initiative.Api.Controllers
         }
 
 
-        [Route("register")]
-        [HttpPost]
+        
+        [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest data, CancellationToken cancellationToken)
         {
             (bool success, string message) = await registrationService.RegisterUser(data.DisplayName, data.EmailAddress, data.Password, cancellationToken);
@@ -41,8 +41,7 @@ namespace Initiative.Api.Controllers
             }
         }
 
-        [Route("login")]
-        [HttpPost]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest data, CancellationToken cancellationToken)
         {
             (var isLoggedIn, var errorMessage, var token) = await loginService.LoginAndFetchToken(data.EmailAddress, data.Password, cancellationToken);

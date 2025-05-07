@@ -26,12 +26,12 @@ namespace Initiative.Api.Services
             if (await userManager.FindByEmailAsync(email) != null)
                 return (false, "Email exists");
 
-            var user = new InitiativeUser() { DisplayName = displayName, Email = email };
+            var user = new InitiativeUser() { DisplayName = displayName, Email = email, UserName = email };
             var result = await userManager.CreateAsync(user, password);
 
             if (!result.Succeeded)
             {
-                return (false, "An error occurred");
+                return (false, result.Errors.First().Description);
             }
             else
             {

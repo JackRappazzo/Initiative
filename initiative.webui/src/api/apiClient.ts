@@ -43,7 +43,10 @@ export class ApiClient {
   }
 
   public post<T>(url: string, data: any): Promise<T> {
-    return this.client.post(url, data);
+    return this.client.post(url, data, {
+      headers: {'Content-Type': 'application/json' },
+      withCredentials: true,
+    });
   }
 
   public get<T>(url: string): Promise<T> {
