@@ -9,7 +9,7 @@ using MongoDB.Driver;
 
 namespace Initiative.Persistence.Repositories
 {
-    public class JwtRefreshTokenRepository : MongoDbRepository
+    public class JwtRefreshTokenRepository : MongoDbRepository, IJwtRefreshTokenRepository
     {
         public const string TableName = "UserRefreshTokens";
 
@@ -28,7 +28,8 @@ namespace Initiative.Persistence.Repositories
 
             await collection.ReplaceOneAsync<JwtRefreshTokenModel>(
                 token => token.UserId == new ObjectId(userId),
-                new JwtRefreshTokenModel() {
+                new JwtRefreshTokenModel()
+                {
                     Id = ObjectId.GenerateNewId(),
                     UserId = new ObjectId(userId),
                     RefreshToken = refreshToken,
@@ -39,7 +40,7 @@ namespace Initiative.Persistence.Repositories
                     IsUpsert = true
                 },
                 cancellationToken);
-        
+
         }
 
         public async Task<JwtRefreshTokenModel> FetchToken(string userGuid, string refreshToken, CancellationToken cancellationToken)
