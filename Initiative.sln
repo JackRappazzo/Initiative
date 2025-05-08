@@ -2,8 +2,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebUI", "WebUI", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Api", "Api", "{2795E41C-3B8B-4B7B-99A2-D8DB1300B43D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Initiative.Api.Core", "Initiative.Api.Core\Initiative.Api.Core.csproj", "{3FB23910-6E20-4D96-AC92-F8DA55156048}"
@@ -19,6 +17,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{9BE94D7C-F500-4E88-8090-137C0C0B037A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Initiative.UnitTests", "Initiative.UnitTests\Initiative.UnitTests.csproj", "{75CAFC7B-01CF-49FC-B73B-609E38F12679}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Initiative.IntegrationTests.Persistence", "Initiative.IntegrationTests.Persistence\Initiative.IntegrationTests.Persistence.csproj", "{421172C7-18DF-4746-92C7-67A61DF1AF7A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,6 +46,10 @@ Global
 		{75CAFC7B-01CF-49FC-B73B-609E38F12679}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75CAFC7B-01CF-49FC-B73B-609E38F12679}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75CAFC7B-01CF-49FC-B73B-609E38F12679}.Release|Any CPU.Build.0 = Release|Any CPU
+		{421172C7-18DF-4746-92C7-67A61DF1AF7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{421172C7-18DF-4746-92C7-67A61DF1AF7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{421172C7-18DF-4746-92C7-67A61DF1AF7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{421172C7-18DF-4746-92C7-67A61DF1AF7A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,6 +60,7 @@ Global
 		{9916D8A9-57B4-4BBB-A7F7-CC92888C4B76} = {CBD05774-244C-4E38-ABEC-D731C217BBD7}
 		{4CCA9FBD-CC8F-4D55-8A5F-7F3C9183A921} = {2795E41C-3B8B-4B7B-99A2-D8DB1300B43D}
 		{75CAFC7B-01CF-49FC-B73B-609E38F12679} = {9BE94D7C-F500-4E88-8090-137C0C0B037A}
+		{421172C7-18DF-4746-92C7-67A61DF1AF7A} = {9BE94D7C-F500-4E88-8090-137C0C0B037A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E05E6987-C460-4487-8B72-D99AA72C642B}

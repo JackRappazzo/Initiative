@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Initiative.Api.Core;
 using Initiative.Api.Core.Identity;
@@ -55,6 +56,18 @@ namespace Initiative.Api.Core.Authentication
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public JwtRefreshToken GenerateRefreshToken(InitiativeUser user, DateTime expiration)
+        {
+            var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+            return new JwtRefreshToken()
+            {
+                User = user,
+                Expiration = expiration,
+                RefreshToken = token
+            };
+
         }
     }
 }
