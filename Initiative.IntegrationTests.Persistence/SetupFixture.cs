@@ -1,20 +1,24 @@
-using System.Reflection.Metadata;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Initiative.IntegrationTests.Persistence.Utilities;
 using Initiative.Persistence.ConnectionStrings;
-using LeapingGorilla.Testing.NUnit.Composable;
-using MongoDB.Driver;
 
-namespace Initiative.IntegrationTests.Persistence
+namespace Initiative.IntegrationTests
 {
-    public abstract class WhenTestingWithMongoDb : ComposableTestingTheBehaviourOf
+    [SetUpFixture]
+    public class SetupFixture
     {
         private MongoTestResetService mongoTestResetService = new MongoTestResetService(ConnectionStrings.LocalTest);
         protected const string ConnectionString = ConnectionStrings.LocalTest;
         protected const string DatabaseName = "Initiative_Test";
 
-        protected IMongoDatabase GetDatabase()
+        [OneTimeSetUp]
+        public async Task ResetDatabase()
         {
-            return new MongoClient(ConnectionString).GetDatabase(DatabaseName);
+            await mongoTestResetService.ResetDatabase();
         }
 
     }
