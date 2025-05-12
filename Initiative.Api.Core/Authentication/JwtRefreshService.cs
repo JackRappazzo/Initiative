@@ -10,7 +10,7 @@ using MongoDB.Bson.Serialization.Serializers;
 
 namespace Initiative.Api.Core.Authentication
 {
-    public class JwtRefreshService
+    public class JwtRefreshService : IJwtRefreshService
     {
         protected IJwtService jwtService;
         protected IJwtRefreshTokenRepository jwtRefreshTokenRepository;
@@ -33,7 +33,7 @@ namespace Initiative.Api.Core.Authentication
                 return (false, null);
             }
             else
-            { 
+            {
                 var user = await userManager.FindByIdAsync(token.UserId.ToString());
                 if (user == null)
                 {

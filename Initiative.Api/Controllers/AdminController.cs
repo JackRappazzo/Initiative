@@ -15,17 +15,17 @@ namespace Initiative.Api.Controllers
     {
         IUserRegistrationService registrationService;
         IUserLoginService loginService;
-        IJwtService jwtService;
+        IJwtRefreshService jwtRefreshService;
 
-        public AdminController(IUserRegistrationService registrationService, IUserLoginService loginService, IJwtService jwtService)
+        public AdminController(IUserRegistrationService registrationService, IUserLoginService loginService, IJwtRefreshService jwtRefreshService)
         {
             this.registrationService = registrationService;
             this.loginService = loginService;
-            this.jwtService = jwtService;
+            this.jwtRefreshService = jwtRefreshService;
         }
 
 
-        
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest data, CancellationToken cancellationToken)
         {
@@ -73,6 +73,24 @@ namespace Initiative.Api.Controllers
                 }
 
                 return BadRequest(errorMessage);
+            }
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshJwtRequest request, CancellationToken cancellationToken)
+        {
+            (var success, var token) = await jwtRefreshService.RefreshJwt(request.RefreshToken, cancellationToken);
+
+            if(success)
+            {
+                return Ok(new RefreshJwtResponse()
+                {
+                    RefreshToken = token
+                });
+            }
+            else
+            {
+                return BadRequest("Access denied. Log in again");
             }
         }
     }
