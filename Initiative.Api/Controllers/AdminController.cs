@@ -52,7 +52,13 @@ namespace Initiative.Api.Controllers
                 {
                     Success = true,
                     Jwt = result.Jwt,
-                    RefreshToken = result.RefreshToken
+                });
+                Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions()
+                {
+                    Expires = DateTime.UtcNow.AddDays(30),
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
                 });
             }
             else
