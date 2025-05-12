@@ -8,6 +8,7 @@ using Initiative.Api.Core.Identity;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.Core.Composable;
 using LeapingGorilla.Testing.NUnit.Attributes;
+using NSubstitute;
 
 namespace Initiative.UnitTests.Core.Authentication.JwtServiceTests.GenerateRefreshTokenTests
 {
@@ -17,7 +18,8 @@ namespace Initiative.UnitTests.Core.Authentication.JwtServiceTests.GenerateRefre
             .Given(UserIsSet)
             .And(ExpirationIsSet)
             .When(GenerateRefreshTokenIsCalled)
-            .Then(ShouldReturnValidToken);
+            .Then(ShouldReturnValidToken)
+            .And(ShouldStoreToken);
 
         [Given]
         public void UserIsSet()
@@ -42,6 +44,14 @@ namespace Initiative.UnitTests.Core.Authentication.JwtServiceTests.GenerateRefre
             Assert.That(Result.RefreshToken, Is.Not.Null);
             Assert.That(Result.RefreshToken.Count(), Is.GreaterThan(0));
             Assert.That(Result.Expiration, Is.EqualTo(Expiration));
+        }
+
+        [Then]
+        public void ShouldStoreToken()
+        {
+            JwtRefreshTokenRepository
+                .Received(1)
+                .UpsertRefreshToken(Result.User.Id.ToString(), Result.RefreshToken, Result.Expiration, Arg.Any<CancellationToken>());
         }
     }
 }

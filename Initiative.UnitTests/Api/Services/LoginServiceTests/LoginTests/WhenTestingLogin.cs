@@ -12,9 +12,7 @@ namespace Initiative.UnitTests.Api.Services.LoginServiceTests.LoginTests
     public abstract class WhenTestingLogin : WhenTestingLoginService
     {
 
-        protected bool IsSuccess;
-        protected string ErrorMessage;
-        protected string Jwt;
+        protected LoginResult Result;
 
 
         protected string Email;
@@ -23,7 +21,7 @@ namespace Initiative.UnitTests.Api.Services.LoginServiceTests.LoginTests
         [When]
         public async Task LoginIsCalled()
         {
-            (IsSuccess, ErrorMessage, Jwt) = await UserLoginService.LoginAndFetchToken(Email, Password, CancellationToken);
+            Result = await UserLoginService.LoginAndFetchTokens(Email, Password, CancellationToken);
         }
     }
 }

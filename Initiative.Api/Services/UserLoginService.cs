@@ -1,5 +1,6 @@
 ﻿using Initiative.Api.Core.Authentication;
 using Initiative.Api.Core.Identity;
+using Initiative.Persistence.Repositories;
 using Microsoft.AspNetCore.Identity;
 
 namespace Initiative.Api.Services
@@ -8,6 +9,7 @@ namespace Initiative.Api.Services
     {
         UserManager<InitiativeUser> userManager;
         IJwtService jwtService;
+        IJwtRefreshTokenRepository jwtRefreshTokenRepository;
 
         public UserLoginService(UserManager<InitiativeUser> userManager, IJwtService jwtService)
         {
@@ -15,7 +17,7 @@ namespace Initiative.Api.Services
             this.jwtService = jwtService;
         }
 
-        public async Task<(bool success, string message, string token)> LoginAndFetchToken(string email, string password, CancellationToken cancellationToken)
+        public async Task<LoginResult> LoginAndFetchTokens(string email, string password, CancellationToken cancellationToken)
         {
             if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password))
             {
@@ -23,7 +25,13 @@ namespace Initiative.Api.Services
 
                 if (user == null)
                 {
-                    return (false, "No matching email address", null);
+                    return new LoginResult()
+                    {
+                        ErrorType = LoginErrorType.EmailDoesNotExist,
+                        Success = false,
+                        Jwt = null,
+                        RefreshToken = null
+                    };
                 }
                 else
                 {
@@ -31,17 +39,32 @@ namespace Initiative.Api.Services
                     var passwordMatch = await userManager.CheckPasswordAsync(user, password);
                     if (passwordMatch)
                     {
-                        return (true, string.Empty, jwtService.GenerateToken(user));
+                        var jwt = jwtService.GenerateToken(user);
+                        var refresh = await jwtService.GenerateAndStoreRefreshToken(user, DateTime.UtcNow.AddDays(60), cancellationToken);
+
+                        return new LoginResult()
+                        {
+                            Success = true,
+                            ErrorType = LoginErrorType.None,
+                            Jwt = jwt,
+                            RefreshToken = refresh.RefreshToken
+                        };
                     }
                     else
                     {
-                        return (false, "Incorrect password", null);
+                        return new LoginResult()
+                        {
+                            ErrorType = LoginErrorType.PasswordMismatch,
+                            Success = false,
+                            Jwt = null,
+                            RefreshToken = null
+                        };
                     }
                 }
             }
             else
             {
-                return (false, "Missing arguments", null);
+                throw new ArgumentException("Missing arguments");
             }
         }
     }

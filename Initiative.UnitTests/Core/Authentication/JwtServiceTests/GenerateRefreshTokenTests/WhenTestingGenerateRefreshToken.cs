@@ -18,9 +18,9 @@ namespace Initiative.UnitTests.Core.Authentication.JwtServiceTests.GenerateRefre
         protected DateTime Expiration;
 
         [When]
-        public void GenerateRefreshTokenIsCalled()
+        public async Task GenerateRefreshTokenIsCalled()
         {
-            Result = JwtService.GenerateRefreshToken(User, Expiration);
+            Result = await JwtService.GenerateAndStoreRefreshToken(User, Expiration, CancellationToken);
         }
     }
 }

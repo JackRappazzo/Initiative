@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Initiative.Api.Core.Authentication;
 using Initiative.Api.Core.Identity;
 using Initiative.Api.Services;
+using Initiative.Persistence.Repositories;
 using Initiative.UnitTests.Api.Helpers;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.NUnit.Composable;

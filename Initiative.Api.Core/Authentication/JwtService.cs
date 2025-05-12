@@ -2,8 +2,10 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Initiative.Api.Core;
 using Initiative.Api.Core.Identity;
+using Initiative.Persistence.Repositories;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -14,11 +16,14 @@ namespace Initiative.Api.Core.Authentication
 
         protected IOptions<JwtSettings> jwtSettingsContainer;
         protected ICredentialsFactory credentialsFactory;
+        protected IJwtRefreshTokenRepository jwtRefreshTokenRepository;
 
-        public JwtService(IOptions<JwtSettings> settings, ICredentialsFactory securityKeyFactory)
+        public JwtService(IOptions<JwtSettings> settings, ICredentialsFactory securityKeyFactory, IJwtRefreshTokenRepository jwtRefreshTokenRepository)
         {
             this.jwtSettingsContainer = settings;
             this.credentialsFactory = securityKeyFactory;
+            this.jwtRefreshTokenRepository = jwtRefreshTokenRepository;
+
         }
 
         public static string GetSecret(EnvironmentType environment)
@@ -41,12 +46,12 @@ namespace Initiative.Api.Core.Authentication
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
-            }; 
-            
+            };
+
             var jwtSettings = jwtSettingsContainer.Value;
 
             var credentials = credentialsFactory.Create(jwtSettings.Secret);
-            
+
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings.Issuer,
@@ -58,15 +63,19 @@ namespace Initiative.Api.Core.Authentication
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public JwtRefreshToken GenerateRefreshToken(InitiativeUser user, DateTime expiration)
+        public async Task<JwtRefreshToken> GenerateAndStoreRefreshToken(InitiativeUser user, DateTime expiration, CancellationToken cancellationToken)
         {
             var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-            return new JwtRefreshToken()
+            await jwtRefreshTokenRepository.UpsertRefreshToken(user.Id.ToString(), token, expiration, cancellationToken);
+
+            var returnToken = new JwtRefreshToken()
             {
                 User = user,
                 Expiration = expiration,
                 RefreshToken = token
             };
+
+            return returnToken;
 
         }
     }

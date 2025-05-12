@@ -44,18 +44,34 @@ namespace Initiative.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest data, CancellationToken cancellationToken)
         {
-            (var isLoggedIn, var errorMessage, var token) = await loginService.LoginAndFetchToken(data.EmailAddress, data.Password, cancellationToken);
+            LoginResult result = await loginService.LoginAndFetchTokens(data.EmailAddress, data.Password, cancellationToken);
 
-            if(isLoggedIn)
+            if(result.Success)
             {
                 return Ok(new LoginResponse()
                 {
                     Success = true,
-                    Jwt = token
+                    Jwt = result.Jwt,
+                    RefreshToken = result.RefreshToken
                 });
             }
             else
             {
+                string errorMessage;
+                switch(result.ErrorType)
+                {
+                    case LoginErrorType.EmailDoesNotExist:
+                        errorMessage = "The given email does not exist";
+                        break;
+                    case LoginErrorType.PasswordMismatch:
+                        errorMessage = "The password does not match";
+                        break;
+                    case LoginErrorType.Unknown:
+                    default:
+                        errorMessage = "An unknown error has occurred";
+                        break;
+                }
+
                 return BadRequest(errorMessage);
             }
         }
