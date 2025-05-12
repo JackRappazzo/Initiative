@@ -23,7 +23,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.JwtRefreshTokenRe
         [Given]
         public void TokenIsSet()
         {
-            RefreshToken = "token";
+            RefreshToken = "test-token" + DateTime.UtcNow.ToFileTimeUtc().ToString();
         }
 
         [Given]
