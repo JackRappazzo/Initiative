@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Initiative.Api.Core.Identity\Initiative.Api.Core.Identity.csproj" />
+    <ProjectReference Include="..\Initiative.Persistence\Initiative.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

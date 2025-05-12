@@ -43,12 +43,12 @@ namespace Initiative.Persistence.Repositories
 
         }
 
-        public async Task<JwtRefreshTokenModel> FetchToken(string userGuid, string refreshToken, CancellationToken cancellationToken)
+        public async Task<JwtRefreshTokenModel> FetchToken(string refreshToken, CancellationToken cancellationToken)
         {
             var database = GetMongoDatabase();
             var collection = database.GetCollection<JwtRefreshTokenModel>(TableName);
 
-            var filter = Builders<JwtRefreshTokenModel>.Filter.Eq(refreshToken => refreshToken.UserId, new ObjectId(userGuid));
+            var filter = Builders<JwtRefreshTokenModel>.Filter.Eq(r => r.RefreshToken, refreshToken);
 
             var token = await (await collection.FindAsync<JwtRefreshTokenModel>(filter, cancellationToken: cancellationToken)).FirstOrDefaultAsync();
 

@@ -37,7 +37,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.JwtRefreshTokenRe
         [Then]
         public async Task ShouldUpsert()
         {
-            var token = await JwtRefreshTokenRepository.FetchToken(UserId, RefreshToken, CancellationToken);
+            var token = await JwtRefreshTokenRepository.FetchToken( RefreshToken, CancellationToken);
 
             Assert.That(token, Is.Not.Null);
             Assert.That(token.UserId, Is.EqualTo(new ObjectId(UserId)));
