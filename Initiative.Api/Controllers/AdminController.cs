@@ -93,7 +93,7 @@ namespace Initiative.Api.Controllers
             {
                 return Ok(new RefreshJwtResponse()
                 {
-                    RefreshToken = token
+                    AccessToken = token
                 });
             }
             else

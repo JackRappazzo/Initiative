@@ -1,9 +1,14 @@
-import { ApiClient } from "./apiClient";
+
 import { LoginResponse } from "./messages/LoginResponse";
 import { AxiosResponse } from "axios";
+import { HttpClient } from "./httpClient";
 
 export class AdminClient {
-    private apiClient:ApiClient = new ApiClient();
+    
+    private apiClient: HttpClient;
+    constructor() {
+        this.apiClient = HttpClient.GetInstance();
+    }
 
     public async Login(email:string, password:string) : Promise<LoginResponse>
     {
@@ -11,6 +16,11 @@ export class AdminClient {
             emailAddress: email,
             password
         });
+
+        if(response.success)
+        {
+            this.apiClient.setAccessToken(response.token);
+        }
 
         return response;
     }
