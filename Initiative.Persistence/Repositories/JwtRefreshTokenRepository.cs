@@ -24,13 +24,14 @@ namespace Initiative.Persistence.Repositories
 
             var filter = Builders<JwtRefreshTokenModel>.Filter.Eq(refreshToken => refreshToken.UserId, new ObjectId(userId));
 
+            var currentToken = await collection.Find<JwtRefreshTokenModel>(filter).FirstOrDefaultAsync();
 
 
             await collection.ReplaceOneAsync<JwtRefreshTokenModel>(
                 token => token.UserId == new ObjectId(userId),
                 new JwtRefreshTokenModel()
                 {
-                    Id = ObjectId.GenerateNewId(),
+                    Id = currentToken?.Id ?? new ObjectId(),
                     UserId = new ObjectId(userId),
                     RefreshToken = refreshToken,
                     Expiration = expiration

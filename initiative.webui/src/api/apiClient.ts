@@ -32,7 +32,8 @@ export class ApiClient {
   }
 
   private handleError(error: any): Promise<any> {
-    if (error.response && error.response.status === 401) {
+    
+    if (error.response && error.response.status === 301) {
       // Handle unauthorized error, maybe redirect to login
       console.error("Unauthorized request", error);
     } else {

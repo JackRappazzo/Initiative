@@ -40,6 +40,7 @@ namespace Initiative.Api.Services
                     if (passwordMatch)
                     {
                         var jwt = jwtService.GenerateToken(user);
+
                         var refresh = await jwtService.GenerateAndStoreRefreshToken(user, DateTime.UtcNow.AddDays(60), cancellationToken);
 
                         return new LoginResult()

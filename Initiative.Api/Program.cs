@@ -6,6 +6,11 @@ using Initiative.Api.Core.Identity;
 using Initiative.Api.Core.Identity.Roles;
 using Initiative.Api.Core.Authentication;
 using Initiative.Api.Core;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Initiative.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +31,11 @@ builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 builder.Services.AddScoped<IUserLoginService, UserLoginService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ICredentialsFactory, CredentialsFactory>();
+builder.Services.AddScoped<IJwtRefreshTokenRepository, JwtRefreshTokenRepository>(impl => new JwtRefreshTokenRepository("mongodb://localhost:27017", "Initiative"));
+builder.Services.AddScoped<IJwtRefreshService, JwtRefreshService>();
+
+
+
 
 //Identity
 builder.Services.AddIdentityMongoDbProvider<InitiativeUser, DefaultRole>(identityOptions =>
@@ -35,7 +45,7 @@ builder.Services.AddIdentityMongoDbProvider<InitiativeUser, DefaultRole>(identit
     identityOptions.Password.RequiredLength = 6;
     identityOptions.User.RequireUniqueEmail = true;
     identityOptions.User.AllowedUserNameCharacters = null;
-}, 
+},
 mongoOptions =>
 {
     mongoOptions.ConnectionString = "mongodb://localhost:27017/Initiative";
@@ -51,6 +61,48 @@ builder.Services.Configure<JwtSettings>(options =>
     options.ExpiresInMinutes = int.Parse(builder.Configuration["JwtSettings:ExpiresInMinutes"] ?? "60");
 });
 
+builder.Services.AddAuthentication(authOptions =>
+{
+    authOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    authOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(jwtOptions =>
+    {
+        var secret = JwtService.GetSecret(EnvironmentType.Local);
+        var key = Encoding.UTF8.GetBytes(secret);
+
+        jwtOptions.RequireHttpsMetadata = false;
+        jwtOptions.SaveToken = true;
+        jwtOptions.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+        };
+        jwtOptions.Events = new JwtBearerEvents()
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"JWT FAILED: {context.Exception.Message}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("JWT Validated Successfully");
+                return Task.CompletedTask;
+            },
+            OnMessageReceived = context =>
+            {
+                Console.WriteLine("Message received");
+                return Task.CompletedTask;
+            }
+        };
+    });
+
 
 builder.Services.AddControllers();
 
@@ -63,7 +115,10 @@ app.UseCors("AllowFrontend");
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+
 app.UseAuthorization();
+
 
 app.MapControllers();
 

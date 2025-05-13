@@ -6,6 +6,7 @@ using Initiative.Api.Core.Identity;
 using System.Threading.Tasks;
 using Initiative.Api.Services;
 using Initiative.Api.Core.Authentication;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Initiative.Api.Controllers
 {
@@ -44,6 +45,7 @@ namespace Initiative.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest data, CancellationToken cancellationToken)
         {
+            Console.WriteLine("Test");
             LoginResult result = await loginService.LoginAndFetchTokens(data.EmailAddress, data.Password, cancellationToken);
 
             if(result.Success)
@@ -98,6 +100,13 @@ namespace Initiative.Api.Controllers
             {
                 return BadRequest("Access denied. Log in again");
             }
+        }
+
+        [Authorize]
+        [HttpGet("isLoggedIn")]
+        public async Task<IActionResult> IsLoggedIn(CancellationToken cancellationToken)
+        {
+            return Ok("Authorized!");
         }
     }
 }
