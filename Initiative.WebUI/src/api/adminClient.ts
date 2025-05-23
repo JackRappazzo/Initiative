@@ -17,11 +17,6 @@ export class AdminClient {
             password
         });
 
-        if(response.success)
-        {
-            this.apiClient.setAccessToken(response.token);
-        }
-
         return response;
     }
 

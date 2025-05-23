@@ -122,11 +122,11 @@ public static GetInstance() {
     return this.api.get(url, { headers: {'Content-Type': 'application/json' , withCredentials: true}});
   }
 
-  public post<T>(url: string, data: any): Promise<T> {
-    return  this.api.post(url, data, {
+  public async post<T>(url: string, data: any): Promise<T> {
+    return (await this.api.post(url, data, {
       headers: {'Content-Type': 'application/json' },
       withCredentials: true,
-    });
+    })).data;
   }
 
   // Or expose full Axios instance

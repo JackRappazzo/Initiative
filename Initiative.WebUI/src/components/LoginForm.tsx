@@ -20,7 +20,7 @@ const LoginForm = () => {
     
     try {
       const res = await adminClient.Login(email,password);
-      login(res.token);
+      login(res.jwt);
     } catch (err) {
       console.error(err);
       alert("Login failed");

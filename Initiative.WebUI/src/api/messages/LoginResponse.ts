@@ -1,5 +1,5 @@
 export interface LoginResponse
 {
-    token:string,
+    jwt:string,
     success:boolean
 }
