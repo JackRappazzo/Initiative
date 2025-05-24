@@ -1,8 +1,8 @@
-<div *ngIf="auth.isLoggedIn$ | async; else loginForm">
-  <p>Welcome,</p>
-  <button (click)="logout()">Logout</button>
-</div>
 
+<div *ngIf="auth.isLoggedIn$ | async; else loginForm">
+    <p>Welcome,</p>
+    <button (click)="logout()">Logout</button>
+</div>
 <ng-template #loginForm>
   <form (ngSubmit)="login()">
     <input type="text" [(ngModel)]="email" name="email" placeholder="Email" required>
