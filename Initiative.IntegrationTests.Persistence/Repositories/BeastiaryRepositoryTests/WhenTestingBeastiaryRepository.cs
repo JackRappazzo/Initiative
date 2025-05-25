@@ -7,12 +7,11 @@ using Initiative.Persistence.ConnectionStrings;
 using Initiative.Persistence.Repositories;
 using LeapingGorilla.Testing.Core.Attributes;
 
-namespace Initiative.IntegrationTests.Persistence.Repositories.JwtRefreshTokenRepositoryTests
+namespace Initiative.IntegrationTests.Persistence.Repositories.BeastiaryRepositoryTests
 {
-    public abstract class WhenTestingJwtRefreshTokenRepository : WhenTestingWithMongoDb
+    public abstract class WhenTestingBeastiaryRepository : WhenTestingWithMongoDb
     {
-        [ItemUnderTest]
-        public JwtRefreshTokenRepository JwtRefreshTokenRepository;
+        [ItemUnderTest] protected BeastiaryRepository BeastiaryRepository { get; set; }
 
         [Dependency]
         public string DbConnectionString = ConnectionString;
@@ -21,5 +20,6 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.JwtRefreshTokenRe
         public string DatabaseName = Databases.LocalTest;
 
         public CancellationToken CancellationToken = default;
+
     }
 }

@@ -10,11 +10,10 @@ namespace Initiative.IntegrationTests.Persistence
     {
         private MongoTestResetService mongoTestResetService = new MongoTestResetService(ConnectionStrings.LocalTest);
         protected const string ConnectionString = ConnectionStrings.LocalTest;
-        protected const string DatabaseName = "Initiative_Test";
 
         protected IMongoDatabase GetDatabase()
         {
-            return new MongoClient(ConnectionString).GetDatabase(DatabaseName);
+            return new MongoClient(ConnectionString).GetDatabase(Databases.LocalTest);
         }
 
     }

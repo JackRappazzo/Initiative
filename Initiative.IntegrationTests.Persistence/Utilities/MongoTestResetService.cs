@@ -22,6 +22,8 @@ namespace Initiative.IntegrationTests.Persistence.Utilities
             var database = client.GetDatabase("Initiative_Test");
             await ResetCollection(database, JwtRefreshTokenRepository.TableName);
             await ResetCollection(database, "Users");
+            await ResetCollection(database, EncounterRepository.TableName);
+            await ResetCollection(database, BeastiaryRepository.TableName);
         }
 
         protected async Task ResetCollection(IMongoDatabase database, string collectionName)
