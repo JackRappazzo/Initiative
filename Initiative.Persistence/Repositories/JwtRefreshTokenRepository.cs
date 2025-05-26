@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Initiative.Persistence.Configuration;
 using Initiative.Persistence.Models.Authentication;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -13,7 +14,7 @@ namespace Initiative.Persistence.Repositories
     {
         public const string TableName = "UserRefreshTokens";
 
-        public JwtRefreshTokenRepository(string connectionString, string databaseName) : base(connectionString, databaseName)
+        public JwtRefreshTokenRepository(IDatabaseConnectionFactory connectionFactory) : base(connectionFactory)
         {
         }
 

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Initiative.IntegrationTests.Persistence.Utilities;
+using Initiative.Persistence.Configuration;
 using Initiative.Persistence.ConnectionStrings;
 using Initiative.Persistence.Repositories;
 using LeapingGorilla.Testing.Core.Attributes;
@@ -15,10 +17,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.JwtRefreshTokenRe
         public JwtRefreshTokenRepository JwtRefreshTokenRepository;
 
         [Dependency]
-        public string DbConnectionString = ConnectionString;
-
-        [Dependency]
-        public string DatabaseName = Databases.LocalTest;
+        public IDatabaseConnectionFactory DatabaseConnectionFactory = new TestConnectionFactory();
 
         public CancellationToken CancellationToken = default;
     }

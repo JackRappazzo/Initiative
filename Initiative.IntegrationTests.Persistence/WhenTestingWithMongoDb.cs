@@ -8,13 +8,6 @@ namespace Initiative.IntegrationTests.Persistence
 {
     public abstract class WhenTestingWithMongoDb : ComposableTestingTheBehaviourOf
     {
-        private MongoTestResetService mongoTestResetService = new MongoTestResetService(ConnectionStrings.LocalTest);
         protected const string ConnectionString = ConnectionStrings.LocalTest;
-
-        protected IMongoDatabase GetDatabase()
-        {
-            return new MongoClient(ConnectionString).GetDatabase(Databases.LocalTest);
-        }
-
     }
 }

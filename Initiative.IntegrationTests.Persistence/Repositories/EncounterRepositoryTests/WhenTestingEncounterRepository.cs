@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Initiative.IntegrationTests.Persistence.Utilities;
+using Initiative.Persistence.Configuration;
 using Initiative.Persistence.ConnectionStrings;
 using Initiative.Persistence.Repositories;
 using LeapingGorilla.Testing.Core.Attributes;
@@ -13,8 +15,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.EncounterReposito
     {
 
         [ItemUnderTest] protected EncounterRepository EncounterRepository;
-        [Dependency] protected string DbConnectionString = ConnectionString;
-        [Dependency] protected string DatabaseName = Databases.LocalTest;
+        [Dependency] public IDatabaseConnectionFactory DatabaseConnectionFactory = new TestConnectionFactory();
 
         protected CancellationToken CancellationToken = default;
     }

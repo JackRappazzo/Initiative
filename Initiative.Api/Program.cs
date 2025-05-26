@@ -11,6 +11,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Initiative.Persistence.Repositories;
+using Initiative.Api.Core.Services.Encounters;
+using Initiative.Persistence.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,12 +29,17 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddScoped<IDatabaseConnectionFactory, DatabaseConnectionFactory>();
+builder.Services.AddScoped<IJwtRefreshTokenRepository, JwtRefreshTokenRepository>();
+builder.Services.AddScoped<IEncounterRepository, EncounterRepository>();
+
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 builder.Services.AddScoped<IUserLoginService, UserLoginService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ICredentialsFactory, CredentialsFactory>();
-builder.Services.AddScoped<IJwtRefreshTokenRepository, JwtRefreshTokenRepository>(impl => new JwtRefreshTokenRepository("mongodb://localhost:27017", "Initiative"));
+
 builder.Services.AddScoped<IJwtRefreshService, JwtRefreshService>();
+builder.Services.AddScoped<IEncounterService, EncounterService>();
 
 
 

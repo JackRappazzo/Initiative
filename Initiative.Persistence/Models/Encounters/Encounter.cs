@@ -18,6 +18,8 @@ namespace Initiative.Persistence.Models.Encounters
         [BsonRepresentation(BsonType.ObjectId)]
         public string OwnerId { get; set; }
 
+        public DateTime CreatedAt { get; set; }
+
         public IEnumerable<Creature> Creatures { get; set; }
 
     }

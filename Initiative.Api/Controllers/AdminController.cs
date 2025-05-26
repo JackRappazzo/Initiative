@@ -45,16 +45,10 @@ namespace Initiative.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest data, CancellationToken cancellationToken)
         {
-            Console.WriteLine("Test");
             LoginResult result = await loginService.LoginAndFetchTokens(data.EmailAddress, data.Password, cancellationToken);
 
             if(result.Success)
             {
-                return Ok(new LoginResponse()
-                {
-                    Success = true,
-                    Jwt = result.Jwt,
-                });
                 Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions()
                 {
                     Expires = DateTime.UtcNow.AddDays(30),
@@ -62,6 +56,13 @@ namespace Initiative.Api.Controllers
                     Secure = true,
                     SameSite = SameSiteMode.Strict,
                 });
+
+                return Ok(new LoginResponse()
+                {
+                    Success = true,
+                    Jwt = result.Jwt,
+                });
+               
             }
             else
             {
