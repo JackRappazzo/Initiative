@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Initiative.Persistence.ConnectionStrings
+namespace Initiative.Persistence.Constants
 {
     public static class Databases
     {

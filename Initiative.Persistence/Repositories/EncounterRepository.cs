@@ -14,7 +14,7 @@ namespace Initiative.Persistence.Repositories
     {
         public const string TableName = "Encounters";
 
-        public EncounterRepository(DatabaseConnectionFactory connectionFactory) : base(connectionFactory)
+        public EncounterRepository(IDatabaseConnectionFactory connectionFactory) : base(connectionFactory)
         {
 
         }

@@ -1,6 +1,6 @@
 using System.Reflection.Metadata;
 using Initiative.IntegrationTests.Persistence.Utilities;
-using Initiative.Persistence.ConnectionStrings;
+using Initiative.Persistence.Constants;
 using LeapingGorilla.Testing.NUnit.Composable;
 using MongoDB.Driver;
 

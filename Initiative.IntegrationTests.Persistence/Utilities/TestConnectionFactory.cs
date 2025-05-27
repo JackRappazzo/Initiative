@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Initiative.Persistence.Configuration;
-using Initiative.Persistence.ConnectionStrings;
+using Initiative.Persistence.Constants;
 
 namespace Initiative.IntegrationTests.Persistence.Utilities
 {

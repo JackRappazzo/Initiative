@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Initiative.IntegrationTests.Persistence.Utilities;
 using Initiative.Persistence.Configuration;
-using Initiative.Persistence.ConnectionStrings;
+using Initiative.Persistence.Constants;
 using Initiative.Persistence.Repositories;
 using LeapingGorilla.Testing.Core.Attributes;
 

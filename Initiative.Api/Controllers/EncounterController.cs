@@ -1,9 +1,10 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿
 using Initiative.Api.Core.Services.Encounters;
 using Initiative.Api.Extensions;
 using Initiative.Api.Messages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Principal;
 
 namespace Initiative.Api.Controllers
 {
