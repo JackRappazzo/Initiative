@@ -1,0 +1,30 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer mode="side" position="end" class="sidenav" opened>
+    <mat-nav-list>
+        <ng-container *ngIf="!isLoggedIn">
+            <a mat-list-item routerLink="/signup">Signup</a>
+            <a mat-list-item routerLink="/login">Login</a>
+        </ng-container>
+        <ng-container *ngIf="isLoggedIn">
+            <a mat-list-item routerLink="/encounters">Encounters</a>
+            <a mat-list-item routerLink="/beastiary">Beastiary</a>
+            <a mat-list-item (click)="logout()">Logout</a>
+        </ng-container>    
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary" class="app-toolbar">
+        <span class="spacer"></span>
+        <span class="title">Menu</span>
+        <button mat-icon-button (click)="drawer.toggle()" aria-label="Toggle sidenav">
+            <mat-icon>menu</mat-icon>
+        </button>
+    </mat-toolbar>
+
+     <div class="main-content">
+      <router-outlet></router-outlet>
+    </div>
+
+  </mat-sidenav-content>
+</mat-sidenav-container>
