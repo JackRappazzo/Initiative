@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Initiative.Persistence.Models.Encounters;
 using Initiative.Persistence.Repositories;
 
 namespace Initiative.Api.Core.Services.Encounters
@@ -35,5 +36,10 @@ namespace Initiative.Api.Core.Services.Encounters
                 CreatedAt = r.CreatedAt
             }) ?? new List<EncounterListItem>();
         }
-    }
+
+        public async Task<Encounter> GetEncounter(string encounterId, string ownerId, CancellationToken cancellationToken)
+        {
+            var result = await encounterRepository.FetchEncounterById(encounterId, ownerId, cancellationToken);
+            return result;
+        }
 }

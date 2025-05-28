@@ -38,5 +38,15 @@ namespace Initiative.Api.Controllers
             return Ok(encounters);
         }
 
+        [HttpGet("{encounterId}"), Authorize]
+        public async Task<IActionResult> GetEncounter(string encounterId, CancellationToken cancellationToken)
+        {
+            var encounter = await encounterService.GetEncounter(encounterId, User.GetUserId(), cancellationToken);
+            if (encounter == null)
+            {
+                return NotFound();
+            }
+            return Ok(encounter);
+        }
     }
 }
