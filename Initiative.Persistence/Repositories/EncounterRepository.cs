@@ -66,5 +66,12 @@ namespace Initiative.Persistence.Repositories
             return results;
 
         }
+
+        public async Task<Encounter> FetchEncounterById(string encounterId, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
+            var encounter = await collection.FindAsync(e => e.Id == encounterId, cancellationToken: cancellationToken);
+            return encounter.FirstOrDefault();
+        }
     }
 }
