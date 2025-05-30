@@ -2,8 +2,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject} from 'rxjs';
-import { EncounterListItemModel } from '../models/encounterModel';
+import { EncounterListItemModel } from '../models/encounterListModel';
 import { Observable,map } from 'rxjs';
+import { EncounterModel } from '../models/encounterModel';
+import { CreatureModel } from '../models/CreatureModel';
 
 @Injectable({ providedIn: 'root' })
 export class EncounterService {
@@ -30,6 +32,36 @@ export class EncounterService {
         ))
     );
     return result;
+  }
+
+  public getEncounter(encounterId:string) : Observable<EncounterModel> {
+    var headers = this.getHeaders();
+    var response = this.http.get<any>(`${this.apiUrl}/${encounterId}`, {headers});
+
+    var result = response.pipe(
+      map(r=>{
+        console.log(r);
+        var encounter = new EncounterModel();
+        encounter.Id = r.id;
+        encounter.Name = r.displayName;
+        
+        var creatures:CreatureModel[] = r.Creatures?.Map((c: { armorClass: Number; displayName: String; hitPoints: Number; }) => {
+          var creature = new CreatureModel();
+          creature.ArmorClass = c.armorClass;
+          creature.Name = c.displayName;
+          creature.HitPoints = c.hitPoints;
+
+          return creature;
+        });
+
+        encounter.Creatures = creatures;
+        
+        return encounter;
+      })
+    );
+
+    return result;
+
   }
 
   private getHeaders() : HttpHeaders {

@@ -1,0 +1,8 @@
+<mat-card>
+    <mat-card-title>{{encounterModel.Name}}</mat-card-title>
+    <div cdkDropList [cdkDropListData]="encounterModel.Creatures" (cdkDropListDropped)="drop($event)">
+        <div *ngFor="let creature of encounterModel.Creatures" cdkDrag>
+            {{creature.Name}}
+        </div>
+  </div>
+</mat-card>

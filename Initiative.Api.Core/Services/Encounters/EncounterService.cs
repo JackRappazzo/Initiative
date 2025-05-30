@@ -28,7 +28,7 @@ namespace Initiative.Api.Core.Services.Encounters
         {
             var result = await encounterRepository.FetchEncounterListByUserId(ownerId, cancellationToken);
 
-            return result?.Select(r=> new EncounterListItem
+            return result?.Select(r => new EncounterListItem
             {
                 EncounterId = r.EncounterId,
                 EncounterName = r.EncounterName,
@@ -42,4 +42,5 @@ namespace Initiative.Api.Core.Services.Encounters
             var result = await encounterRepository.FetchEncounterById(encounterId, ownerId, cancellationToken);
             return result;
         }
+    }
 }

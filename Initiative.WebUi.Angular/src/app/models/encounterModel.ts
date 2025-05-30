@@ -1,9 +1,7 @@
-export class EncounterListItemModel {
-    public EncounterId: string = "";
-    public EncounterName: string = "";
-    public NumberOfCreatures: number = 0;
+import { CreatureModel } from "./CreatureModel";
 
-    constructor() {
-
-    }
+export class EncounterModel {
+    public Id: string = "";
+    public Name: string = "";
+    public Creatures: Array<CreatureModel> = []
 }

@@ -1,4 +1,4 @@
 <mat-card *ngFor="let encounter of encounterList">
-    <mat-card-title>{{encounter.EncounterName}}</mat-card-title>
+    <mat-card-title><a [routerLink]="['/encounters', encounter.EncounterId]">{{encounter.EncounterName}}</a></mat-card-title>
     <mat-card-content>Lorem ipsum dolor</mat-card-content>
 </mat-card>
