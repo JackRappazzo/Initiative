@@ -45,14 +45,14 @@ export class EncounterService {
         encounter.Id = r.id;
         encounter.Name = r.displayName;
         
-        var creatures:CreatureModel[] = r.Creatures?.Map((c: { armorClass: Number; displayName: String; hitPoints: Number; }) => {
+        var creatures:CreatureModel[] = r.Creatures?.Map((c: { armorClass: number; displayName: string; hitPoints: number; }) => {
           var creature = new CreatureModel();
           creature.ArmorClass = c.armorClass;
           creature.Name = c.displayName;
           creature.HitPoints = c.hitPoints;
 
           return creature;
-        });
+        }) ?? new Array<CreatureModel>();
 
         encounter.Creatures = creatures;
         

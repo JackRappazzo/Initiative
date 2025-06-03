@@ -73,5 +73,12 @@ namespace Initiative.Persistence.Repositories
             var encounter = await collection.FindAsync(e => e.Id == encounterId, cancellationToken: cancellationToken);
             return encounter.FirstOrDefault();
         }
+
+        public async Task SetEncounterCreatures(string encounterId, IEnumerable<Creature> creatures, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
+            var update = Builders<Encounter>.Update.Set(e => e.Creatures, creatures);
+            await collection.UpdateOneAsync(e => e.Id == encounterId, update, cancellationToken: cancellationToken);
+        }
     }
 }

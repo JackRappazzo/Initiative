@@ -6,6 +6,8 @@ import { MaterialModule } from "../../../modules/material.module";
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { CreatureModel } from "../../../models/CreatureModel";
 import { NgFor } from "@angular/common";
+import { FormsModule, NgModel } from "@angular/forms";
+
 
 @Component(
     {
@@ -13,7 +15,7 @@ import { NgFor } from "@angular/common";
         standalone: true,
         styleUrl: "./encounter-edit.component.css",     
         templateUrl: "./encounter-edit.component.html",
-        imports: [MaterialModule, DragDropModule, NgFor]
+        imports: [MaterialModule, DragDropModule, NgFor, FormsModule]
     }
 )
 export class EncounterEditComponent{
@@ -30,6 +32,53 @@ export class EncounterEditComponent{
     
   drop(event: CdkDragDrop<any>) {
     console.log("moved");
+  }
+
+  onAddCreature() {
+    var newCreature = new CreatureModel();
+    newCreature.Name = "Creature "+this.encounterModel.Creatures.length;
+    newCreature.ArmorClass = 10;
+    newCreature.HitPoints = 10;
+
+    this.encounterModel.Creatures.push(newCreature);
+  }
+
+  updateHitpoints(creature:CreatureModel, inputField: HTMLInputElement)
+  {
+    var input = inputField.value;
+
+     if (!input) return;
+
+      const trimmed = input.trim();
+      let newHp = creature.HitPoints;
+
+      //Check for signs for simple addition or subtraction
+      if (/^[+-]\d+$/.test(trimmed)) {
+        newHp += parseInt(trimmed, 10);
+      }
+      //Set raw value
+       else if (/^\d+$/.test(trimmed)) {
+        newHp = parseInt(trimmed, 10);
+      } 
+      //xdx formulae. Needs improvement, this isn't quite expressive enough
+      else if (/^\d+d\d+$/i.test(trimmed)) {
+        const [count, sides] = trimmed.toLowerCase().split('d').map(Number);
+        const roll = Array.from({ length: count })
+          .map(() => Math.floor(Math.random() * sides) + 1)
+          .reduce((a, b) => a + b, 0);
+        newHp += roll;
+      } else {
+        console.warn('Invalid HP input:', input);
+        return;
+      }
+
+      creature.HitPoints = Math.max(0, newHp);
+
+      inputField.value = creature.HitPoints.toString();
+  }
+
+  selectInput(input: HTMLInputElement) {
+    setTimeout(() => input.select(), 0);
   }
 
 

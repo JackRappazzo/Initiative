@@ -14,9 +14,15 @@ namespace Initiative.Persistence.Models.Encounters
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
+        public int Initiative { get; set; }
+        public int InitiativeModifier { get; set; }
         public string DisplayName { get; set; }
         public string SystemName { get; set; }
         public int HitPoints { get; set; }
         public int ArmorClass { get; set; }
+        public bool IsConcentrating { get; set; }
+
+        public bool IsPlayer { get; set; }
+        public string Name { get; set; }
     }
 }

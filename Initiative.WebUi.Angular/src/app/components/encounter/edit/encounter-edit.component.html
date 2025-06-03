@@ -1,8 +1,33 @@
 <mat-card>
-    <mat-card-title>{{encounterModel.Name}}</mat-card-title>
-    <div cdkDropList [cdkDropListData]="encounterModel.Creatures" (cdkDropListDropped)="drop($event)">
+    <mat-card-title>{{encounterModel.Name}}
+        <button mat-icon-button color="primary" (click)="onAddCreature()" style="float: right;">
+            <mat-icon>add</mat-icon>
+        </button>
+    </mat-card-title>
+    <div cdkDropList [cdkDropListData]="encounterModel.Creatures" (cdkDropListDropped)="drop($event)" class="mb-2">
         <div *ngFor="let creature of encounterModel.Creatures" cdkDrag>
-            {{creature.Name}}
+            <mat-card>
+                <mat-card-content class="creature-card">
+                    <div class="drag-handle" cdkDragHandle>
+                        <mat-icon>drag_indicator</mat-icon>
+                    </div>
+                    <mat-form-field appearance="fill">
+                        <mat-label>Name</mat-label>
+                        <input matInput [(ngModel)]="creature.Name" placeholder="Goblin" />
+                    </mat-form-field>
+                    <mat-form-field>
+                        <mat-label>Hit Points</mat-label>
+                        <input 
+                            matInput 
+                            #hpInput
+                            (focus)="selectInput(hpInput)"
+                            (onblur)="updateHitpoints(creature, hpInput)" 
+                            (keydown.enter)="updateHitpoints(creature, hpInput)" 
+                            placeholder="10" />
+                    </mat-form-field>
+                </mat-card-content>
+            </mat-card>
+           
         </div>
   </div>
 </mat-card>

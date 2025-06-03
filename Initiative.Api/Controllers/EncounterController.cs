@@ -2,6 +2,7 @@
 using Initiative.Api.Core.Services.Encounters;
 using Initiative.Api.Extensions;
 using Initiative.Api.Messages;
+using Initiative.Persistence.Models.Encounters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Principal;
@@ -47,6 +48,17 @@ namespace Initiative.Api.Controllers
                 return NotFound();
             }
             return Ok(encounter);
+        }
+
+        [HttpPost("{encounterId}/creatures"), Authorize]
+        public async Task<IActionResult> SetCreatures(string encounterId, [FromBody] IEnumerable<Creature> creatures, CancellationToken cancellationToken)
+        {
+            if (creatures == null)
+            {
+                return BadRequest("Creatures must not be null. Send empty array to set to no creatures");
+            }
+            await encounterService.SetEncounterCreatures(encounterId, User.GetUserId(), creatures, cancellationToken);
+            return NoContent();
         }
     }
 }
