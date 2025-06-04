@@ -6,7 +6,6 @@ namespace Initiative.Persistence.Repositories
     public interface IEncounterRepository
     {
         Task<string> CreateEncounter(string ownerId, string name, CancellationToken cancellationToken);
-        Task<bool> DoesUserOwnEncounter(string encounterId, string ownerId, CancellationToken cancellationToken);
         Task<Encounter> FetchEncounterById(string encounterId, string ownerId, CancellationToken cancellationToken);
         Task<Encounter> FetchEncounterById(string encounterId, CancellationToken cancellationToken);
         Task<IEnumerable<EncounterListItemDto>> FetchEncounterListByUserId(string userId, CancellationToken cancellationToken);
