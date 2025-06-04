@@ -19,6 +19,13 @@ namespace Initiative.Persistence.Repositories
 
         }
 
+        /// <summary>
+        /// Creates a new encounter for the specified user with the given name.
+        /// </summary>
+        /// <param name="ownerId"></param>
+        /// <param name="name"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task<string> CreateEncounter(string ownerId, string name, CancellationToken cancellationToken)
         {
             var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
@@ -36,6 +43,14 @@ namespace Initiative.Persistence.Repositories
             return encounter.Id;
         }
 
+
+        /// <summary>
+        /// Fetches an encounter by its ID and owner ID.
+        /// </summary>
+        /// <param name="encounterId"></param>
+        /// <param name="ownerId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task<Encounter> FetchEncounterById(string encounterId, string ownerId, CancellationToken cancellationToken)
         {
             var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
@@ -45,6 +60,12 @@ namespace Initiative.Persistence.Repositories
             return encounter.First();
         }
 
+        /// <summary>
+        /// Fetches a list of encounters for a specific user by their user ID.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task<IEnumerable<EncounterListItemDto>> FetchEncounterListByUserId(string userId, CancellationToken cancellationToken)
         {
             var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
@@ -65,13 +86,6 @@ namespace Initiative.Persistence.Repositories
 
             return results;
 
-        }
-
-        public async Task<Encounter> FetchEncounterById(string encounterId, CancellationToken cancellationToken)
-        {
-            var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
-            var encounter = await collection.FindAsync(e => e.Id == encounterId, cancellationToken: cancellationToken);
-            return encounter.FirstOrDefault();
         }
 
         public async Task SetEncounterCreatures(string encounterId, IEnumerable<Creature> creatures, CancellationToken cancellationToken)
