@@ -1,9 +1,23 @@
 <mat-card>
-    <mat-card-title>{{encounterModel.Name}}
-        <button mat-icon-button color="primary" (click)="onAddCreature()" style="float: right;">
+    <mat-card-title>
+    <ng-container *ngIf="!editingName; else nameEdit">
+      <span (click)="editingName = true" class="editable-title">{{ encounterModel.Name }}</span>
+    </ng-container>
+
+    <ng-template #nameEdit>
+      <input
+        matInput
+        #nameInput
+        [value]="encounterModel.Name"
+        (keydown.enter)="onUpdateTitle(nameInput.value); editingName = false"
+        (blur)="editingName = false"
+        autofocus
+      />
+    </ng-template>
+      <button mat-icon-button color="primary" (click)="onAddCreature()" style="float: right;">
             <mat-icon>add</mat-icon>
         </button>
-    </mat-card-title>
+  </mat-card-title>
     <div cdkDropList [cdkDropListData]="encounterModel.Creatures" (cdkDropListDropped)="drop($event)" class="mb-2">
         <div *ngFor="let creature of encounterModel.Creatures" cdkDrag>
             <mat-card>
@@ -24,6 +38,15 @@
                             (onblur)="updateHitpoints(creature, hpInput)" 
                             (keydown.enter)="updateHitpoints(creature, hpInput)" 
                             placeholder="10" />
+                    </mat-form-field>
+                    <mat-form-field>
+                        <mat-label>AC</mat-label>
+                        <input 
+                            matInput 
+                            #acInput
+                            [(ngModel)]="creature.ArmorClass"
+                            (focus)="selectInput(acInput)"
+                            placeholder="Armor Class" />
                     </mat-form-field>
                 </mat-card-content>
             </mat-card>

@@ -28,7 +28,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.BeastiaryReposito
             Creature = new Creature()
             {
                 ArmorClass = 10,
-                DisplayName = "Test Creature",
+                Name = "Test Creature",
                 HitPoints = 10,
                 SystemName = "test-creature"
             };

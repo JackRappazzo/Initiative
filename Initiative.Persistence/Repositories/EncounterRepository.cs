@@ -80,5 +80,24 @@ namespace Initiative.Persistence.Repositories
             var update = Builders<Encounter>.Update.Set(e => e.Creatures, creatures);
             await collection.UpdateOneAsync(e => e.Id == encounterId, update, cancellationToken: cancellationToken);
         }
+
+        public async Task SetEncounterName(string encounterId, string newName, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
+            var update = Builders<Encounter>.Update.Set(e => e.DisplayName, newName);
+            await collection.UpdateOneAsync(e => e.Id == encounterId, update, cancellationToken: cancellationToken);
+
+        }
+
+        public async Task<bool> DoesUserOwnEncounter(string encounterId, string ownerId, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
+            var filter = Builders<Encounter>.Filter.And(
+                Builders<Encounter>.Filter.Eq(e => e.Id, encounterId),
+                Builders<Encounter>.Filter.Eq(e => e.OwnerId, ownerId)
+            );
+            var count = await collection.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
+            return count > 0;
+        }
     }
 }

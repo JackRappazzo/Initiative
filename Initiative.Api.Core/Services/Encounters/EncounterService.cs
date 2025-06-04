@@ -57,5 +57,21 @@ namespace Initiative.Api.Core.Services.Encounters
 
             await encounterRepository.SetEncounterCreatures(encounterId, creatures, cancellationToken);
         }
+
+        public async Task RenameEncounter(string encounterId, string ownerId, string name, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Encounter name must not be empty.", nameof(name));
+            }
+            var encounter = await encounterRepository.FetchEncounterById(encounterId, ownerId, cancellationToken);
+
+            if (encounter == null)
+            {
+                throw new ArgumentException("Encounter not found.", nameof(encounterId));
+            }
+            encounter.DisplayName = name;
+            await encounterRepository.SetEncounterName(encounterId, name, cancellationToken);
+        }
     }
 }

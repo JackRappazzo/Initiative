@@ -41,16 +41,17 @@ export class EncounterService {
     var result = response.pipe(
       map(r=>{
         console.log(r);
-        var encounter = new EncounterModel();
+        var encounter = new EncounterModel();   
         encounter.Id = r.id;
-        encounter.Name = r.displayName;
-        
-        var creatures:CreatureModel[] = r.Creatures?.Map((c: { armorClass: number; displayName: string; hitPoints: number; }) => {
+        encounter.Name = r.displayName ?? r.name; // fallback if displayName is missing
+
+        var creatures:CreatureModel[] = r.creatures?.map((c: any) => {
+          console.log(c);
           var creature = new CreatureModel();
           creature.ArmorClass = c.armorClass;
-          creature.Name = c.displayName;
+          creature.Name = c.name;
           creature.HitPoints = c.hitPoints;
-
+          // Map other properties if needed
           return creature;
         }) ?? new Array<CreatureModel>();
 
@@ -62,6 +63,34 @@ export class EncounterService {
 
     return result;
 
+  }
+
+  public setCreaturesInEncounter(encounterId:string, creatures:CreatureModel[])
+  {
+     const headers = this.getHeaders();
+      // Map CreatureModel to the DTO expected by your API, if needed
+      const body = creatures.map(c => ({
+        armorClass: c.ArmorClass,
+        name: c.Name,
+        hitPoints: c.HitPoints
+      }));
+
+      // Adjust the URL and HTTP method if your API differs
+      return this.http.post<any>(
+        `${this.apiUrl}/${encounterId}/creatures`,
+        body,
+        { headers }
+      );
+  }
+
+  public renameEncounter(encounterId:string, newName:string) : Observable<any> {
+    const headers = this.getHeaders();
+    const body = { displayName: newName };
+    return this.http.put<any>(
+      `${this.apiUrl}/${encounterId}`,
+      body,
+      { headers }
+    );
   }
 
   private getHeaders() : HttpHeaders {

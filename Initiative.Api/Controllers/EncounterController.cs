@@ -51,13 +51,37 @@ namespace Initiative.Api.Controllers
         }
 
         [HttpPost("{encounterId}/creatures"), Authorize]
-        public async Task<IActionResult> SetCreatures(string encounterId, [FromBody] IEnumerable<Creature> creatures, CancellationToken cancellationToken)
+        public async Task<IActionResult> SetCreatures(string encounterId, [FromBody] IEnumerable<CreatureJsonModel> creatures, CancellationToken cancellationToken)
         {
             if (creatures == null)
             {
                 return BadRequest("Creatures must not be null. Send empty array to set to no creatures");
             }
-            await encounterService.SetEncounterCreatures(encounterId, User.GetUserId(), creatures, cancellationToken);
+            var creaturesToSet = creatures.Select(c=>
+                new Creature()
+                {
+                    Name = c.Name,
+                    HitPoints = c.HitPoints,
+                    ArmorClass = c.ArmorClass,
+                }).ToList();
+            await encounterService.SetEncounterCreatures(encounterId, User.GetUserId(), creaturesToSet, cancellationToken);
+            return NoContent();
+        }
+
+        [HttpPut("{encounterId}"), Authorize]
+        public async Task<IActionResult> RenameEncounter(string encounterId, [FromBody] string newName, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(newName))
+            {
+                return BadRequest("Encounter name must not be empty.");
+            }
+            var encounter = await encounterService.GetEncounter(encounterId, User.GetUserId(), cancellationToken);
+            if (encounter == null)
+            {
+                return NotFound();
+            }
+            encounter.DisplayName = newName;
+            await encounterService.SetEncounterCreatures(encounterId, User.GetUserId(), encounter.Creatures, cancellationToken);
             return NoContent();
         }
     }

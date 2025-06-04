@@ -36,7 +36,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.EncounterReposito
         {
             Creature creatureOne = new Creature()
             {
-                DisplayName = "Test Creature One",
+                Name = "Test Creature One",
                 SystemName = "test-creature-one",
                 ArmorClass = 10,
                 HitPoints = 20,
@@ -48,7 +48,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.EncounterReposito
 
             Creature creatureTwo = new Creature()
             {
-                DisplayName = "Test Creature Two",
+                Name = "Test Creature Two",
                 SystemName = "test-creature-two",
                 ArmorClass = 12,
                 HitPoints = 25,
@@ -67,8 +67,8 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.EncounterReposito
             var encounter = await EncounterRepository.FetchEncounterById(EncounterId, OwnerId, CancellationToken);
             Assert.That(encounter.Creatures, Is.Not.Null);
             Assert.That(encounter.Creatures.Count(), Is.EqualTo(Creatures.Count()));
-            Assert.That(encounter.Creatures.Any(c => c.DisplayName == "Test Creature One"), Is.True);
-            Assert.That(encounter.Creatures.Any(c => c.DisplayName == "Test Creature Two"), Is.True);
+            Assert.That(encounter.Creatures.Any(c => c.Name == "Test Creature One"), Is.True);
+            Assert.That(encounter.Creatures.Any(c => c.Name == "Test Creature Two"), Is.True);
         }
     }
 }

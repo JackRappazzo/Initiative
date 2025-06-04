@@ -5,7 +5,7 @@ import { EncounterModel } from "../../../models/encounterModel";
 import { MaterialModule } from "../../../modules/material.module";
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { CreatureModel } from "../../../models/CreatureModel";
-import { NgFor } from "@angular/common";
+import { NgFor, NgIf } from "@angular/common";
 import { FormsModule, NgModel } from "@angular/forms";
 
 
@@ -15,11 +15,12 @@ import { FormsModule, NgModel } from "@angular/forms";
         standalone: true,
         styleUrl: "./encounter-edit.component.css",     
         templateUrl: "./encounter-edit.component.html",
-        imports: [MaterialModule, DragDropModule, NgFor, FormsModule]
+        imports: [MaterialModule, DragDropModule, NgFor, NgIf, FormsModule]
     }
 )
 export class EncounterEditComponent{
     encounterId!:string;
+    editingName:boolean = false;
 
     encounterModel:EncounterModel = new EncounterModel();
 
@@ -41,7 +42,16 @@ export class EncounterEditComponent{
     newCreature.HitPoints = 10;
 
     this.encounterModel.Creatures.push(newCreature);
+
+    this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
+
   }
+
+  onUpdateTitle(input: string) {
+    var newTitle = input.trim();
+    this.encounterService.renameEncounter(this.encounterId, newTitle).subscribe();
+  }
+
 
   updateHitpoints(creature:CreatureModel, inputField: HTMLInputElement)
   {
@@ -75,6 +85,7 @@ export class EncounterEditComponent{
       creature.HitPoints = Math.max(0, newHp);
 
       inputField.value = creature.HitPoints.toString();
+      this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
   }
 
   selectInput(input: HTMLInputElement) {
