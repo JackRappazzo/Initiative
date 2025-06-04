@@ -10,5 +10,6 @@ namespace Initiative.Persistence.Repositories
         Task<Encounter> FetchEncounterById(string encounterId, CancellationToken cancellationToken);
         Task<IEnumerable<EncounterListItemDto>> FetchEncounterListByUserId(string userId, CancellationToken cancellationToken);
         Task SetEncounterCreatures(string encounterId, IEnumerable<Creature> creatures, CancellationToken cancellationToken);
+        Task SetEncounterName(string encounterId, string newName, CancellationToken cancellationToken);
     }
 }
