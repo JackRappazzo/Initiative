@@ -27,7 +27,11 @@
                     </div>
                     <mat-form-field appearance="fill">
                         <mat-label>Name</mat-label>
-                        <input matInput [(ngModel)]="creature.Name" placeholder="Goblin" />
+                        <input 
+                          matInput 
+                          [(ngModel)]="creature.Name" 
+                          placeholder="Goblin" 
+                          (change)="setCreaturesOnService()"/>
                     </mat-form-field>
                     <mat-form-field>
                         <mat-label>Hit Points</mat-label>
@@ -35,9 +39,10 @@
                             matInput 
                             #hpInput
                             (focus)="selectInput(hpInput)"
-                            (onblur)="updateHitpoints(creature, hpInput)" 
+                            (change)="updateHitpoints(creature, hpInput)" 
                             (keydown.enter)="updateHitpoints(creature, hpInput)" 
-                            placeholder="10" />
+                            placeholder="10"
+                            value="{{creature.HitPoints}}"/>
                     </mat-form-field>
                     <mat-form-field>
                         <mat-label>AC</mat-label>
@@ -46,6 +51,7 @@
                             #acInput
                             [(ngModel)]="creature.ArmorClass"
                             (focus)="selectInput(acInput)"
+                            (change)="setCreaturesOnService()"
                             placeholder="Armor Class" />
                     </mat-form-field>
                 </mat-card-content>

@@ -7,6 +7,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-
 import { CreatureModel } from "../../../models/CreatureModel";
 import { NgFor, NgIf } from "@angular/common";
 import { FormsModule, NgModel } from "@angular/forms";
+import { interval, Subscription } from "rxjs";
 
 
 @Component(
@@ -23,11 +24,24 @@ export class EncounterEditComponent{
     editingName:boolean = false;
 
     encounterModel:EncounterModel = new EncounterModel();
+    private autoSaveSub?: Subscription;
 
     constructor(private encounterService:EncounterService, private route:ActivatedRoute) {
         this.encounterId = this.route.snapshot.paramMap.get('encounterId') ?? "";
         this.encounterService.getEncounter(this.encounterId)
             .subscribe(encounter=> { console.log(encounter); return this.encounterModel = encounter; });
+
+        // Start periodic auto-save every 10 seconds
+        this.autoSaveSub = interval(10000).subscribe(() => {
+            if (this.encounterModel.Creatures.length > 0) {
+                this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
+            }
+        });
+    }
+
+    ngOnDestroy() {
+        this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
+        this.autoSaveSub?.unsubscribe();
     }
 
     
@@ -92,5 +106,9 @@ export class EncounterEditComponent{
     setTimeout(() => input.select(), 0);
   }
 
+  setCreaturesOnService() {
+    console.log("Setting creatures on service");
+    this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
+  }
 
 }
