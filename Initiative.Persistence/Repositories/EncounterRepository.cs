@@ -113,5 +113,12 @@ namespace Initiative.Persistence.Repositories
             var count = await collection.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
             return count > 0;
         }
+
+        public async Task<bool> DeleteEncounter(string encounterId, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
+            var result = await collection.DeleteOneAsync(e => e.Id == encounterId, cancellationToken: cancellationToken);
+            return result.DeletedCount > 0;
+        }
     }
 }

@@ -46,7 +46,12 @@ export class EncounterEditComponent{
 
     
   drop(event: CdkDragDrop<any>) {
-    console.log("moved");
+    moveItemInArray(
+        this.encounterModel.Creatures,
+        event.previousIndex,
+        event.currentIndex
+    );
+    this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
   }
 
   onAddCreature() {
@@ -64,6 +69,7 @@ export class EncounterEditComponent{
   onUpdateTitle(input: string) {
     var newTitle = input.trim();
     this.encounterService.renameEncounter(this.encounterId, newTitle).subscribe();
+    this.encounterModel.Name = newTitle;
   }
 
 
@@ -109,6 +115,14 @@ export class EncounterEditComponent{
   setCreaturesOnService() {
     console.log("Setting creatures on service");
     this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
+  }
+
+  deleteCreature(creature: CreatureModel) {
+    const index = this.encounterModel.Creatures.indexOf(creature);
+    if (index > -1) {
+        this.encounterModel.Creatures.splice(index, 1);
+        this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
+    }
   }
 
 }

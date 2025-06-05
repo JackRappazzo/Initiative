@@ -50,7 +50,7 @@ namespace Initiative.Api.Core.Services.Encounters
                 throw new ArgumentException("At least one creature must be provided.", nameof(creatures));
             }
 
-            if( await encounterRepository.FetchEncounterById(encounterId, ownerId, cancellationToken) == null)
+            if (await encounterRepository.FetchEncounterById(encounterId, ownerId, cancellationToken) == null)
             {
                 throw new ArgumentException("Encounter not found.", nameof(encounterId));
             }
@@ -72,6 +72,11 @@ namespace Initiative.Api.Core.Services.Encounters
             }
             encounter.DisplayName = name;
             await encounterRepository.SetEncounterName(encounterId, name, cancellationToken);
+        }
+
+        public async Task<bool> DeleteEncounter(string encounterId, CancellationToken cancellationToken)
+        {
+            return await encounterRepository.DeleteEncounter(encounterId, cancellationToken);
         }
     }
 }

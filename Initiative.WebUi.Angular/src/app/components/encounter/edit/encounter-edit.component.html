@@ -10,7 +10,7 @@
         #nameInput
         [value]="encounterModel.Name"
         (keydown.enter)="onUpdateTitle(nameInput.value); editingName = false"
-        (blur)="editingName = false"
+        (blur)="onUpdateTitle(nameInput.value); editingName = false"
         autofocus
       />
     </ng-template>
@@ -54,9 +54,11 @@
                             (change)="setCreaturesOnService()"
                             placeholder="Armor Class" />
                     </mat-form-field>
+                    <button mat-icon-button color="warn" style="float: right; margin-top: 8px;" (click)="deleteCreature(creature)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
                 </mat-card-content>
             </mat-card>
-           
         </div>
   </div>
 </mat-card>

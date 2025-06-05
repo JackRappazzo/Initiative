@@ -57,7 +57,7 @@ namespace Initiative.Api.Controllers
             {
                 return BadRequest("Creatures must not be null. Send empty array to set to no creatures");
             }
-            var creaturesToSet = creatures.Select(c=>
+            var creaturesToSet = creatures.Select(c =>
                 new Creature()
                 {
                     Name = c.Name,
@@ -68,21 +68,24 @@ namespace Initiative.Api.Controllers
             return NoContent();
         }
 
-        [HttpPut("{encounterId}"), Authorize]
-        public async Task<IActionResult> RenameEncounter(string encounterId, [FromBody] string newName, CancellationToken cancellationToken)
+        [HttpPut("{encounterId}/setName"), Authorize]
+        public async Task<IActionResult> RenameEncounter(string encounterId, [FromBody] SetEncounterNameRequest request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(newName))
+            if (string.IsNullOrWhiteSpace(request.NewName))
             {
                 return BadRequest("Encounter name must not be empty.");
             }
-            var encounter = await encounterService.GetEncounter(encounterId, User.GetUserId(), cancellationToken);
-            if (encounter == null)
-            {
-                return NotFound();
-            }
-            encounter.DisplayName = newName;
-            await encounterService.SetEncounterCreatures(encounterId, User.GetUserId(), encounter.Creatures, cancellationToken);
+
+            await encounterService.RenameEncounter(encounterId, User.GetUserId(), request.NewName, cancellationToken);
             return NoContent();
+        }
+
+        [HttpDelete("{encounterId}"), Authorize]
+        public async Task<IActionResult> DeleteEncounter(string encounterId, CancellationToken cancellationToken)
+        {
+            // This method is not implemented in the service, so we return NotImplemented.
+            // You can implement the deletion logic in the service and repository if needed.
+            return NotImplemented();
         }
     }
 }

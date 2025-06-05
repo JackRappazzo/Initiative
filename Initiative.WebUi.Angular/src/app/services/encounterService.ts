@@ -85,9 +85,9 @@ export class EncounterService {
 
   public renameEncounter(encounterId:string, newName:string) : Observable<any> {
     const headers = this.getHeaders();
-    const body = { displayName: newName };
+    const body = { newName: newName };
     return this.http.put<any>(
-      `${this.apiUrl}/${encounterId}`,
+      `${this.apiUrl}/${encounterId}/setName`,
       body,
       { headers }
     );

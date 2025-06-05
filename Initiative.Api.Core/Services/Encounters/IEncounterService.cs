@@ -9,5 +9,6 @@ namespace Initiative.Api.Core.Services.Encounters
         Task<IEnumerable<EncounterListItem>> GetEncounterList(string ownerId, CancellationToken cancellationToken);
         Task<Encounter> GetEncounter(string encounterId, string ownerId, CancellationToken cancellationToken);
         Task SetEncounterCreatures(string encounterId, string ownerId, IEnumerable<Creature> creatures, CancellationToken cancellationToken);
+        Task RenameEncounter(string encounterId, string ownerId, string name, CancellationToken cancellationToken);
     }
 }
