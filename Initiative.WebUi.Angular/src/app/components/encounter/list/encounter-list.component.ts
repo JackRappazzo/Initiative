@@ -8,6 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { EncounterListItemModel } from '../../../models/encounterListModel';
 import { EncounterService } from '../../../services/encounterService';
+import { MatIcon, MatIconModule } from '@angular/material/icon'; // Add this to imports if not present
+
 
 @Component({
   selector: 'app-encounter-list',
@@ -24,7 +26,8 @@ import { EncounterService } from '../../../services/encounterService';
     MatInputModule,
     MatButtonModule,
     NgFor,
-    RouterModule
+    RouterModule,
+    MatIconModule // Ensure MatIconModule is imported
   ]
 })
 export class EncounterListComponent {
@@ -38,5 +41,16 @@ export class EncounterListComponent {
     this.encounterService.getEncounters().subscribe(encounters=> { this.encounterList = encounters; console.log(this.encounterList);});
   }
 
-  
+   confirmDelete(encounter: EncounterListItemModel) {
+    if (confirm(`Are you sure you want to delete "${encounter.EncounterName}"?`)) {
+      this.deleteEncounter(encounter);
+    }
+  }
+
+  deleteEncounter(encounter: EncounterListItemModel) {
+    this.encounterService.deleteEncounter(encounter.EncounterId).subscribe(() => {
+      this.encounterList = this.encounterList.filter(e => e !== encounter);
+    });
+  }
+
 }

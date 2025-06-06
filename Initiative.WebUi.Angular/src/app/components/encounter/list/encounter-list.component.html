@@ -1,4 +1,9 @@
 <mat-card *ngFor="let encounter of encounterList">
-    <mat-card-title><a [routerLink]="['/encounters', encounter.EncounterId]">{{encounter.EncounterName}}</a></mat-card-title>
+    <mat-card-title>
+        <a [routerLink]="['/encounters', encounter.EncounterId]">{{encounter.EncounterName}}</a>
+        <button mat-icon-button color="warn" style="float:right" (click)="confirmDelete(encounter)">
+            <mat-icon>delete</mat-icon>
+        </button>
+    </mat-card-title>
     <mat-card-content>Lorem ipsum dolor</mat-card-content>
 </mat-card>

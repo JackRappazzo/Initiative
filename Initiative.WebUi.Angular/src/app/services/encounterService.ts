@@ -83,6 +83,11 @@ export class EncounterService {
       );
   }
 
+  public deleteEncounter(encounterId: string) {
+    const headers = this.getHeaders();
+    return this.http.delete<any>(`${this.apiUrl}/${encounterId}`, { headers });
+  }
+
   public renameEncounter(encounterId:string, newName:string) : Observable<any> {
     const headers = this.getHeaders();
     const body = { newName: newName };
