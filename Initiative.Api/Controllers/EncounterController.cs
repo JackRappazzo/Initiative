@@ -83,9 +83,15 @@ namespace Initiative.Api.Controllers
         [HttpDelete("{encounterId}"), Authorize]
         public async Task<IActionResult> DeleteEncounter(string encounterId, CancellationToken cancellationToken)
         {
-            // This method is not implemented in the service, so we return NotImplemented.
-            // You can implement the deletion logic in the service and repository if needed.
-            return NotImplemented();
+            var result = await encounterService.DeleteEncounter(encounterId, cancellationToken);
+            if (result)
+            {
+                return NoContent();
+            }
+            else
+            {
+                return NotFound();
+            }
         }
     }
 }
