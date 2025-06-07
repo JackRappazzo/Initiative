@@ -54,7 +54,8 @@ namespace Initiative.Api.Controllers
                     Expires = DateTime.UtcNow.AddDays(30),
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.Strict,
+                    SameSite = SameSiteMode.None,
+                    Path = "/"
                 });
 
                 return Ok(new LoginResponse()
@@ -86,9 +87,11 @@ namespace Initiative.Api.Controllers
         }
 
         [HttpPost("refresh")]
-        public async Task<IActionResult> Refresh([FromBody] RefreshJwtRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
         {
-            (var success, var token) = await jwtRefreshService.RefreshJwt(request.RefreshToken, cancellationToken);
+            var refreshToken = Request.Cookies["refreshToken"] as string;
+
+            (var success, var token) = await jwtRefreshService.RefreshJwt(refreshToken, cancellationToken);
 
             if(success)
             {

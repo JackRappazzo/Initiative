@@ -13,13 +13,12 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(username: string, password: string) {
-    return this.http.post<{ success:Boolean, jwt: string }>(`${this.apiUrl}/login`, { emailAddress: username, password: password })
+    return this.http.post<{ success:Boolean, jwt: string }>(`${this.apiUrl}/login`, { emailAddress: username, password: password }, { withCredentials: true })
         .pipe(
         map(response =>  ({
           success: response.success,
           token: response.jwt,
         })));
-    
     }
 
   register(email: string, password: string) {
