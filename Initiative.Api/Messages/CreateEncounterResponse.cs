@@ -2,7 +2,7 @@
 {
     public class CreateEncounterResponse
     {
-        public string EncounterId { get; set; }
-        public string EncounterName { get; set; }
+        public required string EncounterId { get; set; }
+        public required string EncounterName { get; set; }
     }
 }

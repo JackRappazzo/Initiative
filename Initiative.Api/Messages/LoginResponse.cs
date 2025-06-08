@@ -3,6 +3,6 @@
     public class LoginResponse
     {
         public bool Success { get; set; }
-        public string Jwt { get; set; }
+        public required string Jwt { get; set; }
     }
 }

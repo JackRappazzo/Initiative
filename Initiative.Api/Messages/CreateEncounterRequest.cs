@@ -2,6 +2,6 @@
 {
     public class CreateEncounterRequest
     {
-        public string EncounterName { get; set; }
+        public required string EncounterName { get; set; }
     }
 }

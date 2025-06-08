@@ -2,8 +2,8 @@
 {
     public class RegisterRequest
     {
-        public string DisplayName  { get; set; }
-        public string EmailAddress { get; set; }
-        public string Password { get; set; }
+        public required string DisplayName  { get; set; }
+        public required string EmailAddress { get; set; }
+        public required string Password { get; set; }
     }
 }
