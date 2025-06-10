@@ -51,6 +51,7 @@ export class EncounterService {
           creature.ArmorClass = c.armorClass;
           creature.Name = c.name;
           creature.HitPoints = c.hitPoints;
+          creature.MaxHitPoints = c.maximumHitPoints ?? 0; // Ensure MaxHitPoints is a number, default to 0 if undefined
           // Map other properties if needed
           return creature;
         }) ?? new Array<CreatureModel>();
@@ -72,7 +73,8 @@ export class EncounterService {
       const body = creatures.map(c => ({
         armorClass: c.ArmorClass,
         name: c.Name,
-        hitPoints: c.HitPoints
+        hitPoints: c.HitPoints,
+        maxHitPoints: Number(c.MaxHitPoints ?? 0)
       }));
 
       // Adjust the URL and HTTP method if your API differs

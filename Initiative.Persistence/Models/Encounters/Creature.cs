@@ -19,6 +19,7 @@ namespace Initiative.Persistence.Models.Encounters
         public string Name { get; set; }
         public string SystemName { get; set; }
         public int HitPoints { get; set; }
+        public int MaximumHitPoints { get; set; }
         public int ArmorClass { get; set; }
         public bool IsConcentrating { get; set; }
 

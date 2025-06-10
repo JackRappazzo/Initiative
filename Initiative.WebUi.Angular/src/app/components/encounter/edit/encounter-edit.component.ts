@@ -59,6 +59,7 @@ export class EncounterEditComponent{
     newCreature.Name = "Creature "+this.encounterModel.Creatures.length;
     newCreature.ArmorClass = 10;
     newCreature.HitPoints = 10;
+    newCreature.MaxHitPoints = 10;
 
     this.encounterModel.Creatures.push(newCreature);
 

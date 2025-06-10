@@ -7,6 +7,9 @@ namespace Initiative.Api.Messages
     {
         public required string Name { get; set; }
         public int HitPoints { get; set; }
+
+        [JsonProperty("maxHitPoints")]
+        public int MaximumHitPoints { get; set; }
         public int ArmorClass { get; set; }
     }
 }

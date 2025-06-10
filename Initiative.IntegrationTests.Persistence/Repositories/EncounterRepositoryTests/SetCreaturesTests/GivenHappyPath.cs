@@ -43,6 +43,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.EncounterReposito
                 Initiative = 15,
                 InitiativeModifier = 2,
                 IsConcentrating = false,
+                MaximumHitPoints = 10,
                 IsPlayer = false
             };
 
@@ -54,6 +55,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.EncounterReposito
                 HitPoints = 25,
                 Initiative = 18,
                 InitiativeModifier = 3,
+                MaximumHitPoints = 5,
                 IsConcentrating = true,
                 IsPlayer = false
             };
@@ -69,6 +71,11 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.EncounterReposito
             Assert.That(encounter.Creatures.Count(), Is.EqualTo(Creatures.Count()));
             Assert.That(encounter.Creatures.Any(c => c.Name == "Test Creature One"), Is.True);
             Assert.That(encounter.Creatures.Any(c => c.Name == "Test Creature Two"), Is.True);
+
+            var creatureOne = encounter.Creatures.First(c => c.Name == "Test Creature One");
+
+            Assert.That(creatureOne.MaximumHitPoints, Is.EqualTo(10));
+
         }
     }
 }

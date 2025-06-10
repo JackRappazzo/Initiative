@@ -92,7 +92,14 @@ namespace Initiative.Persistence.Repositories
         {
             var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
             var update = Builders<Encounter>.Update.Set(e => e.Creatures, creatures);
-            await collection.UpdateOneAsync(e => e.Id == encounterId, update, cancellationToken: cancellationToken);
+            var result = await collection.UpdateOneAsync(e =>
+                e.Id == encounterId,
+                update,
+                new UpdateOptions()
+                {
+                    BypassDocumentValidation = true
+                },
+                cancellationToken: cancellationToken);
         }
 
         public async Task SetEncounterName(string encounterId, string newName, CancellationToken cancellationToken)

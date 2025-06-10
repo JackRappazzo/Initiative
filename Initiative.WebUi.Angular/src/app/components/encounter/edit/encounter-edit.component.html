@@ -45,6 +45,17 @@
                             value="{{creature.HitPoints}}"/>
                     </mat-form-field>
                     <mat-form-field>
+                        <mat-label>Max HP</mat-label>
+                        <input 
+                            matInput
+                            #maxHpInput
+                            type="number"
+                            [(ngModel)]="creature.MaxHitPoints"
+                            (focus)="selectInput(maxHpInput)"
+                            (change)="setCreaturesOnService()"
+                            placeholder="Max Hit Points" />
+                    </mat-form-field>
+                    <mat-form-field>
                         <mat-label>AC</mat-label>
                         <input 
                             matInput 

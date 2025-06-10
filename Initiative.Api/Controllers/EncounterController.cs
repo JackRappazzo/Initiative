@@ -62,8 +62,10 @@ namespace Initiative.Api.Controllers
                 {
                     Name = c.Name,
                     HitPoints = c.HitPoints,
+                    MaximumHitPoints = c.MaximumHitPoints,
                     ArmorClass = c.ArmorClass,
                 }).ToList();
+
             await encounterService.SetEncounterCreatures(encounterId, User.GetUserId(), creaturesToSet, cancellationToken);
             return NoContent();
         }
