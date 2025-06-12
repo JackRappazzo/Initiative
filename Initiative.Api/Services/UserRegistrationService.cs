@@ -1,4 +1,5 @@
 ﻿using Initiative.Api.Core.Identity;
+using Initiative.Api.Core.Utilities;
 using Microsoft.AspNetCore.Identity;
 
 namespace Initiative.Api.Services
@@ -7,10 +8,12 @@ namespace Initiative.Api.Services
     {
 
         UserManager<InitiativeUser> userManager;
+        IBase62CodeGenerator codeGenerator;
 
-        public UserRegistrationService(UserManager<InitiativeUser> userManager)
+        public UserRegistrationService(UserManager<InitiativeUser> userManager, IBase62CodeGenerator codeGenerator)
         {
             this.userManager = userManager;
+            this.codeGenerator = codeGenerator;
         }
 
         /// <summary>
@@ -26,7 +29,12 @@ namespace Initiative.Api.Services
             if (await userManager.FindByEmailAsync(email) != null)
                 return (false, "Email exists");
 
-            var user = new InitiativeUser() { DisplayName = displayName, Email = email, UserName = email };
+            var user = new InitiativeUser() { 
+                DisplayName = displayName,
+                Email = email, 
+                UserName = email, 
+                CurrentRoomCode = codeGenerator.GenerateCode(8) 
+            };
             var result = await userManager.CreateAsync(user, password);
 
             if (!result.Succeeded)

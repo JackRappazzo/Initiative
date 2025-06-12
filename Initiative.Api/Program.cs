@@ -14,6 +14,7 @@ using Initiative.Persistence.Repositories;
 using Initiative.Api.Core.Services.Encounters;
 using Initiative.Persistence.Configuration;
 using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
+using Initiative.Api.Core.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,7 @@ builder.Services.AddScoped<ICredentialsFactory, CredentialsFactory>();
 
 builder.Services.AddScoped<IJwtRefreshService, JwtRefreshService>();
 builder.Services.AddScoped<IEncounterService, EncounterService>();
+builder.Services.AddScoped<IBase62CodeGenerator, Base62CodeGenerator>();
 
 
 
