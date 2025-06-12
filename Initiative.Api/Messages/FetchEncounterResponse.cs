@@ -8,13 +8,13 @@ namespace Initiative.Api.Messages
                
         public required string DisplayName { get; set; }
                
-        public IEnumerable<Creature> Creatures { get; set; }
+        public IEnumerable<CreatureJsonModel> Creatures { get; set; }
                
         public DateTime CreatedAt { get; set; }
         
         public FetchEncounterResponse()
         {
-            Creatures = new List<Creature>();
+            Creatures = new List<CreatureJsonModel>();
         }
     }
 }

@@ -51,7 +51,7 @@ export class EncounterService {
           creature.ArmorClass = c.armorClass;
           creature.Name = c.name;
           creature.HitPoints = c.hitPoints;
-          creature.MaxHitPoints = c.maximumHitPoints ?? 0; // Ensure MaxHitPoints is a number, default to 0 if undefined
+          creature.MaxHitPoints = c.maxHitPoints ?? 0; // Ensure MaxHitPoints is a number, default to 0 if undefined
           // Map other properties if needed
           return creature;
         }) ?? new Array<CreatureModel>();

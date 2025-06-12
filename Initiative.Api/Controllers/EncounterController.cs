@@ -47,7 +47,21 @@ namespace Initiative.Api.Controllers
             {
                 return NotFound();
             }
-            return Ok(encounter);
+
+            var response = new FetchEncounterResponse()
+            {
+                DisplayName = encounter.DisplayName,
+                EncounterId = encounter.Id,
+                CreatedAt = encounter.CreatedAt,
+                Creatures = encounter.Creatures.Select(c => new CreatureJsonModel()
+                {
+                    Name = c.Name,
+                    HitPoints = c.HitPoints,
+                    MaximumHitPoints = c.MaximumHitPoints,
+                    ArmorClass = c.ArmorClass
+                }).ToList()
+            };
+            return Ok(response);
         }
 
         [HttpPost("{encounterId}/creatures"), Authorize]
