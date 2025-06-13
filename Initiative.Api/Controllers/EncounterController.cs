@@ -28,7 +28,7 @@ namespace Initiative.Api.Controllers
             return Ok(new CreateEncounterResponse()
             {
                 EncounterId = newEncounterId,
-                EncounterName = request.EncounterName
+                DisplayName = request.EncounterName
             });
         }
 

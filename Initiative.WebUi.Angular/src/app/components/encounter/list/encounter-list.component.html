@@ -1,3 +1,10 @@
+<div class="encounter-list-header">
+  <h2>Encounters</h2>
+  <button mat-icon-button color="primary" (click)="createEncounter()" aria-label="Add Encounter">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>
+
 <mat-card *ngFor="let encounter of encounterList">
     <mat-card-title>
         <a [routerLink]="['/encounters', encounter.EncounterId]">{{encounter.EncounterName}}</a>

@@ -3,6 +3,6 @@
     public class CreateEncounterResponse
     {
         public required string EncounterId { get; set; }
-        public required string EncounterName { get; set; }
+        public required string DisplayName { get; set; }
     }
 }

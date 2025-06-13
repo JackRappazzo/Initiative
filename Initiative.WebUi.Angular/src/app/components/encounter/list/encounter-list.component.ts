@@ -41,6 +41,21 @@ export class EncounterListComponent {
     this.encounterService.getEncounters().subscribe(encounters=> { this.encounterList = encounters; console.log(this.encounterList);});
   }
 
+  createEncounter() {
+    this.isSubmitting = true;
+    this.encounterService.createEncounter("New Encounter").subscribe({
+      next: (encounter) => {
+        this.encounterList.push(encounter);
+        this.isSubmitting = false;
+        this.router.navigate(['/encounter', encounter.EncounterId]);
+      },
+      error: (error) => {
+        console.error('Error creating encounter:', error);
+        this.isSubmitting = false;
+      }
+    });
+  }
+
    confirmDelete(encounter: EncounterListItemModel) {
     if (confirm(`Are you sure you want to delete "${encounter.EncounterName}"?`)) {
       this.deleteEncounter(encounter);

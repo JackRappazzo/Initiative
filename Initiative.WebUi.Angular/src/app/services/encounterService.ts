@@ -100,6 +100,12 @@ export class EncounterService {
     );
   }
 
+  public createEncounter(name: string): Observable<any> {
+    const headers = this.getHeaders();
+    const body = { encounterName: name };
+    return this.http.post<any>(`${this.apiUrl}`, body, { headers });
+  }
+
   private getHeaders() : HttpHeaders {
     var headers = new HttpHeaders().set('Authorization', `Bearer ${this.getToken()}`);
     return headers;
