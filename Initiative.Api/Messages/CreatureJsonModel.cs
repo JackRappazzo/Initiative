@@ -6,6 +6,8 @@ namespace Initiative.Api.Messages
     public class CreatureJsonModel
     {
         public required string Name { get; set; }
+        public int Initiative { get; set; }
+        public int InitiativeModifier { get; set; } 
         public int HitPoints { get; set; }
 
         [JsonProperty("maxHitPoints")]

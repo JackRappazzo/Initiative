@@ -52,6 +52,8 @@ export class EncounterService {
           creature.Name = c.name;
           creature.HitPoints = c.hitPoints;
           creature.MaxHitPoints = c.maxHitPoints ?? 0; // Ensure MaxHitPoints is a number, default to 0 if undefined
+          creature.Initiative = c.initiative;
+          creature.InitiativeModifier = c.initiativeModifier;
           // Map other properties if needed
           return creature;
         }) ?? new Array<CreatureModel>();
@@ -74,7 +76,9 @@ export class EncounterService {
         armorClass: c.ArmorClass,
         name: c.Name,
         hitPoints: c.HitPoints,
-        maxHitPoints: Number(c.MaxHitPoints ?? 0)
+        maxHitPoints: Number(c.MaxHitPoints ?? 0),
+        initiative: c.Initiative,
+        initiativeModifier: c.InitiativeModifier
       }));
 
       // Adjust the URL and HTTP method if your API differs

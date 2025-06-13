@@ -17,6 +17,9 @@
       <button mat-icon-button color="primary" (click)="onAddCreature()" style="float: right;">
             <mat-icon>add</mat-icon>
         </button>
+      <button mat-icon-button color="accent" (click)="sortByInitiative()" style="float: right; margin-right: 8px;" aria-label="Sort by Initiative">
+        <mat-icon>format_list_numbered</mat-icon>
+      </button>
   </mat-card-title>
     <div cdkDropList [cdkDropListData]="encounterModel.Creatures" (cdkDropListDropped)="drop($event)" class="mb-2">
         <div *ngFor="let creature of encounterModel.Creatures" cdkDrag>
@@ -25,6 +28,7 @@
                     <div class="drag-handle" cdkDragHandle>
                         <mat-icon>drag_indicator</mat-icon>
                     </div>
+                    <!-- Initiative fields come first -->
                     <mat-form-field appearance="fill">
                         <mat-label>Name</mat-label>
                         <input 
@@ -32,6 +36,24 @@
                           [(ngModel)]="creature.Name" 
                           placeholder="Goblin" 
                           (change)="setCreaturesOnService()"/>
+                    </mat-form-field>
+                    <mat-form-field>
+                        <mat-label>Initiative</mat-label>
+                        <input 
+                            matInput
+                            type="number"
+                            [(ngModel)]="creature.Initiative"
+                            (change)="setCreaturesOnService()"
+                            placeholder="Initiative" />
+                    </mat-form-field>
+                    <mat-form-field>
+                        <mat-label>Initiative Mod</mat-label>
+                        <input 
+                            matInput
+                            type="number"
+                            [(ngModel)]="creature.InitiativeModifier"
+                            (change)="setCreaturesOnService()"
+                            placeholder="Modifier" />
                     </mat-form-field>
                     <mat-form-field>
                         <mat-label>Hit Points</mat-label>

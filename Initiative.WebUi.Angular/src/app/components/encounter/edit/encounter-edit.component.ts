@@ -126,4 +126,14 @@ export class EncounterEditComponent{
     }
   }
 
+  sortByInitiative() {
+    this.encounterModel.Creatures.sort((a, b) => {
+      // Sort descending by Initiative + InitiativeModifier
+      const aInit = (a.Initiative ?? 0) + (a.InitiativeModifier ?? 0);
+      const bInit = (b.Initiative ?? 0) + (b.InitiativeModifier ?? 0);
+      return bInit - aInit;
+    });
+    this.setCreaturesOnService();
+  }
+
 }

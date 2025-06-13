@@ -58,7 +58,9 @@ namespace Initiative.Api.Controllers
                     Name = c.Name,
                     HitPoints = c.HitPoints,
                     MaximumHitPoints = c.MaximumHitPoints,
-                    ArmorClass = c.ArmorClass
+                    ArmorClass = c.ArmorClass,
+                    Initiative = c.Initiative,
+                    InitiativeModifier = c.InitiativeModifier
                 }).ToList()
             };
             return Ok(response);
@@ -78,6 +80,8 @@ namespace Initiative.Api.Controllers
                     HitPoints = c.HitPoints,
                     MaximumHitPoints = c.MaximumHitPoints,
                     ArmorClass = c.ArmorClass,
+                    Initiative = c.Initiative,
+                    InitiativeModifier = c.InitiativeModifier,
                 }).ToList();
 
             await encounterService.SetEncounterCreatures(encounterId, User.GetUserId(), creaturesToSet, cancellationToken);
