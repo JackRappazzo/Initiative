@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Initiative.Api.Core.Identity;
 
-namespace Initiative.Api.Core.Authentication
+namespace Initiative.Api.Core.Services.Authentication
 {
     public class JwtRefreshToken
     {
-        public InitiativeUser User { get; set; }
+        public ApplicationIdentity User { get; set; }
         public DateTime Expiration { get; set; }
         public string RefreshToken { get; set; }
     }

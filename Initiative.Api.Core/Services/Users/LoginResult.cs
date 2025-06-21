@@ -1,4 +1,4 @@
-﻿namespace Initiative.Api.Services
+﻿namespace Initiative.Api.Core.Services.Users
 {
     public class LoginResult
     {

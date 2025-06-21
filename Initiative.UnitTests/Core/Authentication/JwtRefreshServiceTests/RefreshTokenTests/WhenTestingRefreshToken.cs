@@ -4,7 +4,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Initiative.Api.Core.Authentication;
 using Initiative.Api.Core.Identity;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.NUnit.Attributes;
@@ -35,11 +34,10 @@ namespace Initiative.UnitTests.Core.Authentication.JwtRefreshServiceTests.Refres
         {
             UserId = ObjectId.GenerateNewId();
             UserManager.FindByIdAsync(UserId.ToString())
-                .Returns(new InitiativeUser()
+                .Returns(new ApplicationIdentity()
                 {
                     Id = UserId,
-                    Email = "test@email.com",
-                    DisplayName = "TestUser"
+                    Email = "test@email.com"
                 });
         }
 

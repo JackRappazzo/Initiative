@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Initiative.Api.Core.Identity;
-using Initiative.Api.Services;
+using Initiative.Api.Core.Services.Users;
 using LeapingGorilla.Testing.Core.Attributes;
 
 namespace Initiative.UnitTests.Api.Services.LoginServiceTests.LoginTests

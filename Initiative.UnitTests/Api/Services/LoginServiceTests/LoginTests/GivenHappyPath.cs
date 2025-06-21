@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Initiative.Api.Core.Authentication;
 using Initiative.Api.Core.Identity;
-using Initiative.Api.Services;
+using Initiative.Api.Core.Services.Authentication;
+using Initiative.Api.Core.Services.Users;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.Core.Composable;
 using LeapingGorilla.Testing.NUnit.Attributes;
@@ -16,7 +16,7 @@ namespace Initiative.UnitTests.Api.Services.LoginServiceTests.LoginTests
     public class GivenHappyPath : WhenTestingLogin
     {
         private const string ExpectedRefreshToken = "refresh-token";
-        InitiativeUser TestUser;
+        ApplicationIdentity TestUser;
         string ExpectedJwt = "jwt";
 
         protected override ComposedTest ComposeTest() => TestComposer
@@ -42,10 +42,9 @@ namespace Initiative.UnitTests.Api.Services.LoginServiceTests.LoginTests
         [Given]
         public void UserManagerCanFindUser()
         {
-            TestUser = new InitiativeUser()
+            TestUser = new ApplicationIdentity()
             {
                 Email = Email,
-                DisplayName = "TestUser"
             };
 
             UserManager.FindByEmailAsync(Email)
@@ -55,26 +54,26 @@ namespace Initiative.UnitTests.Api.Services.LoginServiceTests.LoginTests
         [Given]
         public void PasswordMatches()
         {
-            UserManager.CheckPasswordAsync(Arg.Is<InitiativeUser>(u => u.Email == Email), Password)
+            UserManager.CheckPasswordAsync(Arg.Is<ApplicationIdentity>(u => u.Email == Email), Password)
                 .Returns(true);
         }
 
         [Given]
         public void JwtServiceReturnsJwt()
         {
-            JwtService.GenerateToken(Arg.Is<InitiativeUser>(u => u.Email == Email))
+            JwtService.GenerateToken(Arg.Is<ApplicationIdentity>(u => u.Email == Email))
                 .Returns(ExpectedJwt);
         }
 
         [Given]
         public void JwtServiceGeneratesRefreshToken()
         {
-            JwtService.GenerateAndStoreRefreshToken(Arg.Is<InitiativeUser>(u => u.Email == Email), Arg.Any<DateTime>(), CancellationToken)
+            JwtService.GenerateAndStoreRefreshToken(Arg.Is<ApplicationIdentity>(u => u.Email == Email), Arg.Any<DateTime>(), CancellationToken)
                 .Returns(argInfo => new JwtRefreshToken()
                 {
                     Expiration = argInfo.ArgAt<DateTime>(1),
                     RefreshToken = ExpectedRefreshToken,
-                    User = argInfo.ArgAt<InitiativeUser>(0)
+                    User = argInfo.ArgAt<ApplicationIdentity>(0)
                 });
         }
 

@@ -3,13 +3,12 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Initiative.Api.Core;
 using Initiative.Api.Core.Identity;
 using Initiative.Persistence.Repositories;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Initiative.Api.Core.Authentication
+namespace Initiative.Api.Core.Services.Authentication
 {
     public class JwtService : IJwtService
     {
@@ -20,8 +19,8 @@ namespace Initiative.Api.Core.Authentication
 
         public JwtService(IOptions<JwtSettings> settings, ICredentialsFactory securityKeyFactory, IJwtRefreshTokenRepository jwtRefreshTokenRepository)
         {
-            this.jwtSettingsContainer = settings;
-            this.credentialsFactory = securityKeyFactory;
+            jwtSettingsContainer = settings;
+            credentialsFactory = securityKeyFactory;
             this.jwtRefreshTokenRepository = jwtRefreshTokenRepository;
 
         }
@@ -38,7 +37,7 @@ namespace Initiative.Api.Core.Authentication
             }
         }
 
-        public string GenerateToken(InitiativeUser user)
+        public string GenerateToken(ApplicationIdentity user)
         {
 
             var claims = new[]
@@ -63,7 +62,7 @@ namespace Initiative.Api.Core.Authentication
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task<JwtRefreshToken> GenerateAndStoreRefreshToken(InitiativeUser user, DateTime expiration, CancellationToken cancellationToken)
+        public async Task<JwtRefreshToken> GenerateAndStoreRefreshToken(ApplicationIdentity user, DateTime expiration, CancellationToken cancellationToken)
         {
             var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
             await jwtRefreshTokenRepository.UpsertRefreshToken(user.Id.ToString(), token, expiration, cancellationToken);

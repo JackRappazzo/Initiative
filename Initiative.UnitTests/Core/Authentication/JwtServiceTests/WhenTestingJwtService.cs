@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Initiative.Api.Core.Authentication;
+using Initiative.Api.Core.Services.Authentication;
 using Initiative.Persistence.Repositories;
 using LeapingGorilla.Testing.Core;
 using LeapingGorilla.Testing.Core.Attributes;

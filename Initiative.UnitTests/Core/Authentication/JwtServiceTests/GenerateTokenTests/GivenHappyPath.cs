@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Initiative.Api.Core.Authentication;
 using Initiative.Api.Core.Identity;
+using Initiative.Api.Core.Services.Authentication;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.Core.Composable;
 using LeapingGorilla.Testing.NUnit.Attributes;
@@ -30,7 +30,7 @@ namespace Initiative.UnitTests.Core.Authentication.JwtServiceTests.GenerateToken
         [Given]
         public void UserIsSet()
         {
-            User = new InitiativeUser()
+            User = new ApplicationIdentity()
             {
                 UserName = "TestUser",
                 Email = "TestEmail@test.com"

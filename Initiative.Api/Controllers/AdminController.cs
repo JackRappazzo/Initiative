@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Initiative.Api.Messages;
 using Initiative.Api.Core.Identity;
 using System.Threading.Tasks;
-using Initiative.Api.Services;
-using Initiative.Api.Core.Authentication;
+using Initiative.Api.Core.Services.Authentication;
+using Initiative.Api.Core.Services.Users;
+
 using Microsoft.AspNetCore.Authorization;
+using Initiative.Api.Core.Services.Authentication;
 
 namespace Initiative.Api.Controllers
 {
@@ -14,11 +16,11 @@ namespace Initiative.Api.Controllers
     [ApiController]
     public class AdminController : ControllerBase
     {
-        IUserRegistrationService registrationService;
+        IUserService registrationService;
         IUserLoginService loginService;
         IJwtRefreshService jwtRefreshService;
 
-        public AdminController(IUserRegistrationService registrationService, IUserLoginService loginService, IJwtRefreshService jwtRefreshService)
+        public AdminController(IUserService registrationService, IUserLoginService loginService, IJwtRefreshService jwtRefreshService)
         {
             this.registrationService = registrationService;
             this.loginService = loginService;

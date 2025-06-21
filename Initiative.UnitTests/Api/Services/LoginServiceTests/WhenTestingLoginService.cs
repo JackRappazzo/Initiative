@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Initiative.Api.Core.Authentication;
 using Initiative.Api.Core.Identity;
-using Initiative.Api.Services;
+using Initiative.Api.Core.Services.Authentication;
+using Initiative.Api.Core.Services.Users;
 using Initiative.Persistence.Repositories;
 using Initiative.UnitTests.Api.Helpers;
 using LeapingGorilla.Testing.Core.Attributes;
@@ -19,13 +19,13 @@ namespace Initiative.UnitTests.Api.Services.LoginServiceTests
     {
         [ItemUnderTest] protected UserLoginService UserLoginService;
         [Dependency] protected IJwtService JwtService;
-        [Dependency] protected UserManager<InitiativeUser> UserManager;
+        [Dependency] protected UserManager<ApplicationIdentity> UserManager;
 
         protected CancellationToken CancellationToken = default(CancellationToken);
 
         protected override void CreateManualDependencies()
         {
-            UserManager = Substitute.For<MockUserManager<InitiativeUser>>();
+            UserManager = Substitute.For<MockUserManager<ApplicationIdentity>>();
             base.CreateManualDependencies();
         }
     }

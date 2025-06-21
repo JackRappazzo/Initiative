@@ -24,7 +24,7 @@ namespace Initiative.UnitTests.Core.Authentication.JwtServiceTests.GenerateRefre
         [Given]
         public void UserIsSet()
         {
-            User = new InitiativeUser()
+            User = new ApplicationIdentity()
             {
                 Email = "sample@email.com",
                 UserName = "username",

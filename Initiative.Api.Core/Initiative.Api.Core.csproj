@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Initiative.Persistence\Initiative.Persistence.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+  </ItemGroup>
+
 </Project>

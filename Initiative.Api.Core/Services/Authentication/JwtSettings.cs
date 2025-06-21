@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Initiative.Api.Core.Authentication
+namespace Initiative.Api.Core.Services.Authentication
 {
     public class JwtSettings
     {

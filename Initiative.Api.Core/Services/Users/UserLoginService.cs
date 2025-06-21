@@ -1,17 +1,16 @@
-﻿using Initiative.Api.Core.Authentication;
-using Initiative.Api.Core.Identity;
+﻿using Initiative.Api.Core.Identity;
+using Initiative.Api.Core.Services.Authentication;
 using Initiative.Persistence.Repositories;
 using Microsoft.AspNetCore.Identity;
 
-namespace Initiative.Api.Services
+namespace Initiative.Api.Core.Services.Users
 {
     public class UserLoginService : IUserLoginService
     {
-        UserManager<InitiativeUser> userManager;
+        IUserManager<Core.Identity.ApplicationIdentity> userManager;
         IJwtService jwtService;
-        IJwtRefreshTokenRepository jwtRefreshTokenRepository;
 
-        public UserLoginService(UserManager<InitiativeUser> userManager, IJwtService jwtService)
+        public UserLoginService(IUserManager<Core.Identity.ApplicationIdentity> userManager, IJwtService jwtService)
         {
             this.userManager = userManager;
             this.jwtService = jwtService;

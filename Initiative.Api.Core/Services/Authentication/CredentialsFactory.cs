@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Initiative.Api.Core.Authentication
+namespace Initiative.Api.Core.Services.Authentication
 {
     public class CredentialsFactory : ICredentialsFactory
     {

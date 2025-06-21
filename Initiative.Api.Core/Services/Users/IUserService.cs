@@ -1,7 +1,7 @@
 ﻿
-namespace Initiative.Api.Services
+namespace Initiative.Api.Core.Services.Users
 {
-    public interface IUserRegistrationService
+    public interface IUserService
     {
         Task<(bool, string)> RegisterUser(string displayName, string email, string password, CancellationToken cancellationToken);
     }

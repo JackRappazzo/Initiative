@@ -44,7 +44,7 @@ namespace Initiative.UnitTests.Core.Authentication.JwtRefreshServiceTests.Refres
         public void JwtServiceCanGenerateToken()
         {
             ExpectedToken = "jwt-string";
-            JwtService.GenerateToken(Arg.Is<InitiativeUser>(i => i.Id == UserId))
+            JwtService.GenerateToken(Arg.Is<ApplicationIdentity>(i => i.Id == UserId))
                 .Returns(ExpectedToken);
         }
 

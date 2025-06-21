@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Initiative.Api.Core.Authentication;
 using Initiative.Api.Core.Identity;
+using Initiative.Api.Core.Services.Authentication;
 using LeapingGorilla.Testing.Core.Attributes;
 
 namespace Initiative.UnitTests.Core.Authentication.JwtServiceTests.GenerateRefreshTokenTests
@@ -13,7 +13,7 @@ namespace Initiative.UnitTests.Core.Authentication.JwtServiceTests.GenerateRefre
     {
         protected JwtRefreshToken Result;
 
-        protected InitiativeUser User;
+        protected ApplicationIdentity User;
         protected string Token;
         protected DateTime Expiration;
 

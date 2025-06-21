@@ -1,5 +1,4 @@
-﻿
-namespace Initiative.Api.Core.Authentication
+﻿namespace Initiative.Api.Core.Services.Authentication
 {
     public interface IJwtRefreshService
     {

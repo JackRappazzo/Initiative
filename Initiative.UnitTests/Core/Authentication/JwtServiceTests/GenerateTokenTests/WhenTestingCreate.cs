@@ -10,7 +10,7 @@ namespace Initiative.UnitTests.Core.Authentication.JwtServiceTests.GenerateToken
 {
     public abstract class WhenTestingCreate : WhenTestingJwtService
     {
-        protected InitiativeUser User;
+        protected ApplicationIdentity User;
 
         protected string Result;
 

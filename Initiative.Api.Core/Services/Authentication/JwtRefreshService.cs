@@ -8,18 +8,18 @@ using Initiative.Persistence.Repositories;
 using Microsoft.AspNetCore.Identity;
 using MongoDB.Bson.Serialization.Serializers;
 
-namespace Initiative.Api.Core.Authentication
+namespace Initiative.Api.Core.Services.Authentication
 {
     public class JwtRefreshService : IJwtRefreshService
     {
         protected IJwtService jwtService;
         protected IJwtRefreshTokenRepository jwtRefreshTokenRepository;
-        protected UserManager<InitiativeUser> userManager;
+        protected UserManager<Identity.ApplicationIdentity> userManager;
 
-        public JwtRefreshService(IJwtService service, IJwtRefreshTokenRepository jwtRepository, UserManager<InitiativeUser> userManager)
+        public JwtRefreshService(IJwtService service, IJwtRefreshTokenRepository jwtRepository, UserManager<Identity.ApplicationIdentity> userManager)
         {
-            this.jwtRefreshTokenRepository = jwtRepository;
-            this.jwtService = service;
+            jwtRefreshTokenRepository = jwtRepository;
+            jwtService = service;
             this.userManager = userManager;
         }
 
