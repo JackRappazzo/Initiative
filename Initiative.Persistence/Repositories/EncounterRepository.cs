@@ -57,7 +57,7 @@ namespace Initiative.Persistence.Repositories
 
             var encounter = await collection.FindAsync(e => e.Id == encounterId && e.OwnerId == ownerId, cancellationToken: cancellationToken);
 
-            return encounter.First();
+            return encounter.FirstOrDefault();
         }
 
         /// <summary>

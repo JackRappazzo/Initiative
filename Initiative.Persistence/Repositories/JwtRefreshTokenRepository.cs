@@ -32,7 +32,7 @@ namespace Initiative.Persistence.Repositories
                 token => token.UserId == new ObjectId(userId),
                 new JwtRefreshTokenModel()
                 {
-                    Id = currentToken?.Id ?? new ObjectId(),
+                    Id = currentToken?.Id ?? ObjectId.GenerateNewId(),
                     UserId = new ObjectId(userId),
                     RefreshToken = refreshToken,
                     Expiration = expiration
