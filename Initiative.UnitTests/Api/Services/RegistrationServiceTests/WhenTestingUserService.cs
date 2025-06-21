@@ -7,7 +7,6 @@ using Initiative.Api.Core.Identity;
 using Initiative.Api.Core.Services.Users;
 using Initiative.Api.Core.Utilities;
 using Initiative.Persistence.Repositories;
-using Initiative.UnitTests.Api.Helpers;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.NUnit.Composable;
 using Microsoft.AspNetCore.Identity;
@@ -27,7 +26,7 @@ namespace Initiative.UnitTests.Api.Services.UserServiceTests
         protected IInitiativeUserRepository UserRepository;
 
         [Dependency]
-        protected IBase62CodeGenerator Base62CodeGenerator = Substitute.For<IBase62CodeGenerator>();
+        protected IBase62CodeGenerator Base62CodeGenerator;
 
         protected CancellationToken CancellationToken = default;
 

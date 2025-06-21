@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Initiative.Api.Core.Identity;
 using Initiative.Api.Core.Services.Authentication;
 using Initiative.Persistence.Repositories;
-using Initiative.UnitTests.Api.Helpers;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.NUnit.Composable;
 using Microsoft.AspNetCore.Identity;
@@ -19,13 +18,13 @@ namespace Initiative.UnitTests.Core.Authentication.JwtRefreshServiceTests
         [ItemUnderTest] protected JwtRefreshService JwtRefreshService;
         [Dependency] protected IJwtRefreshTokenRepository JwtRefreshTokenRepository;
         [Dependency] protected IJwtService JwtService;
-        [Dependency] protected UserManager<Initiative.Api.Core.Identity.ApplicationIdentity> UserManager;
+        [Dependency] protected IUserManager<ApplicationIdentity> UserManager;
 
         protected CancellationToken CancellationToken = default(CancellationToken);
 
         protected override void CreateManualDependencies()
         {
-            UserManager = Substitute.For<MockUserManager<Initiative.Api.Core.Identity.ApplicationIdentity>>();
+           
             base.CreateManualDependencies();
         }
     }

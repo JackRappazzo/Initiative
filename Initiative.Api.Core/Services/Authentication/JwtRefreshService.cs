@@ -14,9 +14,9 @@ namespace Initiative.Api.Core.Services.Authentication
     {
         protected IJwtService jwtService;
         protected IJwtRefreshTokenRepository jwtRefreshTokenRepository;
-        protected UserManager<Identity.ApplicationIdentity> userManager;
+        protected IUserManager<ApplicationIdentity> userManager;
 
-        public JwtRefreshService(IJwtService service, IJwtRefreshTokenRepository jwtRepository, UserManager<Identity.ApplicationIdentity> userManager)
+        public JwtRefreshService(IJwtService service, IJwtRefreshTokenRepository jwtRepository, IUserManager<ApplicationIdentity> userManager)
         {
             jwtRefreshTokenRepository = jwtRepository;
             jwtService = service;

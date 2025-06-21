@@ -7,7 +7,6 @@ using Initiative.Api.Core.Identity;
 using Initiative.Api.Core.Services.Authentication;
 using Initiative.Api.Core.Services.Users;
 using Initiative.Persistence.Repositories;
-using Initiative.UnitTests.Api.Helpers;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.NUnit.Composable;
 using Microsoft.AspNetCore.Identity;
@@ -19,14 +18,10 @@ namespace Initiative.UnitTests.Api.Services.LoginServiceTests
     {
         [ItemUnderTest] protected UserLoginService UserLoginService;
         [Dependency] protected IJwtService JwtService;
-        [Dependency] protected UserManager<ApplicationIdentity> UserManager;
+        [Dependency] protected IUserManager<ApplicationIdentity> UserManager;
 
         protected CancellationToken CancellationToken = default(CancellationToken);
 
-        protected override void CreateManualDependencies()
-        {
-            UserManager = Substitute.For<MockUserManager<ApplicationIdentity>>();
-            base.CreateManualDependencies();
-        }
+
     }
 }
