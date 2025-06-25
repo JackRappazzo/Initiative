@@ -46,7 +46,6 @@ export class EncounterService {
         encounter.Name = r.displayName ?? r.name; // fallback if displayName is missing
 
         var creatures:CreatureModel[] = r.creatures?.map((c: any) => {
-          console.log(c);
           var creature = new CreatureModel();
           creature.ArmorClass = c.armorClass;
           creature.Name = c.name;

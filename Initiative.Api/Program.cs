@@ -36,6 +36,7 @@ builder.Services.AddScoped<IJwtRefreshTokenRepository, JwtRefreshTokenRepository
 builder.Services.AddScoped<IEncounterRepository, EncounterRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IInitiativeUserRepository, InitiativeUserRepository>();
 builder.Services.AddScoped<IUserLoginService, UserLoginService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ICredentialsFactory, CredentialsFactory>();
