@@ -74,4 +74,28 @@ export class LobbyClient {
             console.error("Failed to send creature list:", err);
         }
     }
+
+    public async setEncounterState(encounterState: any): Promise<void> {
+        try {
+            await this.connection.invoke("SetEncounterState", encounterState);
+        } catch (err) {
+            console.error("Failed to set encounter state:", err);
+        }
+    }
+
+    public async startEncounter(creatures: string[]): Promise<void> {
+        try {
+            await this.connection.invoke("StartEncounter", creatures);
+        } catch (err) {
+            console.error("Failed to start encounter:", err);
+        }
+    }
+
+    public async endEncounter(): Promise<void> {
+        try {
+            await this.connection.invoke("EndEncounter");
+        } catch (err) {
+            console.error("Failed to end encounter:", err);
+        }
+    }
 }

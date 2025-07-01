@@ -8,6 +8,7 @@ import { CreatureModel } from "../../../models/CreatureModel";
 import { NgFor, NgIf } from "@angular/common";
 import { FormsModule, NgModel } from "@angular/forms";
 import { interval, Subscription } from "rxjs";
+import { LobbyClient } from "../../../signalR/LobbyClient";
 
 
 @Component(
@@ -26,6 +27,11 @@ export class EncounterEditComponent{
     encounterModel:EncounterModel = new EncounterModel();
     private autoSaveSub?: Subscription;
 
+    lobbyClient!: LobbyClient;
+    lobbyMode: 'Waiting' | 'InProgress' = 'Waiting';
+    currentTurnIndex = 0;
+    turnNumber = 1;
+
     constructor(private encounterService:EncounterService, private route:ActivatedRoute) {
         this.encounterId = this.route.snapshot.paramMap.get('encounterId') ?? "";
         this.encounterService.getEncounter(this.encounterId)
@@ -37,11 +43,29 @@ export class EncounterEditComponent{
                 this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
             }
         });
+
+        // Initialize LobbyClient (replace with your actual hub URL and room code logic)
+        const hubUrl = "https://your-api-url/lobbyhub";
+        const roomCode = this.encounterId; // Or however you map encounter to lobby
+        this.lobbyClient = new LobbyClient(hubUrl, roomCode);
+        this.lobbyClient.connect();
     }
 
     ngOnDestroy() {
         this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
         this.autoSaveSub?.unsubscribe();
+        this.lobbyClient.disconnect();
+    }
+
+    // Call this after every API update
+    private sendLobbyState() {
+        const state = {
+            ...this.encounterModel,
+            lobbyMode: this.lobbyMode,
+            currentTurnIndex: this.currentTurnIndex,
+            turnNumber: this.turnNumber
+        };
+        this.lobbyClient.setEncounterState(state);
     }
 
     
@@ -51,7 +75,9 @@ export class EncounterEditComponent{
         event.previousIndex,
         event.currentIndex
     );
-    this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
+    this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe(() => {
+        this.sendLobbyState();
+    });
   }
 
   onAddCreature() {
@@ -63,7 +89,9 @@ export class EncounterEditComponent{
 
     this.encounterModel.Creatures.push(newCreature);
 
-    this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
+    this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe(() => {
+        this.sendLobbyState();
+    });
 
   }
 
@@ -134,6 +162,33 @@ export class EncounterEditComponent{
       return bInit - aInit;
     });
     this.setCreaturesOnService();
+  }
+
+  // Start/Stop Encounter
+  startEncounter() {
+    this.lobbyMode = 'InProgress';
+    this.currentTurnIndex = 0;
+    this.turnNumber = 1;
+    this.lobbyClient.startEncounter(this.encounterModel.Creatures.map(c => c.Name));
+    this.sendLobbyState();
+  }
+
+  endEncounter() {
+    this.lobbyMode = 'Waiting';
+    this.lobbyClient.endEncounter();
+    this.sendLobbyState();
+  }
+
+  // Advance turn logic
+  nextTurn() {
+    if (this.encounterModel.Creatures.length === 0) return;
+    this.currentTurnIndex++;
+    if (this.currentTurnIndex >= this.encounterModel.Creatures.length) {
+        this.currentTurnIndex = 0;
+        this.turnNumber++;
+    }
+    this.sendLobbyState();
+    this.lobbyClient.sendNextTurn();
   }
 
 }

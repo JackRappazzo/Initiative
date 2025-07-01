@@ -94,4 +94,10 @@
             </mat-card>
         </div>
   </div>
+  <div style="margin-bottom: 16px;">
+  <button mat-raised-button color="primary" (click)="startEncounter()" [disabled]="lobbyMode === 'InProgress'">Start Encounter</button>
+  <button mat-raised-button color="warn" (click)="endEncounter()" [disabled]="lobbyMode === 'Waiting'">End Encounter</button>
+  <button mat-raised-button color="accent" (click)="nextTurn()" [disabled]="lobbyMode !== 'InProgress'">Next Turn</button>
+  <span *ngIf="lobbyMode === 'InProgress'">Turn: {{turnNumber}}, Creature: {{currentTurnIndex + 1}} / {{encounterModel.Creatures.length}}</span>
+</div>
 </mat-card>
