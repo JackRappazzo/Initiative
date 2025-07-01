@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Initiative.Api.Core.Identity\Initiative.Api.Core.Identity.csproj" />
     <ProjectReference Include="..\Initiative.Api.Core\Initiative.Api.Core.csproj" />
+    <ProjectReference Include="..\Initiative.Lobby.Core\Initiative.Lobby.Core.csproj" />
   </ItemGroup>
 
 </Project>

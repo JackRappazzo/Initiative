@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Initiative.Api.Core.Utilities;
 using Initiative.Api.Core.Services.Authentication;
 using Initiative.Api.Core.Services.Users;
+using Initiative.Lobby.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,7 @@ builder.Services.AddCors(options =>
         .AllowCredentials();
     });
 });
+builder.Services.AddSignalR();
 
 builder.Services.AddScoped<IDatabaseConnectionFactory, DatabaseConnectionFactory>();
 builder.Services.AddScoped<IJwtRefreshTokenRepository, JwtRefreshTokenRepository>();
@@ -46,6 +48,8 @@ builder.Services.AddScoped<IEncounterService, EncounterService>();
 builder.Services.AddScoped<IBase62CodeGenerator, Base62CodeGenerator>();
 
 builder.Services.AddScoped<IUserManager<ApplicationIdentity>, UserManagerFacade<ApplicationIdentity>>();
+
+
 
 
 
@@ -136,5 +140,7 @@ app.UseAuthorization();
 
 
 app.MapControllers();
+
+app.MapHub<LobbyHub>(app.Configuration["SignalR:LobbyHubPath"] ?? "/lobby");
 
 app.Run();
