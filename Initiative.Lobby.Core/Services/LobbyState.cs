@@ -13,6 +13,8 @@ namespace Initiative.Lobby.Core.Services
         public int CurrentCreatureIndex { get; set; } = 0;
         public int CurrentTurn { get; set; } = 0;
 
+        public LobbyMode CurrentMode { get; set; } = LobbyMode.Waiting;
+
         private HashSet<string> connectionIds = new HashSet<string>();
 
         public LobbyState() { }
