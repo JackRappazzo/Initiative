@@ -1,6 +1,7 @@
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav #drawer mode="side" position="end" class="sidenav" opened>
     <mat-nav-list>
+        <a mat-list-item routerLink="/lobby">Join Lobby</a>
         <ng-container *ngIf="!isLoggedIn">
             <a mat-list-item routerLink="/signup">Signup</a>
             <a mat-list-item routerLink="/login">Login</a>

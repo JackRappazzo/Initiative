@@ -11,6 +11,7 @@ export const routes: Routes = [
   { path: 'encounters', component: EncounterListComponent},
   { path: 'encounters/:encounterId', component: EncounterEditComponent},
   { path: 'beastiary', redirectTo: ''},
+  { path: 'lobby', redirectTo: ''},
   { path: '**', redirectTo: 'encounters' }
 ];
 
