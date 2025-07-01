@@ -44,6 +44,31 @@ namespace Initiative.Lobby.Core
             }
         }
 
+        public async Task StartEncounter(IEnumerable<string> creatures)
+        {
+            var lobby = lobbyService.GetRoomCodeByConnection(Context.ConnectionId);
+            if (string.IsNullOrEmpty(lobby))
+            {
+                await Clients.Caller.SendAsync("Error", "You are not in a lobby.");
+                return;
+            }
+
+            lobbyService.SetLobbyMode(lobby, LobbyMode.InProgress);
+            await Clients.Group(lobby).SendAsync("StartEncounter", creatures);
+        }
+
+        public async Task EndEncounter()
+        {
+            var lobby = lobbyService.GetRoomCodeByConnection(Context.ConnectionId);
+            if (string.IsNullOrEmpty(lobby))
+            {
+                await Clients.Caller.SendAsync("Error", "You are not in a lobby.");
+                return;
+            }
+            lobbyService.SetLobbyMode(lobby, LobbyMode.Waiting);
+            await Clients.Group(lobby).SendAsync("EndEncounter");
+        }
+
         public async Task LeaveLobby(string roomCode)
         {
             lobbyService.LeaveLobby(Context.ConnectionId);
