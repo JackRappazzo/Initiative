@@ -1,4 +1,5 @@
-﻿using Initiative.Lobby.Core.Services;
+﻿using Initiative.Lobby.Core.Dtos;
+using Initiative.Lobby.Core.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Initiative.Lobby.Core
@@ -19,6 +20,19 @@ namespace Initiative.Lobby.Core
             await Clients.Group(lobby).SendAsync("NextTurn");
         }
 
+        public async Task GetLobbyState()
+        {
+            var connectionId = Context.ConnectionId;
+            var lobby = lobbyService.GetRoomCodeByConnection(connectionId);
+            if (string.IsNullOrEmpty(lobby))
+            {
+                await Clients.Caller.SendAsync("Error", "You are not in a lobby.");
+                return;
+            }
+            var lobbyState = lobbyService.GetLobbyState(lobby);
+            await Clients.Caller.SendAsync("ReceivedLobbyState", lobbyState);
+        }
+
         public async Task SendCreatureList(List<string> creatureList)
         {
             var lobby = lobbyService.GetRoomCodeByConnection(Context.ConnectionId);
@@ -27,7 +41,7 @@ namespace Initiative.Lobby.Core
                 await Clients.Caller.SendAsync("Error", "You are not in a lobby.");
                 return;
             }
-            await Clients.Group(lobby).SendAsync("CreatureList", creatureList);
+            await Clients.Group(lobby).SendAsync("ReceivedCreatureList", creatureList);
         }
 
         public async Task JoinLobby(string roomCode)
@@ -55,6 +69,17 @@ namespace Initiative.Lobby.Core
 
             lobbyService.SetLobbyMode(lobby, LobbyMode.InProgress);
             await Clients.Group(lobby).SendAsync("StartEncounter", creatures);
+        }
+
+        public async Task SetEncounterState(EncounterDto encounterDto)
+        {
+            var lobby = lobbyService.GetRoomCodeByConnection(Context.ConnectionId);
+            if (string.IsNullOrEmpty(lobby))
+            {
+                await Clients.Caller.SendAsync("Error", "You are not in a lobby.");
+                return;
+            }
+            await Clients.Group(lobby).SendAsync("SetEncounterState", encounterDto);
         }
 
         public async Task EndEncounter()

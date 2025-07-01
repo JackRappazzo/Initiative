@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Initiative.Lobby.Core.Dtos;
 using Initiative.Persistence.Repositories;
 
 namespace Initiative.Lobby.Core.Services
@@ -84,6 +85,38 @@ namespace Initiative.Lobby.Core.Services
                 return lobby.CurrentMode;
             }
             return LobbyMode.Waiting;
+        }
+
+        public EncounterDto GetLobbyState(string roomCode)
+        {
+            if (lobbies.TryGetValue(roomCode, out var lobby))
+            {
+                return new EncounterDto
+                {
+                    Creatures = lobby.GetConnections().OrderBy(c => c),
+                    CurrentCreatureIndex = lobby.CurrentCreatureIndex,
+                    CurrentTurn = lobby.CurrentTurn,
+                    CurrentMode = lobby.CurrentMode
+                };
+            }
+            return new EncounterDto
+            {
+                Creatures = Enumerable.Empty<string>().OrderBy(c => c),
+                CurrentCreatureIndex = 0,
+                CurrentTurn = 0,
+                CurrentMode = LobbyMode.Waiting
+            };
+        }
+
+        public void SetLobbyState(string roomCode, EncounterDto encounter)
+        {
+            if (lobbies.TryGetValue(roomCode, out var lobby))
+            {
+                lobby.Creatures = encounter.Creatures.ToImmutableList();
+                lobby.CurrentCreatureIndex = encounter.CurrentCreatureIndex;
+                lobby.CurrentTurn = encounter.CurrentTurn;
+                lobby.CurrentMode = encounter.CurrentMode;
+            }
         }
 
     }
