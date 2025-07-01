@@ -1,30 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Initiative.Lobby.Core.Services
 {
-    public class Lobby
+    public class LobbyState
     {
-        public string OwnerId { get; set; }
-        public string LobbyKey { get; set; }
 
-        public IEnumerable<string> ConnectionIds {  get=> connectionIds.ToImmutableList(); }
+        public IEnumerable<string> Creatures { get; set; } = Enumerable.Empty<string>();
+        public int CurrentCreatureIndex { get; set; } = 0;
+        public int CurrentTurn { get; set; } = 0;
 
-        private List<string> connectionIds = new List<string>();
+        private HashSet<string> connectionIds = new HashSet<string>();
 
-        public Lobby(string ownerId, string lobbyKey)
-        {
-            OwnerId = ownerId;
-            LobbyKey = lobbyKey;
-        }
+        public LobbyState() { }
 
         public void AddConnection(string connectionId)
         {
-            if (!connectionIds.Contains(connectionId))
+            if(!connectionIds.Contains(connectionId))
             {
                 connectionIds.Add(connectionId);
             }
@@ -38,5 +33,9 @@ namespace Initiative.Lobby.Core.Services
             }
         }
 
+        public IEnumerable<string> GetConnections()
+        {
+            return connectionIds.ToList();
+        }
     }
 }

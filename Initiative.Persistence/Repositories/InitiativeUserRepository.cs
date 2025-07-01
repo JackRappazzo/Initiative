@@ -21,12 +21,12 @@ namespace Initiative.Persistence.Repositories
 
         public async Task<string> InsertUser(InitiativeUserModel user, CancellationToken cancellationToken)
         {
-            if(!user.IdentityId.IsValidObjectId())
+            if (!user.IdentityId.IsValidObjectId())
             {
                 throw new ArgumentException("IdentityId cannot be null or empty", nameof(user.IdentityId));
             }
 
-            if(await UserExists(user.IdentityId, cancellationToken))
+            if (await UserExists(user.IdentityId, cancellationToken))
             {
                 throw new InvalidOperationException($"User with IdentityId {user.IdentityId} already exists.");
             }
@@ -51,5 +51,12 @@ namespace Initiative.Persistence.Repositories
             return count > 0;
         }
 
+        public async Task<bool> RoomCodeExists(string roomCode, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<InitiativeUserModel>(TableName);
+            var count = await collection.CountDocumentsAsync(u => u.RoomCode == roomCode, cancellationToken: cancellationToken);
+            return count > 0;
+
+        }
     }
 }

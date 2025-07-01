@@ -1,30 +1,54 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Initiative.Lobby.Core.Services;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Initiative.Lobby.Core
 {
     public class LobbyHub : Hub
     {
+        private readonly ILobbyService lobbyService;
 
-        public async Task SendNextTurn(string sender)
+        public LobbyHub(ILobbyService lobbyService)
         {
-            await Clients.All.SendAsync("NextTurn", sender);
+            this.lobbyService = lobbyService;
         }
 
-        public async Task SendCreatureList(string sender, List<string> creatureList)
+        public async Task SendNextTurn()
         {
-            await Clients.All.SendAsync("InitiativeList", sender, creatureList);
+            var connectionId = Context.ConnectionId;
+            var lobby = lobbyService.GetRoomCodeByConnection(connectionId);
+            await Clients.Group(lobby).SendAsync("NextTurn");
         }
 
-        public async Task JoinLobby(string lobbyName)
+        public async Task SendCreatureList(List<string> creatureList)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyName);
-            await Clients.Group(lobbyName).SendAsync("UserJoined", Context.ConnectionId);
+            var lobby = lobbyService.GetRoomCodeByConnection(Context.ConnectionId);
+            if(string.IsNullOrEmpty(lobby))
+            {
+                await Clients.Caller.SendAsync("Error", "You are not in a lobby.");
+                return;
+            }
+            await Clients.Group(lobby).SendAsync("CreatureList", creatureList);
         }
 
-        public async Task LeaveLobby(string lobbyName)
+        public async Task JoinLobby(string roomCode)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyName);
-            await Clients.Group(lobbyName).SendAsync("UserLeft", Context.ConnectionId);
+            var (success, error) = await lobbyService.JoinLobby(Context.ConnectionId, roomCode, Context.ConnectionAborted);
+            if (success)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
+                await Clients.Group(roomCode).SendAsync("UserJoined", Context.ConnectionId);
+            }
+            else
+            {
+                await Clients.Caller.SendAsync("Error", $"Failed to join lobby: {error}");
+            }
+        }
+
+        public async Task LeaveLobby(string roomCode)
+        {
+            lobbyService.LeaveLobby(Context.ConnectionId);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomCode);
+            await Clients.Group(roomCode).SendAsync("UserLeft", Context.ConnectionId);
         }
 
     }
