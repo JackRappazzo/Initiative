@@ -36,7 +36,7 @@ namespace Initiative.Lobby.Core
         public async Task SendCreatureList(List<string> creatureList)
         {
             var lobby = lobbyService.GetRoomCodeByConnection(Context.ConnectionId);
-            if(string.IsNullOrEmpty(lobby))
+            if (string.IsNullOrEmpty(lobby))
             {
                 await Clients.Caller.SendAsync("Error", "You are not in a lobby.");
                 return;
@@ -47,7 +47,7 @@ namespace Initiative.Lobby.Core
         public async Task JoinLobby(string roomCode)
         {
             var (success, error) = await lobbyService.JoinLobby(Context.ConnectionId, roomCode, Context.ConnectionAborted);
-            if (success)
+            if (success || error == LobbyServiceError.UserAlreadyInRoom)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
                 await Clients.OthersInGroup(roomCode).SendAsync("UserJoined", Context.ConnectionId);

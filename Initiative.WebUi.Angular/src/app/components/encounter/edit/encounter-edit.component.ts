@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { EncounterService } from "../../../services/encounterService";
 import { ActivatedRoute } from "@angular/router";
 import { EncounterModel } from "../../../models/encounterModel";
@@ -9,6 +9,7 @@ import { NgFor, NgIf } from "@angular/common";
 import { FormsModule, NgModel } from "@angular/forms";
 import { interval, Subscription } from "rxjs";
 import { LobbyClient } from "../../../signalR/LobbyClient";
+import { UserService, UserInformation } from "../../../services/userService";
 
 
 @Component(
@@ -20,24 +21,45 @@ import { LobbyClient } from "../../../signalR/LobbyClient";
         imports: [MaterialModule, DragDropModule, NgFor, NgIf, FormsModule]
     }
 )
-export class EncounterEditComponent{
-    encounterId!:string;
-    editingName:boolean = false;
-
-    encounterModel:EncounterModel = new EncounterModel();
+export class EncounterEditComponent implements OnInit, OnDestroy {
+    encounterId!: string;
+    editingName: boolean = false;
+    encounterModel: EncounterModel = new EncounterModel();
     private autoSaveSub?: Subscription;
 
     lobbyClient!: LobbyClient;
     lobbyMode: 'Waiting' | 'InProgress' = 'Waiting';
     currentTurnIndex = 0;
     turnNumber = 1;
-    signalRConnected = false;
     lobbyJoined = false;
+    userInfo?: UserInformation;
+    roomCode: string = "";
+    isConnected: boolean = false;
 
-    constructor(private encounterService:EncounterService, private route:ActivatedRoute) {
+    constructor(
+        private encounterService: EncounterService,
+        private route: ActivatedRoute,
+        private userService: UserService
+    ) {
         this.encounterId = this.route.snapshot.paramMap.get('encounterId') ?? "";
+        console.log("Encounter ID:", this.encounterId);
+    }
+
+    ngOnInit() {
+      console.log("Init!");
         this.encounterService.getEncounter(this.encounterId)
-            .subscribe(encounter=> { console.log(encounter); return this.encounterModel = encounter; });
+            .subscribe(encounter => { this.encounterModel = encounter; });
+
+        this.userService.getUserInformation().subscribe(userInfo => {
+            this.userInfo = userInfo;
+            this.roomCode = userInfo.roomCode;        
+
+            this.initializeLobbyClient("https://localhost:7034/lobby", this.roomCode);
+
+            this.lobbyClient.connect();
+            
+
+        });
 
         // Start periodic auto-save every 10 seconds
         this.autoSaveSub = interval(10000).subscribe(() => {
@@ -45,18 +67,26 @@ export class EncounterEditComponent{
                 this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
             }
         });
-
-        // Initialize LobbyClient (replace with your actual hub URL and room code logic)
-        const hubUrl = "https://localhost:7300/lobby";
-        const roomCode = this.encounterId; // Or however you map encounter to lobby
-        this.lobbyClient = new LobbyClient(hubUrl, roomCode);
-        this.lobbyClient.connect();
     }
 
     ngOnDestroy() {
         this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
         this.autoSaveSub?.unsubscribe();
         this.lobbyClient.disconnect();
+    }
+
+    private initializeLobbyClient(host:string, roomCode:string):void {
+      this.lobbyClient = new LobbyClient(host, roomCode);
+       this.lobbyClient.isConnected$.subscribe(connected => {
+            this.isConnected = connected;
+            if(this.isConnected && !this.lobbyJoined)
+            {
+              this.lobbyClient.joinLobby(this.roomCode);
+            }
+        });
+        this.lobbyClient.isInLobby.subscribe(inLobby => {
+            this.lobbyJoined = inLobby;
+        });
     }
 
     // Call this after every API update
@@ -168,10 +198,7 @@ export class EncounterEditComponent{
 
   // Start/Stop Encounter
   async startEncounter() {
-    if (!this.signalRConnected) {
-        await this.lobbyClient.connect();
-        this.signalRConnected = true;
-    }
+
     if (!this.lobbyJoined) {
         // Wait for ReceivedLobbyState event to set lobbyJoined = true
         await new Promise<void>(resolve => {
@@ -185,8 +212,8 @@ export class EncounterEditComponent{
     this.lobbyMode = 'InProgress';
     this.currentTurnIndex = 0;
     this.turnNumber = 1;
-    this.lobbyClient.startEncounter(this.encounterModel.Creatures.map(c => c.Name));
-    this.sendLobbyState();
+    await this.lobbyClient.startEncounter(this.encounterModel.Creatures.map(c => c.Name));
+    await this.sendLobbyState();
   }
 
   endEncounter() {

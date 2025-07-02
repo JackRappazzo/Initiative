@@ -1,11 +1,7 @@
+import { Subject, BehaviorSubject } from "rxjs";
 import * as signalR from "@microsoft/signalr";
-import { Subject } from "rxjs";
 
 export class LobbyClient {
-    private connection: signalR.HubConnection;
-    private roomCode: string;
-
-    // Subjects for events
     public nextTurn$ = new Subject<void>();
     public creatureList$ = new Subject<string[]>();
     public receivedCreatureList$ = new Subject<string[]>();
@@ -13,11 +9,15 @@ export class LobbyClient {
     public userJoined$ = new Subject<string>();
     public userLeft$ = new Subject<string>();
     public error$ = new Subject<string>();
-
-    // New: Subjects for connection events
     public connected$ = new Subject<void>();
     public reconnected$ = new Subject<void>();
     public closed$ = new Subject<void>();
+
+    public isConnected$ = new BehaviorSubject<boolean>(false);
+    public isInLobby = new BehaviorSubject<boolean>(false);
+
+    private connection: signalR.HubConnection;
+    public roomCode: string;
 
     constructor(hubUrl: string, roomCode: string) {
         this.roomCode = roomCode;
@@ -29,15 +29,16 @@ export class LobbyClient {
 
         this.registerHandlers();
 
-        // Expose connection events
         this.connection.onclose(() => {
             this.closed$.next();
+            this.isConnected$.next(false);
         });
         this.connection.onreconnected(() => {
             this.reconnected$.next();
+            this.isConnected$.next(true);
         });
         this.connection.onreconnecting(() => {
-            // Optionally, you can add a reconnecting$ subject if needed
+            // Optionally handle reconnecting
         });
     }
 
@@ -81,15 +82,24 @@ export class LobbyClient {
             console.log("[SignalR] Received: Error", error);
             this.error$.next(error);
         });
+
+        this.connection.on("LobbyJoined", (state: any) => {
+            console.log("[SignalR] Received: LobbyJoined", state);
+            this.receivedLobbyState$.next(state);
+            this.isConnected$.next(true);
+            this.isInLobby.next(true);
+        });
     }
 
     public async connect(): Promise<void> {
         try {
             await this.connection.start();
             this.connected$.next();
-            await this.connection.invoke("JoinLobby", this.roomCode);
+            this.isConnected$.next(true);
         } catch (err) {
             this.error$.next("Failed to connect: " + err);
+            this.isConnected$.next(false);
+            throw err;
         }
     }
 
@@ -97,6 +107,7 @@ export class LobbyClient {
         try {
             await this.connection.invoke("LeaveLobby", this.roomCode);
             await this.connection.stop();
+            this.isConnected$.next(false);
         } catch (err) {
             this.error$.next("Error during disconnect: " + err);
         }
@@ -139,6 +150,14 @@ export class LobbyClient {
             await this.connection.invoke("EndEncounter");
         } catch (err) {
             this.error$.next("Failed to end encounter: " + err);
+        }
+    }
+
+    public async joinLobby(roomCode: string): Promise<void> {
+        try {
+            await this.connection.invoke("JoinLobby", roomCode);
+        } catch (err) {
+            this.error$.next("Failed to join lobby: " + err);
         }
     }
 }
