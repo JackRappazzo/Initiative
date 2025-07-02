@@ -16,6 +16,7 @@ using Initiative.Api.Core.Utilities;
 using Initiative.Api.Core.Services.Authentication;
 using Initiative.Api.Core.Services.Users;
 using Initiative.Lobby.Core;
+using Initiative.Lobby.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,12 +50,7 @@ builder.Services.AddScoped<IBase62CodeGenerator, Base62CodeGenerator>();
 
 builder.Services.AddScoped<IUserManager<ApplicationIdentity>, UserManagerFacade<ApplicationIdentity>>();
 
-
-
-
-
-
-
+builder.Services.AddScoped<ILobbyService, LobbyService>();
 
 //Identity
 builder.Services.AddIdentityMongoDbProvider<Initiative.Api.Core.Identity.ApplicationIdentity, DefaultRole>(identityOptions =>

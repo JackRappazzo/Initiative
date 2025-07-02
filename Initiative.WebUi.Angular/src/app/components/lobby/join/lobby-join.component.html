@@ -1,0 +1,18 @@
+<div class="lobby-join-container">
+  <h2>Enter Room Code</h2>
+  <form (ngSubmit)="joinLobby()" autocomplete="off">
+    <input
+      type="text"
+      [(ngModel)]="roomCode"
+      name="roomCode"
+      maxlength="8"
+      minlength="4"
+      required
+      class="room-code-input"
+      placeholder="Room Code"
+      autofocus
+    />
+    <br />
+    <button type="submit" class="join-btn" [disabled]="!roomCode || roomCode.length < 4">Join Lobby</button>
+  </form>
+</div>

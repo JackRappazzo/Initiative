@@ -31,6 +31,8 @@ export class EncounterEditComponent{
     lobbyMode: 'Waiting' | 'InProgress' = 'Waiting';
     currentTurnIndex = 0;
     turnNumber = 1;
+    signalRConnected = false;
+    lobbyJoined = false;
 
     constructor(private encounterService:EncounterService, private route:ActivatedRoute) {
         this.encounterId = this.route.snapshot.paramMap.get('encounterId') ?? "";
@@ -45,7 +47,7 @@ export class EncounterEditComponent{
         });
 
         // Initialize LobbyClient (replace with your actual hub URL and room code logic)
-        const hubUrl = "https://your-api-url/lobbyhub";
+        const hubUrl = "https://localhost:7300/lobby";
         const roomCode = this.encounterId; // Or however you map encounter to lobby
         this.lobbyClient = new LobbyClient(hubUrl, roomCode);
         this.lobbyClient.connect();
@@ -165,7 +167,21 @@ export class EncounterEditComponent{
   }
 
   // Start/Stop Encounter
-  startEncounter() {
+  async startEncounter() {
+    if (!this.signalRConnected) {
+        await this.lobbyClient.connect();
+        this.signalRConnected = true;
+    }
+    if (!this.lobbyJoined) {
+        // Wait for ReceivedLobbyState event to set lobbyJoined = true
+        await new Promise<void>(resolve => {
+            const sub = this.lobbyClient.receivedLobbyState$.subscribe(() => {
+                this.lobbyJoined = true;
+                sub.unsubscribe();
+                resolve();
+            });
+        });
+    }
     this.lobbyMode = 'InProgress';
     this.currentTurnIndex = 0;
     this.turnNumber = 1;

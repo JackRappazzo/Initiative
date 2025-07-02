@@ -20,7 +20,7 @@ export class LobbyViewComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.roomCode = this.route.snapshot.paramMap.get('roomCode') ?? '';
-    this.lobbyClient = new LobbyClient('https://localhost:7034/lobbyHub', this.roomCode);
+    this.lobbyClient = new LobbyClient('https://localhost:7034/lobby', this.roomCode);
 
     (this.lobbyClient as any).connection.off('CreatureList');
     this.lobbyClient['connection'].on('CreatureList', (creatures: string[]) => {

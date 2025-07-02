@@ -25,7 +25,7 @@ namespace Initiative.Lobby.Core.Services
 
         public async Task<(bool success, LobbyServiceError error)> JoinLobby(string connectionId, string roomCode, CancellationToken cancellationToken)
         {
-            if (await initiativeUserRepository.RoomCodeExists(roomCode, cancellationToken))
+            if (!await initiativeUserRepository.RoomCodeExists(roomCode, cancellationToken))
             {
                 return (false, LobbyServiceError.RoomNotFound);
             }

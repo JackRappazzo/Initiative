@@ -50,7 +50,8 @@ namespace Initiative.Lobby.Core
             if (success)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
-                await Clients.Group(roomCode).SendAsync("UserJoined", Context.ConnectionId);
+                await Clients.OthersInGroup(roomCode).SendAsync("UserJoined", Context.ConnectionId);
+                await Clients.Caller.SendAsync("LobbyJoined", lobbyService.GetLobbyState(roomCode));
             }
             else
             {
