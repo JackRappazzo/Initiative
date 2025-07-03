@@ -17,6 +17,7 @@ using Initiative.Api.Core.Services.Authentication;
 using Initiative.Api.Core.Services.Users;
 using Initiative.Lobby.Core;
 using Initiative.Lobby.Core.Services;
+using Newtonsoft.Json.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +33,21 @@ builder.Services.AddCors(options =>
         .AllowCredentials();
     });
 });
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(
+    options => 
+    {
+        options.EnableDetailedErrors = true; 
+    })
+    .AddNewtonsoftJsonProtocol(options =>
+    {
+        options.PayloadSerializerSettings = new Newtonsoft.Json.JsonSerializerSettings
+        {
+            ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+            Formatting = Newtonsoft.Json.Formatting.Indented
+        };
+        options.PayloadSerializerSettings.Converters.Add(new StringEnumConverter());
+    });
 
 builder.Services.AddScoped<IDatabaseConnectionFactory, DatabaseConnectionFactory>();
 builder.Services.AddScoped<IJwtRefreshTokenRepository, JwtRefreshTokenRepository>();
@@ -50,7 +65,7 @@ builder.Services.AddScoped<IBase62CodeGenerator, Base62CodeGenerator>();
 
 builder.Services.AddScoped<IUserManager<ApplicationIdentity>, UserManagerFacade<ApplicationIdentity>>();
 
-builder.Services.AddScoped<ILobbyService, LobbyService>();
+builder.Services.AddSingleton<ILobbyService, LobbyService>();
 
 //Identity
 builder.Services.AddIdentityMongoDbProvider<Initiative.Api.Core.Identity.ApplicationIdentity, DefaultRole>(identityOptions =>

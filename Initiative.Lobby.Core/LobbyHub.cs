@@ -50,7 +50,7 @@ namespace Initiative.Lobby.Core
             if (success || error == LobbyServiceError.UserAlreadyInRoom)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
-                await Clients.OthersInGroup(roomCode).SendAsync("UserJoined", Context.ConnectionId);
+                await Clients.Group(roomCode).SendAsync("UserJoined", Context.ConnectionId);
                 await Clients.Caller.SendAsync("LobbyJoined", lobbyService.GetLobbyState(roomCode));
             }
             else
@@ -80,7 +80,9 @@ namespace Initiative.Lobby.Core
                 await Clients.Caller.SendAsync("Error", "You are not in a lobby.");
                 return;
             }
-            await Clients.Group(lobby).SendAsync("SetEncounterState", encounterDto);
+            lobbyService.SetLobbyState(lobby, encounterDto);
+
+            await Clients.OthersInGroup(lobby).SendAsync("ReceivedLobbyState", encounterDto);
         }
 
         public async Task EndEncounter()

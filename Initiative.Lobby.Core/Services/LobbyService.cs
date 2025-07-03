@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Initiative.Lobby.Core.Dtos;
 using Initiative.Persistence.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Initiative.Lobby.Core.Services
 {
@@ -16,15 +17,18 @@ namespace Initiative.Lobby.Core.Services
         private readonly ConcurrentDictionary<string, LobbyState> lobbies = new();
         private readonly object lobbyConnectionsLock = new();
 
-        private readonly IInitiativeUserRepository initiativeUserRepository;
+        private readonly IServiceScopeFactory serviceScopeFactory;
 
-        public LobbyService(IInitiativeUserRepository initiativeUserRepository)
+        public LobbyService(IServiceScopeFactory serviceScopeFactory)
         {
-            this.initiativeUserRepository = initiativeUserRepository;
+            this.serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task<(bool success, LobbyServiceError error)> JoinLobby(string connectionId, string roomCode, CancellationToken cancellationToken)
         {
+            using var scope = serviceScopeFactory.CreateScope();
+            var initiativeUserRepository = scope.ServiceProvider.GetRequiredService<IInitiativeUserRepository>();
+
             if (!await initiativeUserRepository.RoomCodeExists(roomCode, cancellationToken))
             {
                 return (false, LobbyServiceError.RoomNotFound);
@@ -37,8 +41,8 @@ namespace Initiative.Lobby.Core.Services
                     lobbies[roomCode] = new LobbyState();
                 }
                 lobbies[roomCode].AddConnection(connectionId);
+                connectionToHostMap[connectionId] = roomCode;
             }
-            connectionToHostMap[connectionId] = roomCode;
 
             return (true, LobbyServiceError.None);
         }
@@ -93,7 +97,7 @@ namespace Initiative.Lobby.Core.Services
             {
                 return new EncounterDto
                 {
-                    Creatures = lobby.GetConnections().OrderBy(c => c),
+                    Creatures = lobby.Creatures.OrderBy(c => c),
                     CurrentCreatureIndex = lobby.CurrentCreatureIndex,
                     CurrentTurn = lobby.CurrentTurn,
                     CurrentMode = lobby.CurrentMode

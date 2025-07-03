@@ -1,4 +1,17 @@
 <h2>Lobby Creature List</h2>
-<ul>
-  <li *ngFor="let creature of creatureList">{{ creature }}</li>
-</ul>
+
+<div *ngIf="lobbyMode === 'Waiting'; else inProgressBlock">
+  <p>Waiting for the encounter to begin!</p>
+</div>
+
+<ng-template #inProgressBlock>
+  <div>
+    <ul>
+      <li *ngFor="let creature of creatureList">{{ creature }}</li>
+    </ul>
+    <div>
+      <strong>Turn:</strong> {{ turnNumber }}<br>
+      <strong>Current Creature:</strong> {{ currentTurnIndex + 1 }} / {{ creatureList.length }}
+    </div>
+  </div>
+</ng-template>

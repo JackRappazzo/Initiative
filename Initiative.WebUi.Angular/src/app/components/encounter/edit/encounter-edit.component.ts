@@ -91,15 +91,10 @@ export class EncounterEditComponent implements OnInit, OnDestroy {
 
     // Call this after every API update
     private sendLobbyState() {
-        const state = {
-            ...this.encounterModel,
-            lobbyMode: this.lobbyMode,
-            currentTurnIndex: this.currentTurnIndex,
-            turnNumber: this.turnNumber
-        };
-        this.lobbyClient.setEncounterState(state);
-    }
+      const creatureList: string[] = this.encounterModel.Creatures.map(c => c.Name);
 
+        this.lobbyClient.setEncounterState(creatureList, this.currentTurnIndex, this.turnNumber, this.lobbyMode);
+    }
     
   drop(event: CdkDragDrop<any>) {
     moveItemInArray(
@@ -182,7 +177,9 @@ export class EncounterEditComponent implements OnInit, OnDestroy {
     const index = this.encounterModel.Creatures.indexOf(creature);
     if (index > -1) {
         this.encounterModel.Creatures.splice(index, 1);
-        this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe();
+        this.encounterService.setCreaturesInEncounter(this.encounterId, this.encounterModel.Creatures).subscribe(() => { 
+          this.sendLobbyState();
+        });
     }
   }
 
@@ -212,7 +209,6 @@ export class EncounterEditComponent implements OnInit, OnDestroy {
     this.lobbyMode = 'InProgress';
     this.currentTurnIndex = 0;
     this.turnNumber = 1;
-    await this.lobbyClient.startEncounter(this.encounterModel.Creatures.map(c => c.Name));
     await this.sendLobbyState();
   }
 

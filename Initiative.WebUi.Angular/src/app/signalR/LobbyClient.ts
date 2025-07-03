@@ -1,11 +1,12 @@
 import { Subject, BehaviorSubject } from "rxjs";
 import * as signalR from "@microsoft/signalr";
+import { LobbyState } from "./LobbyState";
 
 export class LobbyClient {
     public nextTurn$ = new Subject<void>();
     public creatureList$ = new Subject<string[]>();
     public receivedCreatureList$ = new Subject<string[]>();
-    public receivedLobbyState$ = new Subject<any>();
+    public receivedLobbyState$ = new Subject<LobbyState>();
     public userJoined$ = new Subject<string>();
     public userLeft$ = new Subject<string>();
     public error$ = new Subject<string>();
@@ -58,7 +59,7 @@ export class LobbyClient {
             this.receivedCreatureList$.next(creatures);
         });
 
-        this.connection.on("ReceivedLobbyState", (state: any) => {
+        this.connection.on("ReceivedLobbyState", (state: LobbyState) => {
             console.log("[SignalR] Received: ReceivedLobbyState", state);
             this.receivedLobbyState$.next(state);
         });
@@ -129,9 +130,14 @@ export class LobbyClient {
         }
     }
     
-    public async setEncounterState(encounterState: any): Promise<void> {
+    public async setEncounterState(creatureList: string[], currentCreatureIndex: number, currentTurn: number, lobbyMode: string): Promise<void> {
         try {
-            await this.connection.invoke("SetEncounterState", encounterState);
+            await this.connection.invoke("SetEncounterState", { 
+                creatures: creatureList, 
+                currentCreatureIndex: currentCreatureIndex, 
+                currentTurn: currentTurn,
+                currentMode: lobbyMode
+            });
         } catch (err) {
             this.error$.next("Failed to set encounter state: " + err);
         }
@@ -158,6 +164,15 @@ export class LobbyClient {
             await this.connection.invoke("JoinLobby", roomCode);
         } catch (err) {
             this.error$.next("Failed to join lobby: " + err);
+        }
+    }
+
+    public async getLobbyState(): Promise<LobbyState> {
+        try {
+            return await this.connection.invoke("GetLobbyState");
+        } catch (err) {
+            this.error$.next("Failed to get lobby state: " + err);
+            throw err;
         }
     }
 }
