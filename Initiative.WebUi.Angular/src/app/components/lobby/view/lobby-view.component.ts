@@ -19,6 +19,7 @@ export class LobbyViewComponent implements OnInit, OnDestroy {
   lobbyMode: 'Waiting' | 'InProgress' = 'Waiting';
   turnNumber: number = 1;
   currentTurnIndex: number = 0;
+  isFullscreen = false;
 
   constructor(private route: ActivatedRoute) {}
 
@@ -63,5 +64,9 @@ export class LobbyViewComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.lobbyClient.disconnect();
+  }
+
+  toggleFullscreen() {
+    this.isFullscreen = !this.isFullscreen;
   }
 }

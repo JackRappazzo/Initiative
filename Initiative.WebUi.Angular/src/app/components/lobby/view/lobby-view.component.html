@@ -1,17 +1,55 @@
-<h2>Lobby Creature List</h2>
-
-<div *ngIf="lobbyMode === 'Waiting'; else inProgressBlock">
-  <p>Waiting for the encounter to begin!</p>
+<div class="fullscreen-toggle">
+  <button (click)="toggleFullscreen()" [attr.aria-label]="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'">
+    <svg *ngIf="!isFullscreen" class="fullscreen-icon" viewBox="0 0 24 24">
+      <polyline points="4,9 4,4 9,4"/>
+      <polyline points="20,9 20,4 15,4"/>
+      <polyline points="4,15 4,20 9,20"/>
+      <polyline points="20,15 20,20 15,20"/>
+    </svg>
+    <svg *ngIf="isFullscreen" class="fullscreen-icon" viewBox="0 0 24 24">
+      <polyline points="9,4 4,4 4,9"/>
+      <polyline points="15,4 20,4 20,9"/>
+      <polyline points="4,15 4,20 9,20"/>
+      <polyline points="20,15 20,20 15,20"/>
+    </svg>
+  </button>
 </div>
 
-<ng-template #inProgressBlock>
-  <div>
+<div [class.fullscreen]="isFullscreen" class="lobby-container">
+  <aside *ngIf="!isFullscreen" class="sidebar">
+    <h3>Initiative Order</h3>
     <ul>
-      <li *ngFor="let creature of creatureList">{{ creature }}</li>
+      <li *ngFor="let creature of creatureList; let i = index"
+          [class.active]="i === 0">
+        {{ creature }}
+      </li>
     </ul>
-    <div>
-      <strong>Turn:</strong> {{ turnNumber }}<br>
-      <strong>Current Creature:</strong> {{ currentTurnIndex + 1 }} / {{ creatureList.length }}
+  </aside>
+
+  <main class="main-display">
+    <div *ngIf="lobbyMode === 'Waiting'; else inProgressBlock" class="waiting-message">
+      <p>Waiting for the encounter to begin!</p>
     </div>
-  </div>
-</ng-template>
+    <ng-template #inProgressBlock>
+      <div class="active-creature">
+        <span class="active-name">{{ creatureList[0] || '—' }}</span>
+      </div>
+      <div class="next-creature" *ngIf="creatureList.length > 1">
+        <span>Next: </span>
+        <span class="next-name">{{ creatureList[1] }}</span>
+      </div>
+      <div class="turn-info">
+        <strong>Turn:</strong> {{ turnNumber }}<br>
+        <strong>Current Creature:</strong> {{ currentTurnIndex + 1 }} / {{ creatureList.length }}
+      </div>
+      <div *ngIf="isFullscreen && creatureList.length > 0" class="fullscreen-initiative-list">
+        <ul>
+          <li *ngFor="let creature of creatureList; let i = index"
+              [class.active]="i === 0">
+            {{ creature }}
+          </li>
+        </ul>
+      </div>
+    </ng-template>
+  </main>
+</div>

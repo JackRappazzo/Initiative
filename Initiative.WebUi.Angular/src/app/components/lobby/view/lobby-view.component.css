@@ -1,0 +1,248 @@
+.lobby-container {
+  display: flex;
+  min-height: 80vh;
+}
+
+.sidebar {
+  width: 260px;
+  background: #f5f5f5;
+  border-right: 1px solid #ddd;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+.sidebar h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  letter-spacing: 0.05em;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  padding: 8px 0;
+  font-size: 1.1rem;
+  color: #444;
+  opacity: 0.7;
+  transition: font-weight 0.2s, color 0.2s;
+}
+
+.sidebar li.active {
+  font-weight: bold;
+  color: #1976d2;
+  opacity: 1;
+}
+
+.main-display {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 32px;
+}
+
+.active-creature {
+  font-size: 3rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 24px;
+  word-break: break-word;
+  max-width: 90vw;
+}
+
+.next-creature {
+  font-size: 1.5rem;
+  color: #888;
+  text-align: center;
+  margin-bottom: 32px;
+  opacity: 0.7;
+}
+
+.next-name {
+  font-weight: 500;
+  color: #888;
+}
+
+.turn-info {
+  font-size: 1.1rem;
+  color: #555;
+  text-align: center;
+  margin-top: 16px;
+}
+
+.waiting-message {
+  font-size: 2rem;
+  color: #888;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.fullscreen-toggle {
+  position: absolute;
+  top: 16px;
+  left: 24px;
+  right: auto;
+  z-index: 100;
+}
+
+.lobby-container.fullscreen {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  height: 100vh;
+  background: #fff;
+}
+
+.lobby-container.fullscreen .main-display {
+  width: 100vw;
+  min-width: 0;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.lobby-container.fullscreen .active-creature {
+  font-size: 5vw;
+  margin-bottom: 2vw;
+}
+
+.lobby-container.fullscreen .next-creature {
+  font-size: 2vw;
+  opacity: 0.5;
+  margin-bottom: 3vw;
+}
+
+.lobby-container.fullscreen .turn-info {
+  font-size: 1.2vw;
+  margin-top: 2vw;
+}
+
+.lobby-container.fullscreen .fullscreen-initiative-list {
+  margin-top: 3vw;
+  text-align: center;
+}
+
+.lobby-container.fullscreen .fullscreen-initiative-list ul {
+  display: inline-block;
+  background: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lobby-container.fullscreen .fullscreen-initiative-list li {
+  display: inline-block;
+  margin: 0 0.7vw;
+  font-size: 1.1vw;
+  color: #bbb;
+  opacity: 0.6;
+  font-weight: normal;
+}
+
+.lobby-container.fullscreen .fullscreen-initiative-list li.active {
+  color: #1976d2;
+  opacity: 1;
+  font-weight: bold;
+}
+
+/* Hide sidebar in fullscreen */
+.lobby-container.fullscreen .sidebar {
+  display: none !important;
+}
+
+/* Hide navigation menu in fullscreen (assumes .app-toolbar or .mat-toolbar is your nav) */
+.lobby-container.fullscreen ~ .app-toolbar,
+.lobby-container.fullscreen ~ .mat-toolbar,
+.lobby-container.fullscreen ~ nav,
+.lobby-container.fullscreen ~ .app-sidenav,
+.lobby-container.fullscreen ~ .sidenav-container {
+  display: none !important;
+}
+
+/* Fullscreen button: faded corners-only square */
+.fullscreen-toggle button {
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  opacity: 0.5;
+  transition: opacity 0.2s, background 0.2s;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fullscreen-toggle button:hover,
+.fullscreen-toggle button:focus {
+  opacity: 0.9;
+  background: rgba(0,0,0,0.04);
+}
+
+/* SVG icon styling for corners */
+.fullscreen-icon {
+  width: 28px;
+  height: 28px;
+  display: block;
+  stroke: #444;
+  stroke-width: 2.5;
+  fill: none;
+  opacity: 0.8;
+}
+
+@media (max-width: 900px) {
+  .lobby-container {
+    flex-direction: column;
+    min-height: unset;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding: 12px 8px;
+    order: 2;
+  }
+
+  .main-display {
+    padding: 16px 4vw;
+    min-width: 0;
+    order: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .active-creature {
+    font-size: 2rem;
+    max-width: 98vw;
+  }
+  .next-creature {
+    font-size: 1rem;
+  }
+  .sidebar h3 {
+    font-size: 1rem;
+  }
+  .sidebar li {
+    font-size: 0.95rem;
+    padding: 4px 0;
+  }
+  .main-display {
+    padding: 8px 2vw;
+  }
+  .turn-info {
+    font-size: 0.95rem;
+  }
+  .waiting-message {
+    font-size: 1.2rem;
+    margin-top: 20px;
+  }
+}
