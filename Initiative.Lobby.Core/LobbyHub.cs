@@ -13,37 +13,28 @@ namespace Initiative.Lobby.Core
             this.lobbyService = lobbyService;
         }
 
-        public async Task SendNextTurn()
-        {
-            var connectionId = Context.ConnectionId;
-            var lobby = lobbyService.GetRoomCodeByConnection(connectionId);
-            await Clients.Group(lobby).SendAsync("NextTurn");
-        }
-
-        public async Task GetLobbyState()
-        {
-            var connectionId = Context.ConnectionId;
-            var lobby = lobbyService.GetRoomCodeByConnection(connectionId);
-            if (string.IsNullOrEmpty(lobby))
-            {
-                await Clients.Caller.SendAsync("Error", "You are not in a lobby.");
-                return;
-            }
-            var lobbyState = lobbyService.GetLobbyState(lobby);
-            await Clients.Caller.SendAsync("ReceivedLobbyState", lobbyState);
-        }
-
-        public async Task SendCreatureList(List<string> creatureList)
+        private async Task<string> ValidateLobbyAccess()
         {
             var lobby = lobbyService.GetRoomCodeByConnection(Context.ConnectionId);
             if (string.IsNullOrEmpty(lobby))
             {
                 await Clients.Caller.SendAsync("Error", "You are not in a lobby.");
-                return;
+                return string.Empty;
             }
-            await Clients.Group(lobby).SendAsync("ReceivedCreatureList", creatureList);
+            return lobby;
         }
 
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            var lobby = lobbyService.GetRoomCodeByConnection(Context.ConnectionId);
+            if (!string.IsNullOrEmpty(lobby))
+            {
+                await LeaveLobby(lobby);
+            }
+            await base.OnDisconnectedAsync(exception);
+        }
+
+        // Lobby Management
         public async Task JoinLobby(string roomCode)
         {
             var (success, error) = await lobbyService.JoinLobby(Context.ConnectionId, roomCode, Context.ConnectionAborted);
@@ -52,49 +43,10 @@ namespace Initiative.Lobby.Core
                 await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
                 await Clients.Group(roomCode).SendAsync("UserJoined", Context.ConnectionId);
                 await Clients.Caller.SendAsync("LobbyJoined", lobbyService.GetLobbyState(roomCode));
-            }
-            else
-            {
-                await Clients.Caller.SendAsync("Error", $"Failed to join lobby: {error}");
-            }
-        }
-
-        public async Task StartEncounter(IEnumerable<string> creatures)
-        {
-            var lobby = lobbyService.GetRoomCodeByConnection(Context.ConnectionId);
-            if (string.IsNullOrEmpty(lobby))
-            {
-                await Clients.Caller.SendAsync("Error", "You are not in a lobby.");
                 return;
             }
 
-            lobbyService.SetLobbyMode(lobby, LobbyMode.InProgress);
-            await Clients.Group(lobby).SendAsync("StartEncounter", creatures);
-        }
-
-        public async Task SetEncounterState(EncounterDto encounterDto)
-        {
-            var lobby = lobbyService.GetRoomCodeByConnection(Context.ConnectionId);
-            if (string.IsNullOrEmpty(lobby))
-            {
-                await Clients.Caller.SendAsync("Error", "You are not in a lobby.");
-                return;
-            }
-            lobbyService.SetLobbyState(lobby, encounterDto);
-
-            await Clients.OthersInGroup(lobby).SendAsync("ReceivedLobbyState", encounterDto);
-        }
-
-        public async Task EndEncounter()
-        {
-            var lobby = lobbyService.GetRoomCodeByConnection(Context.ConnectionId);
-            if (string.IsNullOrEmpty(lobby))
-            {
-                await Clients.Caller.SendAsync("Error", "You are not in a lobby.");
-                return;
-            }
-            lobbyService.SetLobbyMode(lobby, LobbyMode.Waiting);
-            await Clients.Group(lobby).SendAsync("EndEncounter");
+            await Clients.Caller.SendAsync("Error", $"Failed to join lobby: {error}");
         }
 
         public async Task LeaveLobby(string roomCode)
@@ -104,5 +56,59 @@ namespace Initiative.Lobby.Core
             await Clients.Group(roomCode).SendAsync("UserLeft", Context.ConnectionId);
         }
 
+        // Encounter Management
+        public async Task StartEncounter(IEnumerable<string> creatures)
+        {
+            var lobby = await ValidateLobbyAccess();
+            if (string.IsNullOrEmpty(lobby)) return;
+
+            lobbyService.SetLobbyMode(lobby, LobbyMode.InProgress);
+            await Clients.Group(lobby).SendAsync("StartEncounter", creatures);
+        }
+
+        public async Task EndEncounter()
+        {
+            var lobby = await ValidateLobbyAccess();
+            if (string.IsNullOrEmpty(lobby)) return;
+
+            lobbyService.SetLobbyMode(lobby, LobbyMode.Waiting);
+            await Clients.Group(lobby).SendAsync("EndEncounter");
+        }
+
+        // State Management
+        public async Task GetLobbyState()
+        {
+            var lobby = await ValidateLobbyAccess();
+            if (string.IsNullOrEmpty(lobby)) return;
+
+            var lobbyState = lobbyService.GetLobbyState(lobby);
+            await Clients.Caller.SendAsync("ReceivedLobbyState", lobbyState);
+        }
+
+        public async Task SetEncounterState(EncounterDto encounterDto)
+        {
+            var lobby = await ValidateLobbyAccess();
+            if (string.IsNullOrEmpty(lobby)) return;
+
+            lobbyService.SetLobbyState(lobby, encounterDto);
+            await Clients.OthersInGroup(lobby).SendAsync("ReceivedLobbyState", encounterDto);
+        }
+
+        // Turn Management
+        public async Task SendNextTurn()
+        {
+            var lobby = await ValidateLobbyAccess();
+            if (string.IsNullOrEmpty(lobby)) return;
+
+            await Clients.Group(lobby).SendAsync("NextTurn");
+        }
+
+        public async Task SendCreatureList(List<string> creatureList)
+        {
+            var lobby = await ValidateLobbyAccess();
+            if (string.IsNullOrEmpty(lobby)) return;
+
+            await Clients.Group(lobby).SendAsync("ReceivedCreatureList", creatureList);
+        }
     }
 }
