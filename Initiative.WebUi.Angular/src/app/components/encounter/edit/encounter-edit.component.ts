@@ -93,7 +93,7 @@ export class EncounterEditComponent implements OnInit, OnDestroy {
     private sendLobbyState() {
       const creatureList: string[] = this.encounterModel.Creatures.map(c => c.Name);
 
-        this.lobbyClient.setEncounterState(creatureList, this.currentTurnIndex, this.turnNumber, this.lobbyMode);
+        this.lobbyClient.setLobbyState(creatureList, this.currentTurnIndex, this.turnNumber, this.lobbyMode);
     }
     
   drop(event: CdkDragDrop<any>) {
@@ -193,7 +193,6 @@ export class EncounterEditComponent implements OnInit, OnDestroy {
     this.setCreaturesOnService();
   }
 
-  // Start/Stop Encounter
   async startEncounter() {
 
     if (!this.lobbyJoined) {
@@ -214,7 +213,6 @@ export class EncounterEditComponent implements OnInit, OnDestroy {
 
   endEncounter() {
     this.lobbyMode = 'Waiting';
-    this.lobbyClient.endEncounter();
     this.sendLobbyState();
   }
 
@@ -227,7 +225,6 @@ export class EncounterEditComponent implements OnInit, OnDestroy {
         this.turnNumber++;
     }
     this.sendLobbyState();
-    this.lobbyClient.sendNextTurn();
   }
 
 }

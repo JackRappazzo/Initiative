@@ -44,20 +44,6 @@ export class LobbyClient {
     }
 
     private registerHandlers() {
-        this.connection.on("NextTurn", () => {
-            console.log("[SignalR] Received: NextTurn");
-            this.nextTurn$.next();
-        });
-
-        this.connection.on("CreatureList", (creatures: string[]) => {
-            console.log("[SignalR] Received: CreatureList", creatures);
-            this.creatureList$.next(creatures);
-        });
-
-        this.connection.on("ReceivedCreatureList", (creatures: string[]) =>  {
-            console.log("[SignalR] Received: ReceivedCreatureList", creatures);
-            this.receivedCreatureList$.next(creatures);
-        });
 
         this.connection.on("ReceivedLobbyState", (state: LobbyState) => {
             console.log("[SignalR] Received: ReceivedLobbyState", state);
@@ -113,49 +99,17 @@ export class LobbyClient {
             this.error$.next("Error during disconnect: " + err);
         }
     }
-
-    public async sendNextTurn(): Promise<void> {
-        try {
-            await this.connection.invoke("SendNextTurn");
-        } catch (err) {
-            this.error$.next("Failed to send next turn: " + err);
-        }
-    }
-
-    public async sendCreatureList(creatures: string[]): Promise<void> {
-        try {
-            await this.connection.invoke("SendCreatureList", creatures);
-        } catch (err) {
-            this.error$.next("Failed to send creature list: " + err);
-        }
-    }
     
-    public async setEncounterState(creatureList: string[], currentCreatureIndex: number, currentTurn: number, lobbyMode: string): Promise<void> {
+    public async setLobbyState(creatureList: string[], currentCreatureIndex: number, currentTurn: number, lobbyMode: string): Promise<void> {
         try {
-            await this.connection.invoke("SetEncounterState", { 
+            await this.connection.invoke("SetLobbyState", { 
                 creatures: creatureList, 
                 currentCreatureIndex: currentCreatureIndex, 
                 currentTurn: currentTurn,
                 currentMode: lobbyMode
             });
         } catch (err) {
-            this.error$.next("Failed to set encounter state: " + err);
-        }
-    }
-
-    public async startEncounter(creatures: string[]): Promise<void> {
-        try {
-            await this.connection.invoke("StartEncounter", creatures);
-        } catch (err) {
-            this.error$.next("Failed to start encounter: " + err);
-        }
-    }
-
-    public async endEncounter(): Promise<void> {
-        try {
-            await this.connection.invoke("EndEncounter");
-        } catch (err) {
-            this.error$.next("Failed to end encounter: " + err);
+            this.error$.next("Failed to set lobby state: " + err);
         }
     }
 

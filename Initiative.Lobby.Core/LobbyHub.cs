@@ -56,26 +56,7 @@ namespace Initiative.Lobby.Core
             await Clients.Group(roomCode).SendAsync("UserLeft", Context.ConnectionId);
         }
 
-        // Encounter Management
-        public async Task StartEncounter(IEnumerable<string> creatures)
-        {
-            var lobby = await ValidateLobbyAccess();
-            if (string.IsNullOrEmpty(lobby)) return;
 
-            lobbyService.SetLobbyMode(lobby, LobbyMode.InProgress);
-            await Clients.Group(lobby).SendAsync("StartEncounter", creatures);
-        }
-
-        public async Task EndEncounter()
-        {
-            var lobby = await ValidateLobbyAccess();
-            if (string.IsNullOrEmpty(lobby)) return;
-
-            lobbyService.SetLobbyMode(lobby, LobbyMode.Waiting);
-            await Clients.Group(lobby).SendAsync("EndEncounter");
-        }
-
-        // State Management
         public async Task GetLobbyState()
         {
             var lobby = await ValidateLobbyAccess();
@@ -85,30 +66,13 @@ namespace Initiative.Lobby.Core
             await Clients.Caller.SendAsync("ReceivedLobbyState", lobbyState);
         }
 
-        public async Task SetEncounterState(EncounterDto encounterDto)
+        public async Task SetLobbyState(EncounterDto encounterDto)
         {
             var lobby = await ValidateLobbyAccess();
             if (string.IsNullOrEmpty(lobby)) return;
 
             lobbyService.SetLobbyState(lobby, encounterDto);
             await Clients.OthersInGroup(lobby).SendAsync("ReceivedLobbyState", encounterDto);
-        }
-
-        // Turn Management
-        public async Task SendNextTurn()
-        {
-            var lobby = await ValidateLobbyAccess();
-            if (string.IsNullOrEmpty(lobby)) return;
-
-            await Clients.Group(lobby).SendAsync("NextTurn");
-        }
-
-        public async Task SendCreatureList(List<string> creatureList)
-        {
-            var lobby = await ValidateLobbyAccess();
-            if (string.IsNullOrEmpty(lobby)) return;
-
-            await Clients.Group(lobby).SendAsync("ReceivedCreatureList", creatureList);
         }
     }
 }
