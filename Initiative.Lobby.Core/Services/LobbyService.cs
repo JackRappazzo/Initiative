@@ -74,23 +74,6 @@ namespace Initiative.Lobby.Core.Services
             return string.Empty;
         }
 
-        public void SetLobbyMode(string roomCode, LobbyMode mode)
-        {
-            if (lobbies.TryGetValue(roomCode, out var lobby))
-            {
-                lobby.CurrentMode = mode;
-            }
-        }
-
-        public LobbyMode GetLobbyMode(string roomCode)
-        {
-            if (lobbies.TryGetValue(roomCode, out var lobby))
-            {
-                return lobby.CurrentMode;
-            }
-            return LobbyMode.Waiting;
-        }
-
         public EncounterDto GetLobbyState(string roomCode)
         {
             if (lobbies.TryGetValue(roomCode, out var lobby))
