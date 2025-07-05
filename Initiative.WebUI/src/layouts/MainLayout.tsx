@@ -1,22 +1,19 @@
+import { Outlet } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import SidebarMenu from "../components/SidebarMenu";
 
-interface MainLayoutProps {
-    children: React.ReactNode;
-  }
-  
-  const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const MainLayout: React.FC = () => {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Header />
-        <div style={{ display: 'flex', flex: 1 }}>
-          <main style={{ flex: 1, padding: '1rem' }}>
-            {children}
-          </main>
+        <div className="app-container">
+            <Header />
+            <main>
+                <Outlet />
+            </main>
+            <SidebarMenu />
+            <Footer />
         </div>
-        <Footer />
-      </div>
     );
-  };
-  
-  export default MainLayout;
+};
+
+export default MainLayout;
