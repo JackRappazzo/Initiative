@@ -23,6 +23,9 @@ const EditEncounter: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [currentTurn, setCurrentTurn] = useState(0);
   const [turnNumber, setTurnNumber] = useState(1);
+  const [draggedCreature, setDraggedCreature] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [dragPosition, setDragPosition] = useState<'top' | 'bottom' | null>(null);
 
   const loadEncounter = useCallback(async () => {
     if (!encounterId) 
@@ -72,6 +75,46 @@ const EditEncounter: React.FC = () => {
       setError('Failed to update creatures');
       console.error('Error updating creatures:', err);
     }
+  };
+
+  const handleDragStart = (index: number) => {
+    setDraggedCreature(index);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedCreature(null);
+    setDragOverIndex(null);
+    setDragPosition(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedCreature === null || draggedCreature === index) return;
+
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const midpoint = rect.top + rect.height / 2;
+    const position = e.clientY < midpoint ? 'top' : 'bottom';
+    
+    setDragOverIndex(index);
+    setDragPosition(position);
+
+    // Update the order in real-time
+    const dropIndex = position === 'bottom' ? index + 1 : index;
+    if (dropIndex !== draggedCreature && dropIndex !== draggedCreature + 1) {
+      const newCreatures = [...creatures];
+      const [draggedItem] = newCreatures.splice(draggedCreature, 1);
+      const adjustedDropIndex = dropIndex > draggedCreature ? dropIndex - 1 : dropIndex;
+      newCreatures.splice(adjustedDropIndex, 0, draggedItem);
+      setCreatures(newCreatures);
+      setDraggedCreature(adjustedDropIndex);
+    }
+  };
+
+  const handleDrop = async () => {
+    setDraggedCreature(null);
+    setDragOverIndex(null);
+    setDragPosition(null);
+    await handleCreatureUpdate();
   };
 
   const addCreature = () => {
@@ -191,8 +234,22 @@ const EditEncounter: React.FC = () => {
         {creatures.map((creature, index) => (
           <div 
             key={index} 
-            className="creature-item"
-            style={index === currentTurn && isRunning ? { background: '#e9ecef' } : undefined}
+            className={`creature-item ${
+              draggedCreature === index ? 'dragging' : ''
+            } ${
+              dragOverIndex === index && dragPosition === 'top' ? 'drag-over-top' : ''
+            } ${
+              dragOverIndex === index && dragPosition === 'bottom' ? 'drag-over-bottom' : ''
+            }`}
+            style={{
+              ...index === currentTurn && isRunning ? { background: '#e9ecef' } : {},
+              cursor: 'move'
+            }}
+            draggable
+            onDragStart={() => handleDragStart(index)}
+            onDragOver={(e) => handleDragOver(e, index)}
+            onDrop={handleDrop}
+            onDragEnd={handleDragEnd}
           >
             <input
               type="text"

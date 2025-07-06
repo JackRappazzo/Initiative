@@ -56,6 +56,32 @@
   width: 100%;
 }
 
+.creature-item[draggable] {
+  user-select: none;
+}
+
+.creature-item[draggable]:hover {
+  background-color: #f8f9fa;
+}
+
+.creature-item[draggable]:active {
+  opacity: 0.7;
+  background-color: #e9ecef;
+}
+
+.creature-item.drag-over-top {
+  border-top: 2px solid #007bff;
+}
+
+.creature-item.drag-over-bottom {
+  border-bottom: 2px solid #007bff;
+}
+
+.creature-item.dragging {
+  opacity: 0.5;
+  background-color: #e9ecef;
+}
+
 .creature-header {
   font-weight: bold;
   background: #f8f9fa;
