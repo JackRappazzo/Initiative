@@ -1,8 +1,8 @@
 // src/components/LoginForm.tsx
 import { useState, useContext, FormEvent } from "react";
 import axios from "axios";
-import { AuthContext } from "../contexts/AuthContext";
-import { AdminClient } from "../api/adminClient";
+import { AuthContext } from "../../contexts/AuthContext";
+import { AdminClient } from "../../api/adminClient";
 import { collapseTextChangeRangesAcrossMultipleVersions } from "typescript";
 
 

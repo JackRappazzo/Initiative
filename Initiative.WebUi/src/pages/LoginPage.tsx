@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { AdminClient } from "../../api/adminClient";
-import { AuthContext } from "../../contexts/AuthContext";
+import { AdminClient } from "../api/adminClient";
+import { AuthContext } from "../contexts/AuthContext";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();

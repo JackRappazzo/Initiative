@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { EncounterClient, EncounterListItem } from '../../../api/encounterClient';
+import { EncounterClient, EncounterListItem } from '../../api/encounterClient';
 import './ListEncounters.css';
 
 const ListEncounters: React.FC = () => {
@@ -8,13 +8,9 @@ const ListEncounters: React.FC = () => {
   const [encounters, setEncounters] = useState<EncounterListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const encounterClient = new EncounterClient();
+  const encounterClient = useMemo(() => new EncounterClient(), []);
 
-  useEffect(() => {
-    loadEncounters();
-  }, []);
-
-  const loadEncounters = async () => {
+  const loadEncounters = useCallback(async () => {
     try {
       const data = await encounterClient.getEncounterList();
       console.log('Loaded encounters: ', data)
@@ -25,7 +21,11 @@ const ListEncounters: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [encounterClient]);
+
+  useEffect(() => {
+    loadEncounters();
+  }, [loadEncounters]);
 
   const handleCreateEncounter = async () => {
     try {

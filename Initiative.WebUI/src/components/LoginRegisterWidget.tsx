@@ -1,7 +1,7 @@
 import { useState, useContext, FormEvent } from "react";
 import { AuthContext } from "../contexts/AuthContext";
-import LoginForm from "./LoginForm";
-import RegisterForm from "./RegisterForm";
+import LoginForm from "./auth/LoginForm";
+import RegisterForm from "./auth/RegisterForm";
 
 
 const LoginRegisterWidget = () => {

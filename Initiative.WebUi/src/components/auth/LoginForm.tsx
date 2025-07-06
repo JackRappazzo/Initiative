@@ -1,8 +1,8 @@
 // src/components/LoginForm.tsx
 import { useState, useContext, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../contexts/AuthContext";
-import { AdminClient } from "../api/adminClient";
+import { AuthContext } from "../../contexts/AuthContext";
+import { AdminClient } from "../../api/adminClient";
 
 const LoginForm = () => {
   const navigate = useNavigate();

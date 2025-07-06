@@ -1,9 +1,9 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
-import LoginPage from "./components/pages/LoginPage";
-import ListEncounters from "./components/pages/encounters/ListEncounters";
-import EditEncounter from "./components/pages/encounters/EditEncounter";
+import LoginPage from "./pages/LoginPage";
+import ListEncounters from "./pages/encounters/ListEncounters";
+import EditEncounter from "./pages/encounters/EditEncounter";
 import { AuthProvider } from './contexts/AuthContext';
 import { UserProvider } from './contexts/UserContext';
 import './App.css'; 
