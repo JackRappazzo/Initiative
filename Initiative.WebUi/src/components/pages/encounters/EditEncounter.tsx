@@ -163,7 +163,13 @@ const EditEncounter: React.FC = () => {
     setTurnNumber(nextTurnNumber);
   };
 
-
+  const sortByInitiative = async () => {
+    const sortedCreatures = [...creatures].sort((a, b) => 
+      (b.initiative + b.initiativeModifier) - (a.initiative + a.initiativeModifier)
+    );
+    setCreatures(sortedCreatures);
+    await handleCreatureUpdate();
+  };
 
   if (loading) {
     return <div className="edit-encounter-container">Loading encounter...</div>;
@@ -221,7 +227,17 @@ const EditEncounter: React.FC = () => {
       )}
 
       <div className="creature-list">
+        <div className="creature-list-header">
+          <button 
+            className="control-button secondary sort-initiative-button"
+            onClick={sortByInitiative}
+            title="Sort by Initiative (Descending)"
+          >
+            Sort by Initiative
+          </button>
+        </div>
         <div className="creature-item creature-header">
+          <div></div>
           <div>Name</div>
           <div>HP</div>
           <div>Max HP</div>
@@ -241,16 +257,18 @@ const EditEncounter: React.FC = () => {
             } ${
               dragOverIndex === index && dragPosition === 'bottom' ? 'drag-over-bottom' : ''
             }`}
-            style={{
-              ...index === currentTurn && isRunning ? { background: '#e9ecef' } : {},
-              cursor: 'move'
-            }}
-            draggable
-            onDragStart={() => handleDragStart(index)}
+            style={index === currentTurn && isRunning ? { background: '#e9ecef' } : undefined}
             onDragOver={(e) => handleDragOver(e, index)}
             onDrop={handleDrop}
-            onDragEnd={handleDragEnd}
           >
+            <div
+              className="drag-handle"
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragEnd={handleDragEnd}
+            >
+              ⋮⋮
+            </div>
             <input
               type="text"
               value={creature.name}

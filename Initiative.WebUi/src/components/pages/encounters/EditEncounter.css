@@ -36,9 +36,17 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.creature-list-header {
+  padding: 0 0 0.5rem 2rem;
+}
+
+.sort-initiative-button {
+  margin-bottom: 0.5rem;
+}
+
 .creature-item {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto;
+  grid-template-columns: auto 2fr 1fr 1fr 1fr 1fr 1fr auto;
   gap: 1rem;
   align-items: center;
   padding: 1rem;
@@ -239,4 +247,16 @@
 
 .new-encounter-button:hover {
   background-color: #218838;
+}
+
+.drag-handle {
+  cursor: move;
+  color: #6c757d;
+  width: 24px;
+  text-align: center;
+  user-select: none;
+}
+
+.drag-handle:hover {
+  color: #495057;
 }
