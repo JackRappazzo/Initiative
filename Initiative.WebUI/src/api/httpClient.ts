@@ -34,15 +34,15 @@ public static GetInstance() {
   }
 
   private getAccessToken(): string | null {
-    return localStorage.getItem('accessToken');
+    return localStorage.getItem('token');
   }
 
   public setAccessToken(token: string) {
-    localStorage.setItem('accessToken', token);
+    localStorage.setItem('token', token);
   }
 
   private clearAccessToken() {
-    localStorage.removeItem('accessToken');
+    localStorage.removeItem('token');
   }
 
   private setupInterceptors() {
@@ -118,12 +118,19 @@ public static GetInstance() {
   }
 
   // Generic request methods (optional convenience)
-  public get<T>(url: string): Promise<T> {
-    return this.api.get(url, { headers: {'Content-Type': 'application/json' , withCredentials: true}});
+  public async get<T>(url: string): Promise<T> {
+    return (await this.api.get(url, { headers: {'Content-Type': 'application/json' , withCredentials: true}})).data;
   }
 
   public async post<T>(url: string, data: any): Promise<T> {
     return (await this.api.post(url, data, {
+      headers: {'Content-Type': 'application/json' },
+      withCredentials: true,
+    })).data;
+  }
+
+  public async put<T>(url: string, data: any): Promise<T> {
+    return (await this.api.put(url, data, {
       headers: {'Content-Type': 'application/json' },
       withCredentials: true,
     })).data;
