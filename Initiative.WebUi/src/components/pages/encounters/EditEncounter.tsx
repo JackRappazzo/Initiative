@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { EncounterClient, CreatureJsonModel, FetchEncounterResponse } from '../../../api/encounterClient';
+import { NumericInput } from '../../../components/NumericInput';
+
 import './EditEncounter.css';
 
 interface EditableCreature extends CreatureJsonModel {
@@ -23,7 +25,8 @@ const EditEncounter: React.FC = () => {
   const [turnNumber, setTurnNumber] = useState(1);
 
   const loadEncounter = useCallback(async () => {
-    if (!encounterId) return;
+    if (!encounterId) 
+      return;
 
     try {
       const data = await encounterClient.getEncounter(encounterId);
@@ -44,7 +47,8 @@ const EditEncounter: React.FC = () => {
   }, [loadEncounter]);
 
   const handleNameEdit = async () => {
-    if (!encounter || !encounterId || !newName.trim()) return;
+    if (!encounter || !encounterId || !newName.trim()) 
+      return;
     
     try {
       await encounterClient.renameEncounter(encounterId, newName.trim());
@@ -58,7 +62,8 @@ const EditEncounter: React.FC = () => {
   };
 
   const handleCreatureUpdate = async () => {
-    if (!encounterId) return;
+    if (!encounterId) 
+      return;
 
     try {
       await encounterClient.setCreatures(encounterId, creatures);
@@ -100,7 +105,8 @@ const EditEncounter: React.FC = () => {
   };
 
   const nextTurn = () => {
-    if (creatures.length === 0) return;
+    if (creatures.length === 0) 
+      return;
     
     let nextTurn = currentTurn + 1;
     let nextTurnNumber = turnNumber;
@@ -113,6 +119,8 @@ const EditEncounter: React.FC = () => {
     setCurrentTurn(nextTurn);
     setTurnNumber(nextTurnNumber);
   };
+
+
 
   if (loading) {
     return <div className="edit-encounter-container">Loading encounter...</div>;
@@ -196,55 +204,64 @@ const EditEncounter: React.FC = () => {
               }}
               onBlur={handleCreatureUpdate}
             />
-            <input
-              type="number"
+            <NumericInput
               value={creature.hitPoints}
-              onChange={(e) => {
+              onChange={(newHP) => {
                 const newCreatures = [...creatures];
-                newCreatures[index] = { ...creature, hitPoints: parseInt(e.target.value) };
+                newCreatures[index] = { ...creature, hitPoints: newHP };
                 setCreatures(newCreatures);
               }}
               onBlur={handleCreatureUpdate}
+              ariaLabel="Hit Points"
+              placeholder="HP"
             />
-            <input
-              type="number"
+            <NumericInput
               value={creature.maximumHitPoints}
-              onChange={(e) => {
+              onChange={(newMaxHP) => {
                 const newCreatures = [...creatures];
-                newCreatures[index] = { ...creature, maximumHitPoints: parseInt(e.target.value) };
+                newCreatures[index] = { 
+                  ...creature, 
+                  maximumHitPoints: newMaxHP
+                };
                 setCreatures(newCreatures);
               }}
               onBlur={handleCreatureUpdate}
+              ariaLabel="Maximum Hit Points"
+              placeholder="Max HP"
             />
-            <input
-              type="number"
+            <NumericInput
               value={creature.armorClass}
-              onChange={(e) => {
+              min={0}
+              onChange={(newAC) => {
                 const newCreatures = [...creatures];
-                newCreatures[index] = { ...creature, armorClass: parseInt(e.target.value) };
+                newCreatures[index] = { ...creature, armorClass: newAC };
                 setCreatures(newCreatures);
               }}
               onBlur={handleCreatureUpdate}
+              ariaLabel="Armor Class"
+              placeholder="AC"
             />
-            <input
-              type="number"
+            <NumericInput
               value={creature.initiative}
-              onChange={(e) => {
+              onChange={(newInitiative) => {
                 const newCreatures = [...creatures];
-                newCreatures[index] = { ...creature, initiative: parseInt(e.target.value) };
+                newCreatures[index] = { ...creature, initiative: newInitiative };
                 setCreatures(newCreatures);
               }}
               onBlur={handleCreatureUpdate}
+              ariaLabel="Initiative"
+              placeholder="Init"
             />
-            <input
-              type="number"
+            <NumericInput
               value={creature.initiativeModifier}
-              onChange={(e) => {
+              onChange={(newMod) => {
                 const newCreatures = [...creatures];
-                newCreatures[index] = { ...creature, initiativeModifier: parseInt(e.target.value) };
+                newCreatures[index] = { ...creature, initiativeModifier: newMod };
                 setCreatures(newCreatures);
               }}
               onBlur={handleCreatureUpdate}
+              ariaLabel="Initiative Modifier"
+              placeholder="Mod"
             />
             <div className="creature-controls">
               <button
