@@ -1,0 +1,84 @@
+.lobby-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.lobby-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #eee;
+}
+
+.lobby-header h1 {
+    margin: 0;
+    color: #333;
+    font-size: 2rem;
+}
+
+.connection-status {
+    font-weight: bold;
+}
+
+.status-connected {
+    color: #28a745;
+    padding: 0.5rem 1rem;
+    background-color: #d4edda;
+    border-radius: 6px;
+    border: 1px solid #c3e6cb;
+}
+
+.status-connecting {
+    color: #ffc107;
+    padding: 0.5rem 1rem;
+    background-color: #fff3cd;
+    border-radius: 6px;
+    border: 1px solid #ffeaa7;
+}
+
+.lobby-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #f5c6cb;
+    margin-bottom: 1rem;
+}
+
+.lobby-error h2 {
+    margin-top: 0;
+}
+
+.lobby-content {
+    background-color: #f8f9fa;
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    text-align: center;
+}
+
+.lobby-content p {
+    font-size: 1.1rem;
+    color: #666;
+    margin: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .lobby-container {
+        padding: 1rem;
+    }
+    
+    .lobby-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .lobby-header h1 {
+        font-size: 1.5rem;
+    }
+}
