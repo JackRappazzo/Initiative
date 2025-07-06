@@ -1,8 +1,11 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
+import { useUser } from "../contexts/UserContext";
+import "./SidebarMenu.css";
 
 const SidebarMenu: React.FC = () => {
   const { isLoggedIn, logout } = useContext(AuthContext);
+  const { userInfo } = useUser();
   const [open, setOpen] = useState(false);
 
   const handleLogout = () => {
@@ -22,6 +25,11 @@ const SidebarMenu: React.FC = () => {
       </button>
 
       {/* Sidebar */}
+      {isLoggedIn() && userInfo && (
+        <div className="room-code">
+          Room Code: {userInfo.roomCode}
+        </div>
+      )}
       <nav>
         <ul>
           <li>
