@@ -2,14 +2,16 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserClient, UserInformation } from '../api/userClient';
 import { AuthContext } from './AuthContext';
 
-interface UserContextType {
+// Export the interface
+export interface UserContextType {
   userInfo: UserInformation | null;
   isLoading: boolean;
   error: string | null;
   refreshUserInfo: () => Promise<void>;
 }
 
-const UserContext = createContext<UserContextType>({
+// Export the context
+export const UserContext = createContext<UserContextType>({
   userInfo: null,
   isLoading: true,
   error: null,

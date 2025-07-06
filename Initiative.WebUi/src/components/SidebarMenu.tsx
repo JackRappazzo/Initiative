@@ -1,4 +1,5 @@
 import React, { useContext, useState } from "react";
+import { Link } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import { useUser } from "../contexts/UserContext";
 import "./SidebarMenu.css";
@@ -33,22 +34,22 @@ const SidebarMenu: React.FC = () => {
       <nav>
         <ul>
           <li>
-            <a href="/lobby" onClick={() => setOpen(false)}>Join</a>
+            <Link to="/lobby" onClick={() => setOpen(false)}>Join</Link>
           </li>
           {!isLoggedIn() && (
             <>
               <li>
-                <a href="/login" onClick={() => setOpen(false)}>Sign In</a>
+                <Link to="/login" onClick={() => setOpen(false)}>Sign In</Link>
               </li>
               <li>
-                <a href="/register" onClick={() => setOpen(false)}>Register</a>
+                <Link to="/register" onClick={() => setOpen(false)}>Register</Link>
               </li>
             </>
           )}
           {isLoggedIn() && (
             <>
               <li>
-                <a href="/encounters" onClick={() => setOpen(false)}>Encounters</a>
+                <Link to="/encounters" onClick={() => setOpen(false)}>Encounters</Link>
               </li>
               <li>
                 <button onClick={handleLogout}>Logout</button>
