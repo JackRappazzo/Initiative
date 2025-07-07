@@ -153,9 +153,9 @@ export class LobbyClient {
         }
     }
 
-    public async getLobbyState(): Promise<LobbyState> {
+    public async getLobbyState(): Promise<void> {
         try {
-            return await this.connection.invoke("GetLobbyState");
+            await this.connection.invoke("GetLobbyState");
         } catch (err) {
             this.error$.next("Failed to get lobby state: " + err);
             throw err;

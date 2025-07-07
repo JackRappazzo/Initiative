@@ -8,6 +8,7 @@ const Lobby: React.FC = () => {
     const { roomCode } = useParams<{ roomCode: string }>();
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [lobbyState, setLobbyState] = useState<LobbyState | null>(null);
+    const [isWaiting, setIsWaiting] = useState<boolean>(true);
 
     // Use the lobby connection hook - handles all connection logic
     const { lobbyClient, isConnected } = useLobbyConnection({
@@ -19,6 +20,8 @@ const Lobby: React.FC = () => {
     useEffect(() => {
         if (!lobbyClient) return;
 
+        console.log('[Lobby] Setting up subscriptions');
+        
         // Subscribe to lobby state updates and errors
         const errorSub = lobbyClient.error$.subscribe((error: string) => {
             console.log('[Lobby] Error received:', error);
@@ -27,38 +30,61 @@ const Lobby: React.FC = () => {
 
         const lobbyStateSub = lobbyClient.receivedLobbyState$.subscribe((newState: LobbyState) => {
             console.log('[Lobby] Received lobby state update:', newState);
-            console.log('[Lobby] State type:', typeof newState);
-            console.log('[Lobby] State keys:', Object.keys(newState || {}));
-            console.log('[Lobby] Is valid state:', isValidLobbyState(newState));
             setLobbyState(newState);
-        });
-
-        // Get initial lobby state when connected
-        const connectedSub = lobbyClient.isConnected$.subscribe(async (connected: boolean) => {
-            console.log('[Lobby] Connection status changed:', connected);
-            if (connected && roomCode) {
-                try {
-                    console.log('[Lobby] Fetching initial lobby state...');
-                    const initialState = await lobbyClient.getLobbyState();
-                    console.log('[Lobby] Initial state received:', initialState);
-                    console.log('[Lobby] Initial state type:', typeof initialState);
-                    console.log('[Lobby] Initial state keys:', Object.keys(initialState || {}));
-                    console.log('[Lobby] Initial state is valid:', isValidLobbyState(initialState));
-                    setLobbyState(initialState);
-                    setConnectionError(null);
-                } catch (err: any) {
-                    console.error('Failed to get initial lobby state:', err);
-                    setConnectionError('Failed to get lobby state');
-                }
+            
+            // Update waiting state based on lobby state
+            if (newState && newState.CurrentMode) {
+                setIsWaiting(newState.CurrentMode === 'Waiting');
             }
         });
 
         // Cleanup subscriptions
         return () => {
-            connectedSub.unsubscribe();
+            console.log('[Lobby] Cleaning up subscriptions');
             errorSub.unsubscribe();
             lobbyStateSub.unsubscribe();
         };
+    }, [lobbyClient]);
+
+    // Separate effect for requesting initial lobby state
+    useEffect(() => {
+        if (!lobbyClient || !roomCode) return;
+
+        const requestLobbyState = async () => {
+            try {
+                console.log('[Lobby] Requesting lobby state for room:', roomCode);
+                await lobbyClient.getLobbyState();
+                
+                setConnectionError(null);
+            } catch (err: any) {
+                console.error('Failed to get lobby state:', err);
+                setConnectionError('Failed to get lobby state');
+            }
+        };
+
+        // Only request state when connected
+        if (lobbyClient.isConnected$.value) {
+            console.log('[Lobby] Already connected, requesting state');
+            // Add delay to ensure room joining is complete
+            setTimeout(() => {
+                requestLobbyState();
+            }, 1000);
+        } else {
+            console.log('[Lobby] Not connected yet, waiting for connection');
+            const connectedSub = lobbyClient.isConnected$.subscribe(async (connected: boolean) => {
+                if (connected) {
+                    console.log('[Lobby] Connected, requesting state');
+                    setTimeout(() => {
+                        requestLobbyState();
+                    }, 1000);
+                    connectedSub.unsubscribe(); // Only request once
+                }
+            });
+
+            return () => {
+                connectedSub.unsubscribe();
+            };
+        }
     }, [lobbyClient, roomCode]);
 
     if (!roomCode) {
@@ -87,8 +113,6 @@ const Lobby: React.FC = () => {
         return lobbyState.Creatures[nextIndex] || null;
     };
 
-    const isWaiting = lobbyState?.CurrentMode === 'Waiting';
-
     return (
         <div className="lobby-container">
             <div className="lobby-header">
@@ -112,7 +136,7 @@ const Lobby: React.FC = () => {
                 {/* Initiative List - Left Side */}
                 <div className="initiative-list">
                     <h3>Initiative Order</h3>
-                    {isValidLobbyState(lobbyState) ? (
+                    {!isWaiting && isValidLobbyState(lobbyState) ? (
                         <ul>
                             {lobbyState.Creatures.map((creature, index) => (
                                 <li 
@@ -124,7 +148,7 @@ const Lobby: React.FC = () => {
                             ))}
                         </ul>
                     ) : (
-                        <p>No creatures in initiative</p>
+                        <p>{isWaiting ? "Waiting for adventure to begin..." : "No creatures in initiative"}</p>
                     )}
                 </div>
 
