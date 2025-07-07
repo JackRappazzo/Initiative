@@ -2,15 +2,30 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EncounterClient, FetchEncounterResponse } from '../../api/encounterClient';
 import { EncounterState } from '../../types';
-import { useCreatureManagement, useDragAndDrop } from '../../hooks';
+import { useCreatureManagement, useDragAndDrop, useLobbyConnection } from '../../hooks';
 import { CreatureRow, EncounterHeader, EncounterStatus } from '../../components';
+import { useUser } from '../../contexts/UserContext';
 
 import './EditEncounter.css';
 
 const EditEncounter: React.FC = () => {
   const { encounterId } = useParams<{ encounterId: string }>();
   const encounterClient = useMemo(() => new EncounterClient(), []);
+  const { userInfo } = useUser();
   
+  // Get room code from UserContext
+  const roomCode = userInfo?.roomCode;
+
+  console.log('[EditEncounter] Room code from UserContext:', roomCode);
+  console.log('[EditEncounter] User info:', userInfo);
+
+  // Use the lobby connection hook - handles all the complex logic
+  const { lobbyClient } = useLobbyConnection({
+    roomCode,
+    autoConnect: true,
+    autoJoinRoom: true
+  });
+
   const [encounter, setEncounter] = useState<FetchEncounterResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingName, setEditingName] = useState(false);
@@ -25,10 +40,10 @@ const EditEncounter: React.FC = () => {
     creatures,
     error,
     setError,
-    updateCreature,
-    addCreature,
-    removeCreature,
-    sortByInitiative,
+    updateCreature: originalUpdateCreature,
+    addCreature: originalAddCreature,
+    removeCreature: originalRemoveCreature,
+    sortByInitiative: originalSortByInitiative,
     setCreatureList,
     saveCreatures
   } = useCreatureManagement(encounterId, encounterClient);
@@ -36,10 +51,137 @@ const EditEncounter: React.FC = () => {
   const {
     dragState,
     handleDragStart,
-    handleDragEnd,
+    handleDragEnd: originalHandleDragEnd,
     handleDragOver,
     handleDrop
   } = useDragAndDrop(creatures, setCreatureList, saveCreatures);
+
+  // Method to send lobby state
+  const sendLobbyState = useCallback(async (
+    creatureList: typeof creatures, 
+    currentTurn: number, 
+    turnNumber: number,
+    isRunning: boolean = encounterState.isRunning
+  ) => {
+    if (!lobbyClient) {
+      console.log('[EditEncounter] Not sending lobby state - no lobby client');
+      return;
+    }
+
+    try {
+      const creatureNames = creatureList.map(creature => creature.name || 'Unnamed Creature');
+      const lobbyMode = isRunning ? 'InProgress' : 'Waiting';
+      
+      console.log('[EditEncounter] Sending lobby state:', {
+        creatures: creatureNames,
+        currentCreatureIndex: currentTurn,
+        currentTurn: turnNumber,
+        mode: lobbyMode
+      });
+
+      await lobbyClient.setLobbyState(
+        creatureNames,
+        currentTurn,
+        turnNumber,
+        lobbyMode
+      );
+      
+      console.log('[EditEncounter] Lobby state sent successfully');
+    } catch (err) {
+      console.error('[EditEncounter] Failed to send lobby state:', err);
+    }
+  }, [encounterState.isRunning, lobbyClient]);
+
+  // Enhanced creature management functions that send lobby state updates
+  const updateCreature = useCallback((index: number, creature: any) => {
+    originalUpdateCreature(index, creature);
+    
+    // Send lobby state if creature name changed (affects display) and encounter is running
+    const oldCreature = creatures[index];
+    if (encounterState.isRunning && oldCreature && oldCreature.name !== creature.name) {
+      const updatedCreatures = [...creatures];
+      updatedCreatures[index] = creature;
+      
+      setTimeout(() => {
+        sendLobbyState(updatedCreatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
+      }, 50);
+    }
+  }, [originalUpdateCreature, creatures, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, sendLobbyState]);
+
+  // Enhanced creature management functions that send lobby state updates
+  const addCreature = useCallback(() => {
+    originalAddCreature();
+    
+    // Send lobby state after creature is added (if encounter is running)
+    if (encounterState.isRunning) {
+      // Use setTimeout to ensure the creature is added to state first
+      setTimeout(() => {
+        sendLobbyState([...creatures, { 
+          name: 'New Creature', 
+          hitPoints: 10, 
+          maximumHitPoints: 10, 
+          armorClass: 10, 
+          initiative: 10, 
+          initiativeModifier: 0, 
+          isEditing: true 
+        }], encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
+      }, 50);
+    }
+  }, [originalAddCreature, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
+
+  const removeCreature = useCallback(async (index: number) => {
+    await originalRemoveCreature(index);
+    
+    // Send lobby state after creature is removed (if encounter is running)
+    if (encounterState.isRunning) {
+      const newCreatures = creatures.filter((_, i) => i !== index);
+      let newCurrentTurn = encounterState.currentTurn;
+      
+      // Adjust current turn if needed
+      if (encounterState.currentTurn >= newCreatures.length && newCreatures.length > 0) {
+        newCurrentTurn = 0;
+      } else if (encounterState.currentTurn > index) {
+        newCurrentTurn = encounterState.currentTurn - 1;
+      }
+      
+      // Update the encounter state with the new current turn
+      if (newCurrentTurn !== encounterState.currentTurn) {
+        setEncounterState(prev => ({
+          ...prev,
+          currentTurn: newCurrentTurn
+        }));
+      }
+      
+      sendLobbyState(newCreatures, newCurrentTurn, encounterState.turnNumber, encounterState.isRunning);
+    }
+  }, [originalRemoveCreature, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
+
+  const sortByInitiative = useCallback(async () => {
+    await originalSortByInitiative();
+    
+    // Send lobby state after sorting (if encounter is running)
+    if (encounterState.isRunning) {
+      // Get the sorted creatures
+      const sortedCreatures = [...creatures].sort((a, b) => 
+        (b.initiative + b.initiativeModifier) - (a.initiative + a.initiativeModifier)
+      );
+      
+      sendLobbyState(sortedCreatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
+    }
+  }, [originalSortByInitiative, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
+
+  // Enhanced drag and drop that sends lobby state updates
+  const handleDragEnd = useCallback(() => {
+    originalHandleDragEnd();
+    
+    // Send lobby state after drag and drop reorder (if encounter is running)
+    if (encounterState.isRunning) {
+      // Use setTimeout to ensure the reorder is applied first
+      setTimeout(() => {
+        sendLobbyState(creatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
+      }, 50);
+    }
+  }, [originalHandleDragEnd, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
 
   const loadEncounter = useCallback(async () => {
     if (!encounterId) return;
@@ -85,6 +227,14 @@ const EditEncounter: React.FC = () => {
     }));
   };
 
+  // Send lobby state when encounter starts/stops or when encounter state changes
+  useEffect(() => {
+    if (lobbyClient && creatures.length > 0) {
+      console.log('[EditEncounter] Encounter state changed, sending lobby state. IsRunning:', encounterState.isRunning);
+      sendLobbyState(creatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
+    }
+  }, [encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, creatures, lobbyClient, sendLobbyState]);
+
   const nextTurn = () => {
     if (creatures.length === 0) return;
     
@@ -97,11 +247,18 @@ const EditEncounter: React.FC = () => {
         nextTurnNumber++;
       }
       
-      return {
+      const newState = {
         ...prev,
         currentTurn: nextTurn,
         turnNumber: nextTurnNumber
       };
+      
+      // Send lobby state after turn advance if encounter is running
+      if (newState.isRunning) {
+        sendLobbyState(creatures, nextTurn, nextTurnNumber, newState.isRunning);
+      }
+      
+      return newState;
     });
   };
 

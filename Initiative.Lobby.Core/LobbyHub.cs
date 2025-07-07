@@ -60,7 +60,8 @@ namespace Initiative.Lobby.Core
         public async Task GetLobbyState()
         {
             var lobby = await ValidateLobbyAccess();
-            if (string.IsNullOrEmpty(lobby)) return;
+            if (string.IsNullOrEmpty(lobby)) 
+                return;
 
             var lobbyState = lobbyService.GetLobbyState(lobby);
             await Clients.Caller.SendAsync("ReceivedLobbyState", lobbyState);
@@ -69,7 +70,8 @@ namespace Initiative.Lobby.Core
         public async Task SetLobbyState(EncounterDto encounterDto)
         {
             var lobby = await ValidateLobbyAccess();
-            if (string.IsNullOrEmpty(lobby)) return;
+            if (string.IsNullOrEmpty(lobby)) 
+                return;
 
             lobbyService.SetLobbyState(lobby, encounterDto);
             await Clients.OthersInGroup(lobby).SendAsync("ReceivedLobbyState", encounterDto);

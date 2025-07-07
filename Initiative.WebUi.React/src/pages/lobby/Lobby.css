@@ -66,6 +66,115 @@
     margin: 0;
 }
 
+.lobby-main {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+/* Initiative List - Left Side */
+.initiative-list {
+    flex: 0 0 300px;
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.initiative-list h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #333;
+    font-size: 1.3rem;
+}
+
+.initiative-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.initiative-list li {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.initiative-list li.current-creature {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+    color: #1976d2;
+    font-weight: bold;
+    transform: translateX(5px);
+}
+
+/* Central Display */
+.central-display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    padding: 2rem;
+}
+
+.waiting-display h2 {
+    font-size: 3rem;
+    color: #666;
+    text-align: center;
+    margin: 0;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.creature-display {
+    text-align: center;
+    width: 100%;
+}
+
+.current-creature {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.next-creature {
+    font-size: 1.5rem;
+    color: #888;
+    margin-bottom: 2rem;
+    opacity: 0.7;
+}
+
+.turn-info {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.turn-info span {
+    padding: 0.5rem 1rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .lobby-container {
@@ -80,5 +189,38 @@
     
     .lobby-header h1 {
         font-size: 1.5rem;
+    }
+    
+    .lobby-main {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .initiative-list {
+        flex: none;
+        order: 2;
+    }
+    
+    .central-display {
+        order: 1;
+        min-height: 300px;
+        padding: 1rem;
+    }
+    
+    .current-creature {
+        font-size: 2.5rem;
+    }
+    
+    .next-creature {
+        font-size: 1.2rem;
+    }
+    
+    .turn-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .waiting-display h2 {
+        font-size: 2rem;
     }
 }

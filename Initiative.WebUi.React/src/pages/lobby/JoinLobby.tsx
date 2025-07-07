@@ -7,7 +7,7 @@ const JoinLobby: React.FC = () => {
     const navigate = useNavigate();
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value.toUpperCase().slice(0, 6);
+        const value = e.target.value.slice(0, 6);
         setRoomCode(value);
         
         // Auto-navigate when 6 characters are entered
@@ -36,7 +36,7 @@ const JoinLobby: React.FC = () => {
                             value={roomCode}
                             onChange={handleInputChange}
                             className="room-code-input"
-                            placeholder="ABCDEF"
+                            placeholder="AbC123"
                             maxLength={6}
                             autoFocus
                         />

@@ -37,8 +37,10 @@ const ListEncounters: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="encounters-container">Loading encounters...</div>;
-  if (error) return <div className="error-message">{error}</div>;
+  if (loading) 
+    return <div className="encounters-container">Loading encounters...</div>;
+  if (error) 
+    return <div className="error-message">{error}</div>;
 
   return (
     <div className="encounters-container">

@@ -1,50 +1,65 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { LobbyClient } from '../../signalR/LobbyClient';
+import { useLobbyConnection } from '../../hooks';
+import { LobbyState, isValidLobbyState } from '../../signalR/LobbyState';
 import './Lobby.css';
 
 const Lobby: React.FC = () => {
     const { roomCode } = useParams<{ roomCode: string }>();
-    const [lobbyClient, setLobbyClient] = useState<LobbyClient | null>(null);
-    const [isConnected, setIsConnected] = useState(false);
     const [connectionError, setConnectionError] = useState<string | null>(null);
+    const [lobbyState, setLobbyState] = useState<LobbyState | null>(null);
+
+    // Use the lobby connection hook - handles all connection logic
+    const { lobbyClient, isConnected } = useLobbyConnection({
+        roomCode,
+        autoConnect: true,
+        autoJoinRoom: true
+    });
 
     useEffect(() => {
-        if (!roomCode) return;
+        if (!lobbyClient) return;
 
-        // Initialize the lobby client
-        // Note: You'll need to replace this with your actual SignalR hub URL
-        const hubUrl = '/lobbyhub'; // Update this to match your backend hub URL
-        const client = new LobbyClient(hubUrl, roomCode);
-        
-        setLobbyClient(client);
+        // Subscribe to lobby state updates and errors
+        const errorSub = lobbyClient.error$.subscribe((error: string) => {
+            console.log('[Lobby] Error received:', error);
+            setConnectionError(error);
+        });
 
-        // Subscribe to connection status
-        const connectedSub = client.isConnected$.subscribe(setIsConnected);
-        const errorSub = client.error$.subscribe(setConnectionError);
+        const lobbyStateSub = lobbyClient.receivedLobbyState$.subscribe((newState: LobbyState) => {
+            console.log('[Lobby] Received lobby state update:', newState);
+            console.log('[Lobby] State type:', typeof newState);
+            console.log('[Lobby] State keys:', Object.keys(newState || {}));
+            console.log('[Lobby] Is valid state:', isValidLobbyState(newState));
+            setLobbyState(newState);
+        });
 
-        // Start the connection and join the lobby
-        const initializeConnection = async () => {
-            try {
-                await client.connect();
-                await client.joinLobby(roomCode);
-            } catch (err: any) {
-                console.error('Failed to start lobby connection:', err);
-                setConnectionError('Failed to connect to lobby');
+        // Get initial lobby state when connected
+        const connectedSub = lobbyClient.isConnected$.subscribe(async (connected: boolean) => {
+            console.log('[Lobby] Connection status changed:', connected);
+            if (connected && roomCode) {
+                try {
+                    console.log('[Lobby] Fetching initial lobby state...');
+                    const initialState = await lobbyClient.getLobbyState();
+                    console.log('[Lobby] Initial state received:', initialState);
+                    console.log('[Lobby] Initial state type:', typeof initialState);
+                    console.log('[Lobby] Initial state keys:', Object.keys(initialState || {}));
+                    console.log('[Lobby] Initial state is valid:', isValidLobbyState(initialState));
+                    setLobbyState(initialState);
+                    setConnectionError(null);
+                } catch (err: any) {
+                    console.error('Failed to get initial lobby state:', err);
+                    setConnectionError('Failed to get lobby state');
+                }
             }
-        };
+        });
 
-        initializeConnection();
-
-        // Cleanup on component unmount
+        // Cleanup subscriptions
         return () => {
             connectedSub.unsubscribe();
             errorSub.unsubscribe();
-            if (lobbyClient) {
-                lobbyClient.disconnect();
-            }
+            lobbyStateSub.unsubscribe();
         };
-    }, [roomCode, lobbyClient]);
+    }, [lobbyClient, roomCode]);
 
     if (!roomCode) {
         return (
@@ -56,6 +71,23 @@ const Lobby: React.FC = () => {
             </div>
         );
     }
+
+    const getCurrentCreature = () => {
+        if (!isValidLobbyState(lobbyState)) {
+            return null;
+        }
+        return lobbyState.Creatures[lobbyState.CurrentCreatureIndex] || null;
+    };
+
+    const getNextCreature = () => {
+        if (!isValidLobbyState(lobbyState)) {
+            return null;
+        }
+        const nextIndex = (lobbyState.CurrentCreatureIndex + 1) % lobbyState.Creatures.length;
+        return lobbyState.Creatures[nextIndex] || null;
+    };
+
+    const isWaiting = lobbyState?.CurrentMode === 'Waiting';
 
     return (
         <div className="lobby-container">
@@ -76,9 +108,47 @@ const Lobby: React.FC = () => {
                 </div>
             )}
 
-            <div className="lobby-content">
-                <p>Welcome to the lobby! This page will be expanded with lobby functionality.</p>
-                {/* Lobby functionality will be added here in the next iteration */}
+            <div className="lobby-main">
+                {/* Initiative List - Left Side */}
+                <div className="initiative-list">
+                    <h3>Initiative Order</h3>
+                    {isValidLobbyState(lobbyState) ? (
+                        <ul>
+                            {lobbyState.Creatures.map((creature, index) => (
+                                <li 
+                                    key={index} 
+                                    className={index === lobbyState.CurrentCreatureIndex ? 'current-creature' : ''}
+                                >
+                                    {creature}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No creatures in initiative</p>
+                    )}
+                </div>
+
+                {/* Central Display */}
+                <div className="central-display">
+                    {isWaiting ? (
+                        <div className="waiting-display">
+                            <h2>Waiting for adventure!</h2>
+                        </div>
+                    ) : (
+                        <div className="creature-display">
+                            <div className="current-creature">
+                                {getCurrentCreature() || 'No current creature'}
+                            </div>
+                            <div className="next-creature">
+                                Next: {getNextCreature() || 'No next creature'}
+                            </div>
+                            <div className="turn-info">
+                                <span>Turn {lobbyState?.CurrentTurn || 0}</span>
+                                <span>Creature {(lobbyState?.CurrentCreatureIndex || 0) + 1}</span>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
