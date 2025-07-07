@@ -33,7 +33,7 @@ export const useCreatureManagement = (encounterId: string | undefined, encounter
     await updateCreatureAPI(newCreatures);
   }, [creatures, updateCreatureAPI]);
 
-  const addCreature = useCallback(() => {
+  const addCreature = useCallback(async () => {
     const newCreature: EditableCreature = {
       name: 'New Creature',
       hitPoints: 10,
@@ -44,8 +44,10 @@ export const useCreatureManagement = (encounterId: string | undefined, encounter
       isEditing: true
     };
     
-    setCreatures([...creatures, newCreature]);
-  }, [creatures]);
+    const newCreatures = [...creatures, newCreature];
+    setCreatures(newCreatures);
+    await updateCreatureAPI(newCreatures);
+  }, [creatures, updateCreatureAPI]);
 
   const removeCreature = useCallback(async (index: number) => {
     const newCreatures = creatures.filter((_, i) => i !== index);

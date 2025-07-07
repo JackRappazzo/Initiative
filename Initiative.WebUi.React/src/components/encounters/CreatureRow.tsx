@@ -1,4 +1,6 @@
 import React from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { NumericInput } from '../ui';
 import { EditableCreature } from '../../types';
 
@@ -6,53 +8,49 @@ interface CreatureRowProps {
   creature: EditableCreature;
   index: number;
   isCurrentTurn: boolean;
-  isDragging: boolean;
-  isDragOver: boolean;
-  dragPosition: 'top' | 'bottom' | null;
   onCreatureChange: (index: number, creature: EditableCreature) => void;
   onCreatureRemove: (index: number) => void;
-  onDragStart: (index: number) => void;
-  onDragEnd: () => void;
-  onDragOver: (e: React.DragEvent, index: number) => void;
-  onDrop: () => void;
 }
 
 export const CreatureRow: React.FC<CreatureRowProps> = ({
   creature,
   index,
   isCurrentTurn,
-  isDragging,
-  isDragOver,
-  dragPosition,
   onCreatureChange,
   onCreatureRemove,
-  onDragStart,
-  onDragEnd,
-  onDragOver,
-  onDrop
 }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: index.toString() });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   const handleFieldChange = (field: keyof EditableCreature, value: any) => {
     onCreatureChange(index, { ...creature, [field]: value });
   };
 
   return (
     <div 
-      className={`creature-item ${
-        isDragging ? 'dragging' : ''
-      } ${
-        isDragOver && dragPosition === 'top' ? 'drag-over-top' : ''
-      } ${
-        isDragOver && dragPosition === 'bottom' ? 'drag-over-bottom' : ''
-      }`}
-      style={isCurrentTurn ? { background: '#e9ecef' } : undefined}
-      onDragOver={(e) => onDragOver(e, index)}
-      onDrop={onDrop}
+      ref={setNodeRef}
+      style={{
+        ...style,
+        ...(isCurrentTurn ? { background: '#e9ecef' } : {})
+      }}
+      className={`creature-item ${isDragging ? 'dragging' : ''}`}
+      {...attributes}
     >
       <div
         className="drag-handle"
-        draggable
-        onDragStart={() => onDragStart(index)}
-        onDragEnd={onDragEnd}
+        {...listeners}
       >
         ⋮⋮
       </div>

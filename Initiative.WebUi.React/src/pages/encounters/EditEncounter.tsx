@@ -2,8 +2,8 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EncounterClient, FetchEncounterResponse } from '../../api/encounterClient';
 import { EncounterState } from '../../types';
-import { useCreatureManagement, useDragAndDrop, useLobbyConnection } from '../../hooks';
-import { CreatureRow, EncounterHeader, EncounterStatus } from '../../components';
+import { useCreatureManagement, useLobbyConnection } from '../../hooks';
+import { EditableCreatureList, EncounterHeader, EncounterStatus } from '../../components';
 import { useUser } from '../../contexts/UserContext';
 
 import './EditEncounter.css';
@@ -44,17 +44,8 @@ const EditEncounter: React.FC = () => {
     addCreature: originalAddCreature,
     removeCreature: originalRemoveCreature,
     sortByInitiative: originalSortByInitiative,
-    setCreatureList,
-    saveCreatures
+    setCreatureList
   } = useCreatureManagement(encounterId, encounterClient);
-
-  const {
-    dragState,
-    handleDragStart,
-    handleDragEnd: originalHandleDragEnd,
-    handleDragOver,
-    handleDrop
-  } = useDragAndDrop(creatures, setCreatureList, saveCreatures);
 
   // Method to send lobby state
   const sendLobbyState = useCallback(async (
@@ -109,8 +100,8 @@ const EditEncounter: React.FC = () => {
   }, [originalUpdateCreature, creatures, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, sendLobbyState]);
 
   // Enhanced creature management functions that send lobby state updates
-  const addCreature = useCallback(() => {
-    originalAddCreature();
+  const addCreature = useCallback(async () => {
+    await originalAddCreature();
     
     // Send lobby state after creature is added (if encounter is running)
     if (encounterState.isRunning) {
@@ -170,18 +161,29 @@ const EditEncounter: React.FC = () => {
     }
   }, [originalSortByInitiative, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
 
-  // Enhanced drag and drop that sends lobby state updates
-  const handleDragEnd = useCallback(() => {
-    originalHandleDragEnd();
+  // Handle creature list changes from EditableCreatureList
+  const handleCreaturesChange = useCallback(async (newCreatures: typeof creatures) => {
+    // Update local state first
+    setCreatureList(newCreatures);
+    
+    // Save to repository
+    try {
+      if (!encounterId) return;
+      await encounterClient.setCreatures(encounterId, newCreatures);
+    } catch (err) {
+      console.error('[EditEncounter] Failed to save creatures after reorder:', err);
+      setError('Failed to save creature order');
+    }
     
     // Send lobby state after drag and drop reorder (if encounter is running)
     if (encounterState.isRunning) {
-      // Use setTimeout to ensure the reorder is applied first
+      console.log('[EditEncounter] Sending lobby state after creature reorder');
+      // Use setTimeout to ensure the reorder is fully applied
       setTimeout(() => {
-        sendLobbyState(creatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
-      }, 50);
+        sendLobbyState(newCreatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
+      }, 100);
     }
-  }, [originalHandleDragEnd, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
+  }, [setCreatureList, encounterId, encounterClient, setError, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, sendLobbyState]);
 
   const loadEncounter = useCallback(async () => {
     if (!encounterId) return;
@@ -318,34 +320,14 @@ const EditEncounter: React.FC = () => {
             Sort by Initiative
           </button>
         </div>
-        <div className="creature-item creature-header">
-          <div></div>
-          <div>Name</div>
-          <div>HP</div>
-          <div>Max HP</div>
-          <div>AC</div>
-          <div>Init</div>
-          <div>Mod</div>
-          <div>Actions</div>
-        </div>
         
-        {creatures.map((creature, index) => (
-          <CreatureRow
-            key={index}
-            creature={creature}
-            index={index}
-            isCurrentTurn={index === encounterState.currentTurn && encounterState.isRunning}
-            isDragging={dragState.draggedCreature === index}
-            isDragOver={dragState.dragOverIndex === index}
-            dragPosition={dragState.dragPosition}
-            onCreatureChange={updateCreature}
-            onCreatureRemove={removeCreature}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-          />
-        ))}
+        <EditableCreatureList
+          creatures={creatures}
+          highlightedCreatureIndex={encounterState.isRunning ? encounterState.currentTurn : undefined}
+          onCreaturesChange={handleCreaturesChange}
+          onCreatureUpdate={updateCreature}
+          onCreatureRemove={removeCreature}
+        />
       </div>
 
       <button className="add-creature-button" onClick={addCreature}>
