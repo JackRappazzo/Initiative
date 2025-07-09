@@ -2,6 +2,25 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Environment Setup
+
+Before running the application, you need to configure the environment variables:
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. Edit `.env.local` with your API server configuration:
+   ```env
+   REACT_APP_API_BASE_URL=https://your-api-server.com/api
+   REACT_APP_SIGNALR_HUB_URL=https://your-api-server.com/lobby
+   ```
+
+For local development, the default values should work with a locally running API server on `https://localhost:7034`.
+
+See [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md) for detailed information about environment variables.
+
 ## Available Scripts
 
 In the project directory, you can run:

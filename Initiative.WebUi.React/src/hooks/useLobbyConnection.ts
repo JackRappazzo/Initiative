@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useCallback } from 'react';
 import { LobbyClient } from '../signalR/LobbyClient';
+import { config } from '../config/environment';
 
 // Global LobbyClient instance to prevent multiple connections
 let globalLobbyClient: LobbyClient | null = null;
@@ -24,9 +25,9 @@ export interface UseLobbyConnectionReturn {
 }
 
 export const useLobbyConnection = (options: UseLobbyConnectionOptions = {}): UseLobbyConnectionReturn => {
-  const {
+  const  {
     roomCode,
-    hubUrl = 'https://localhost:7034/lobby',
+    hubUrl = config.signalRHubUrl,
     autoConnect = true,
     autoJoinRoom = true
   } = options;

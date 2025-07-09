@@ -5,6 +5,7 @@ import axios, {
   AxiosError,
   InternalAxiosRequestConfig
 } from 'axios';
+import { config } from '../config/environment';
 
 export class HttpClient {
   private static instance:HttpClient;
@@ -19,7 +20,7 @@ export class HttpClient {
 public static GetInstance() {
   if(HttpClient.instance == null)
   {
-    HttpClient.instance = new HttpClient("https://localhost:7034/api");
+    HttpClient.instance = new HttpClient(config.apiBaseUrl);
   }
   return HttpClient.instance;
 }
