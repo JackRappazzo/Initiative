@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Initiative.Persistence.Constants
 {
-    public static class Databases
+    public static class EnvironmentVariableNames
     {
-        public const string Main = "Initiative";
-        public const string Test = "Initiative_Test";
+        public const string MongoDbConnectionString = "CUSTOMCONNSTR_MongoDbConnectionString";
     }
 }

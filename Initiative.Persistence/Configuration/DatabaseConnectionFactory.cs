@@ -16,10 +16,12 @@ namespace Initiative.Persistence.Configuration
 
         public DatabaseConnectionConfiguration Create()
         {
+            var connectionString = Environment.GetEnvironmentVariable(EnvironmentVariableNames.MongoDbConnectionString) ?? ConnectionStrings.Local;
+
             return new DatabaseConnectionConfiguration()
             {
-                ConnectionString = Constants.ConnectionStrings.Local,
-                DatabaseName = Databases.Local
+                ConnectionString = connectionString,
+                DatabaseName = Databases.Main
             };
         }
     }

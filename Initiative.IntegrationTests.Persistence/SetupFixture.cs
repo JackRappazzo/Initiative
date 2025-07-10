@@ -13,7 +13,7 @@ namespace Initiative.IntegrationTests
     {
         private MongoTestResetService mongoTestResetService = new MongoTestResetService(ConnectionStrings.LocalTest);
         protected const string ConnectionString = ConnectionStrings.LocalTest;
-        protected const string DatabaseName = Databases.LocalTest;
+        protected const string DatabaseName = Databases.Test;
 
         [OneTimeSetUp]
         public async Task ResetDatabase()

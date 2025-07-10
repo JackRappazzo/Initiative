@@ -15,7 +15,7 @@ namespace Initiative.IntegrationTests.Persistence.Utilities
             return new DatabaseConnectionConfiguration()
             {
                 ConnectionString = ConnectionStrings.LocalTest,
-                DatabaseName = Databases.LocalTest
+                DatabaseName = Databases.Test
             };
         }
     }
