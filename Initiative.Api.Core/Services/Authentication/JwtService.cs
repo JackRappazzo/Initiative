@@ -31,6 +31,10 @@ namespace Initiative.Api.Core.Services.Authentication
             {
                 return Environment.GetEnvironmentVariable("JWT_SECRET");
             }
+            else if (environment == EnvironmentType.Deployed)
+            {
+                return Environment.GetEnvironmentVariable("JWT_SECRET");
+            }
             else
             {
                 throw new NotSupportedException();
