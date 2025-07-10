@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import LoginPage from "./pages/LoginPage";
+import HomePage from "./pages/HomePage";
 import ListEncounters from "./pages/encounters/ListEncounters";
 import EditEncounter from "./pages/encounters/EditEncounter";
 import { JoinLobby, Lobby } from "./pages/lobby";
@@ -19,7 +20,7 @@ const App: React.FC = () => {
             <Route path="/login" element={<LoginPage />} />
             {/* All other pages use MainLayout */}
             <Route element={<MainLayout />}>
-              <Route path="/" element={<h2>Welcome to Initiative!</h2>} />
+              <Route path="/" element={<HomePage />} />
               <Route path="/encounters" element={<ListEncounters />} />
               <Route path="/encounters/:encounterId" element={<EditEncounter />} />
               <Route path="/lobby" element={<JoinLobby />} />
