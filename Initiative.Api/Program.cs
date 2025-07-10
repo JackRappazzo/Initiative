@@ -1,23 +1,24 @@
-using Microsoft.AspNetCore.Identity;
 using AspNetCore.Identity.Mongo;
 using AspNetCore.Identity.Mongo.Model;
+using Initiative.Api.Core;
 using Initiative.Api.Core.Identity;
 using Initiative.Api.Core.Identity.Roles;
-using Initiative.Api.Core;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Initiative.Persistence.Repositories;
-using Initiative.Api.Core.Services.Encounters;
-using Initiative.Persistence.Configuration;
-using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
-using Initiative.Api.Core.Utilities;
 using Initiative.Api.Core.Services.Authentication;
+using Initiative.Api.Core.Services.Encounters;
 using Initiative.Api.Core.Services.Users;
+using Initiative.Api.Core.Utilities;
 using Initiative.Lobby.Core;
 using Initiative.Lobby.Core.Services;
+using Initiative.Persistence.Configuration;
+using Initiative.Persistence.Constants;
+using Initiative.Persistence.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Converters;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,7 +79,7 @@ builder.Services.AddIdentityMongoDbProvider<Initiative.Api.Core.Identity.Applica
 },
 mongoOptions =>
 {
-    mongoOptions.ConnectionString = "mongodb://localhost:27017/Initiative";
+    mongoOptions.ConnectionString = Environment.GetEnvironmentVariable(EnvironmentVariableNames.MongoDbConnectionString) ?? ConnectionStrings.Local;
 });
 
 
