@@ -1,4 +1,4 @@
-# Azure Deployment Guide
+c# Azure Deployment Guide
 
 This document explains how to properly deploy the Initiative React app to Azure to handle client-side routing.
 

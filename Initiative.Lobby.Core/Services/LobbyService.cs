@@ -80,7 +80,7 @@ namespace Initiative.Lobby.Core.Services
             {
                 return new EncounterDto
                 {
-                    Creatures = lobby.Creatures.OrderBy(c => c),
+                    Creatures = lobby.Creatures,
                     CurrentCreatureIndex = lobby.CurrentCreatureIndex,
                     CurrentTurn = lobby.CurrentTurn,
                     CurrentMode = lobby.CurrentMode
@@ -88,7 +88,7 @@ namespace Initiative.Lobby.Core.Services
             }
             return new EncounterDto
             {
-                Creatures = Enumerable.Empty<string>().OrderBy(c => c),
+                Creatures = Enumerable.Empty<string>(),
                 CurrentCreatureIndex = 0,
                 CurrentTurn = 0,
                 CurrentMode = LobbyMode.Waiting
