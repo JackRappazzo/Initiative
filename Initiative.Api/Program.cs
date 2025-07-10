@@ -24,22 +24,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-var environmentType = builder.Environment.IsDevelopment() ? EnvironmentType.Local : EnvironmentType.Deployed;   
+var environmentType = builder.Environment.IsDevelopment() ? EnvironmentType.Local : EnvironmentType.Deployed;
+var connectionString = Environment.GetEnvironmentVariable(EnvironmentVariableNames.MongoDbConnectionString) ?? ConnectionStrings.Local;
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
-    {
-        if (environmentType == EnvironmentType.Local)
-        {
-            policy.WithOrigins("http://localhost:3000", "http://localhost:4200");
-        }
-        else
-        {
-            policy.WithOrigins("https://wonderful-ocean-00dbaf60f.1.azurestaticapps.net/");
-        }
-        
-        policy.AllowAnyHeader()
+    {        
+        policy.WithOrigins("http://localhost:3000", "http://localhost:4200", "https://wonderful-ocean-00dbaf60f.1.azurestaticapps.net")
+              .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
     });
@@ -89,7 +82,7 @@ builder.Services.AddIdentityMongoDbProvider<Initiative.Api.Core.Identity.Applica
 },
 mongoOptions =>
 {
-    mongoOptions.ConnectionString = Environment.GetEnvironmentVariable(EnvironmentVariableNames.MongoDbConnectionString) ?? ConnectionStrings.Local;
+    mongoOptions.ConnectionString = connectionString;
 });
 
 
