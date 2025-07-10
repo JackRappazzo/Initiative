@@ -55,4 +55,9 @@ export class EncounterClient {
     const request = { newName };
     return this.apiClient.put<void>(`encounter/${encodeURIComponent(encounterId)}/setName`, request);
   }
+
+  // DELETE /api/encounter/{encounterId}
+  public async deleteEncounter(encounterId: string): Promise<void> {
+    return this.apiClient.instance.delete(`encounter/${encodeURIComponent(encounterId)}`);
+  }
 }

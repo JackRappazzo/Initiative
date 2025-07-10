@@ -37,6 +37,21 @@ const ListEncounters: React.FC = () => {
     }
   };
 
+  const handleDeleteEncounter = async (encounterId: string, encounterName: string) => {
+    if (!window.confirm(`Are you sure you want to delete "${encounterName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await encounterClient.deleteEncounter(encounterId);
+      // Reload the encounters list after successful deletion
+      await loadEncounters();
+    } catch (err) {
+      console.error('Error deleting encounter:', err);
+      setError('Failed to delete encounter');
+    }
+  };
+
   if (loading) 
     return <div className="encounters-container">Loading encounters...</div>;
   if (error) 
@@ -67,6 +82,12 @@ const ListEncounters: React.FC = () => {
                 <Link to={`/encounters/${encounter.encounterId}`} className="btn-secondary">
                   View Details
                 </Link>
+                <button 
+                  onClick={() => handleDeleteEncounter(encounter.encounterId, encounter.encounterName)}
+                  className="btn-danger"
+                >
+                  Delete
+                </button>
               </div>
             </div>
           ))
