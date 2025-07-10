@@ -24,11 +24,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+var environmentType = builder.Environment.IsDevelopment() ? EnvironmentType.Local : EnvironmentType.Deployed;   
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        if (builder.Environment.IsDevelopment())
+        if (environmentType == EnvironmentType.Local)
         {
             policy.WithOrigins("http://localhost:3000", "http://localhost:4200");
         }
@@ -94,7 +96,7 @@ mongoOptions =>
 // Register JwtSettings from environment variables
 builder.Services.Configure<JwtSettings>(options =>
 {
-    options.Secret = JwtService.GetSecret(EnvironmentType.Local);
+    options.Secret = JwtService.GetSecret(environmentType);
     options.Issuer = builder.Configuration["JwtSettings:Issuer"];
     options.Audience = builder.Configuration["JwtSettings:Audience"];
     options.ExpiresInMinutes = int.Parse(builder.Configuration["JwtSettings:ExpiresInMinutes"] ?? "60");
@@ -107,7 +109,7 @@ builder.Services.AddAuthentication(authOptions =>
 })
     .AddJwtBearer(jwtOptions =>
     {
-        var secret = JwtService.GetSecret(EnvironmentType.Local);
+        var secret = JwtService.GetSecret(environmentType);
         var key = Encoding.UTF8.GetBytes(secret);
 
         jwtOptions.RequireHttpsMetadata = false;
