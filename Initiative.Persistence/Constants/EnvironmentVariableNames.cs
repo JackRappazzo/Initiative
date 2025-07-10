@@ -8,6 +8,6 @@ namespace Initiative.Persistence.Constants
 {
     public static class EnvironmentVariableNames
     {
-        public const string MongoDbConnectionString = "MongoDbConnectionString";
+        public const string MongoDbConnectionString = "MONGO_CONNECTION_STRING";
     }
 }
