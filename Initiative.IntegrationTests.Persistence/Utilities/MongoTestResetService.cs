@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ namespace Initiative.IntegrationTests.Persistence.Utilities
             await ResetCollection(database, InitiativeUserRepository.TableName);
             await ResetCollection(database, EncounterRepository.TableName);
             await ResetCollection(database, BeastiaryRepository.TableName);
+            await ResetCollection(database, LobbyStateRepository.TableName);
         }
 
         protected async Task ResetCollection(IMongoDatabase database, string collectionName)
