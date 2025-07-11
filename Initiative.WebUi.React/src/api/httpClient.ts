@@ -79,7 +79,7 @@ public static GetInstance() {
 
           try {
             const refreshRes = await axios.post<{ accessToken: string }>(
-              `${this.api.defaults.baseURL}/auth/refresh`,
+              `${this.api.defaults.baseURL}/admin/refresh`,
               {},
               { withCredentials: true }
             );

@@ -22,8 +22,8 @@ const HomePage: React.FC = () => {
           <div className="option-card">
             <h2>Dungeon Master?</h2>
             <p>If you're a dungeon master, register here!</p>
-            <Link to="/login" className="btn-primary">
-              Register / Sign In
+            <Link to="/register" className="btn-primary">
+              Register
             </Link>
           </div>
           
