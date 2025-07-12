@@ -18,7 +18,8 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.JoinLobbyTests
             .And(RoomCodeIsSet)
             .And(RoomExists)
             .When(JoinLobbyIsCalled)
-            .Then(ShouldReturnSuccess);
+            .Then(ShouldReturnSuccess)
+            .And(ShouldCallLobbyStateManager);
 
         [Given]
         public void ConnectionIdIsSet()
@@ -44,6 +45,13 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.JoinLobbyTests
         {
             Assert.That(Result.success, Is.True);
             Assert.That(Result.error, Is.EqualTo(LobbyServiceError.None));
+        }
+
+        [Then]
+        public void ShouldCallLobbyStateManager()
+        {
+            // Verify that LobbyStateManager.AddConnectionToLobby was called
+            LobbyStateManager.Received(1).AddConnectionToLobby(RoomCode, ConnectionId);
         }
     }
 }

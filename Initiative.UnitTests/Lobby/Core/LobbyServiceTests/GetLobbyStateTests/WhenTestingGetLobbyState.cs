@@ -10,7 +10,7 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
         protected string RoomCode;
         protected EncounterDto Result;
 
-        [When]
+        [When(DoNotRethrowExceptions:true)]
         public async Task GetLobbyStateIsCalled()
         {
             Result = await LobbyService.GetLobbyState(RoomCode);

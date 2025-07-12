@@ -20,8 +20,10 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests
         [Dependency]
         protected IServiceScopeFactory ServiceScopeFactory = Substitute.For<IServiceScopeFactory>();
 
+
         protected IInitiativeUserRepository InitiativeUserRepository;
         protected ILobbyStateRepository LobbyStateRepository;
+        protected ILobbyStateManager LobbyStateManager;
         protected IServiceScope ServiceScope;
         protected IServiceProvider ServiceProvider;
         protected CancellationToken CancellationToken = default;
@@ -32,6 +34,7 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests
             // Setup service provider mocks
             InitiativeUserRepository = Substitute.For<IInitiativeUserRepository>();
             LobbyStateRepository = Substitute.For<ILobbyStateRepository>();
+            LobbyStateManager = Substitute.For<ILobbyStateManager>();
             ServiceProvider = Substitute.For<IServiceProvider>();
             ServiceScope = Substitute.For<IServiceScope>();
 
@@ -41,12 +44,19 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests
             ServiceProvider.GetService(typeof(ILobbyStateRepository))
                .Returns(LobbyStateRepository);
 
+            ServiceProvider.GetService(typeof(ILobbyStateManager))
+                .Returns(LobbyStateManager);
+
             ServiceProvider.GetRequiredService(typeof(IInitiativeUserRepository))
                 .Returns(InitiativeUserRepository);
             
             ServiceProvider.GetRequiredService(typeof(ILobbyStateRepository))
                 .Returns(LobbyStateRepository);
-            
+
+            ServiceProvider.GetRequiredService(typeof(ILobbyStateManager))
+                .Returns(LobbyStateManager);
+
+
             ServiceScope
                 .ServiceProvider
                 .Returns(ServiceProvider);

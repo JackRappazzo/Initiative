@@ -17,11 +17,13 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
     {
         protected LobbyStateDto StoredState;
         protected EncounterDto SecondResult;
+        protected EncounterDto RecoveredState;
 
         protected override ComposedTest ComposeTest() => TestComposer
             .Given(RoomCodeIsSet)
             .And(StoredStateExists)
-            .When(GetLobbyStateIsCalledTwice)           
+            .And(LobbyStateManagerSetup)
+            .When(GetLobbyStateIsCalledTwice)
             .Then(ShouldReturnStoredState)
             .And(SecondCallShouldReturnSameState)
             .And(ShouldOnlyCallRepositoryOnce);
@@ -47,6 +49,24 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
 
             LobbyStateRepository.FetchLobbyStateByRoomCode(RoomCode, CancellationToken)
                 .Returns(Task.FromResult(StoredState));
+        }
+
+        [Given]
+        public void LobbyStateManagerSetup()
+        {
+            RecoveredState = new EncounterDto
+            {
+                Creatures = StoredState.Creatures,
+                CurrentCreatureIndex = StoredState.CurrentCreatureIndex,
+                CurrentTurn = StoredState.TurnNumber,
+                CurrentMode = StoredState.CurrentMode
+            };
+
+            // First call: lobby not in memory, second call: lobby exists in memory
+            LobbyStateManager.LobbyExists(RoomCode)
+                .Returns(false, true); // First call false, second call true
+
+            LobbyStateManager.GetState(RoomCode).Returns(RecoveredState);
         }
 
         [When]
@@ -79,7 +99,7 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
         [Then]
         public async Task ShouldOnlyCallRepositoryOnce()
         {
-            // Repository should only be called once, as the state is now in memory
+            // Repository should only be called once (first call), as the second call uses LobbyStateManager
             await LobbyStateRepository.Received(1).FetchLobbyStateByRoomCode(RoomCode, CancellationToken);
         }
     }

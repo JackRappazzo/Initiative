@@ -16,6 +16,7 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
         protected override ComposedTest ComposeTest() => TestComposer
             .Given(NonExistentRoomCodeIsSet)
             .And(NoStoredStateExists)
+            .And(LobbyStateManagerSetup)
             .When(GetLobbyStateIsCalled)
             .Then(ShouldReturnEmptyState);
 
@@ -30,6 +31,13 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
         {
             LobbyStateRepository.FetchLobbyStateByRoomCode(RoomCode, CancellationToken)
                 .Returns(Task.FromResult<Initiative.Persistence.Models.Lobby.LobbyStateDto>(null));
+        }
+
+        [Given]
+        public void LobbyStateManagerSetup()
+        {
+            // Mock LobbyStateManager to return false for LobbyExists (lobby not in memory)
+            LobbyStateManager.LobbyExists(RoomCode).Returns(false);
         }
 
         [Then]

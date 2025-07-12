@@ -1,4 +1,4 @@
-﻿// LeaveLobbyTests/GivenUserInLobby.cs
+// LeaveLobbyTests/GivenLastUserInLobby.cs
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,7 +10,7 @@ using NSubstitute;
 
 namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.LeaveLobbyTests
 {
-    public class GivenUserInLobby : WhenTestingLeaveLobby
+    public class GivenLastUserInLobby : WhenTestingLeaveLobby
     {
         protected override ComposedTest ComposeTest() => TestComposer
             .Given(ConnectionIdIsSet)
@@ -46,6 +46,7 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.LeaveLobbyTests
         public void ShouldCallLobbyStateManager()
         {
             // Verify that LobbyStateManager.RemoveConnectionFromLobby was called
+            // The RemoveConnectionFromLobby method handles lobby removal automatically when no connections remain
             LobbyStateManager.Received(1).RemoveConnectionFromLobby(RoomCode, ConnectionId);
         }
     }

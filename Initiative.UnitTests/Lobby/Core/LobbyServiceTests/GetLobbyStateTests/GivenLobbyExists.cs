@@ -49,6 +49,11 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
                 CurrentTurn = 2,
                 CurrentMode = LobbyMode.InProgress
             };
+            
+            // Mock the LobbyStateManager to return true for LobbyExists
+            LobbyStateManager.LobbyExists(RoomCode).Returns(true);
+            LobbyStateManager.GetState(RoomCode).Returns(InitialState);
+            
             await LobbyService.SetLobbyState(RoomCode, InitialState);
         }
 

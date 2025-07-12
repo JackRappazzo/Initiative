@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Initiative.Lobby.Core.Dtos;
 using Initiative.Lobby.Core.Services;
 using Initiative.Persistence.Models.Lobby;
 using LeapingGorilla.Testing.Core.Attributes;
@@ -19,6 +20,7 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
         protected override ComposedTest ComposeTest() => TestComposer
             .Given(RoomCodeIsSet)
             .And(StoredStateWithDefaultValuesExists)
+            .And(LobbyNotInMemory)
             .When(GetLobbyStateIsCalled)
             .Then(ShouldReturnDefaultState)
             .And(ShouldCallSetLobbyState);
@@ -46,6 +48,13 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
                 .Returns(Task.FromResult(StoredState));
         }
 
+        [Given]
+        public void LobbyNotInMemory()
+        {
+            // Mock LobbyStateManager to return false for LobbyExists (not in memory)
+            LobbyStateManager.LobbyExists(RoomCode).Returns(false);
+        }
+
         [Then]
         public void ShouldReturnDefaultState()
         {
@@ -57,16 +66,16 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
         }
 
         [Then]
-        public async Task ShouldCallSetLobbyState()
+        public void ShouldCallSetLobbyState()
         {
-            // Verify that SetLobbyState was called to update the in-memory state
-            await LobbyStateRepository.Received(1).UpsertLobbyState(
+            // Verify that LobbyStateManager.SetState was called to update the in-memory state
+            LobbyStateManager.Received(1).SetState(
                 RoomCode,
-                Arg.Is<string[]>(creatures => creatures.Length == 0),
-                0,
-                0,
-                LobbyMode.Waiting,
-                CancellationToken);
+                Arg.Is<EncounterDto>(e => 
+                    e.Creatures.Count() == 0 &&
+                    e.CurrentCreatureIndex == 0 &&
+                    e.CurrentTurn == 0 &&
+                    e.CurrentMode == LobbyMode.Waiting));
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Initiative.Lobby.Core.Dtos;
 using Initiative.Lobby.Core.Services;
 using Initiative.Persistence.Models.Lobby;
 using LeapingGorilla.Testing.Core.Attributes;
@@ -50,8 +51,9 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
 
         [Given]
         public void StateIsNotInMemory()
-        { 
-            //Intentionally blank
+        {
+            // Mock LobbyStateManager to return false for LobbyExists (not in memory)
+            LobbyStateManager.LobbyExists(RoomCode).Returns(false);
         }
 
         [Then]
@@ -65,16 +67,16 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
         }
 
         [Then]
-        public async Task ShouldCallSetLobbyState()
+        public void ShouldCallSetLobbyState()
         {
-            // Verify that SetLobbyState was called to update the in-memory state
-            await LobbyStateRepository.Received(1).UpsertLobbyState(
+            // Verify that LobbyStateManager.SetState was called to update the in-memory state
+            LobbyStateManager.Received(1).SetState(
                 RoomCode,
-                Arg.Is<string[]>(creatures => creatures.SequenceEqual(StoredState.Creatures)),
-                StoredState.TurnNumber,
-                StoredState.CurrentCreatureIndex,
-                StoredState.CurrentMode,
-                CancellationToken);
+                Arg.Is<EncounterDto>(e => 
+                    e.Creatures.SequenceEqual(StoredState.Creatures) &&
+                    e.CurrentCreatureIndex == StoredState.CurrentCreatureIndex &&
+                    e.CurrentTurn == StoredState.TurnNumber &&
+                    e.CurrentMode == StoredState.CurrentMode));
         }
     }
 }

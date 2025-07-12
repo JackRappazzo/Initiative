@@ -70,6 +70,7 @@ builder.Services.AddScoped<IBase62CodeGenerator, Base62CodeGenerator>();
 
 builder.Services.AddScoped<IUserManager<ApplicationIdentity>, UserManagerFacade<ApplicationIdentity>>();
 
+builder.Services.AddSingleton<ILobbyStateManager, LobbyStateManager>();
 builder.Services.AddSingleton<ILobbyService, LobbyService>();
 
 //Identity
