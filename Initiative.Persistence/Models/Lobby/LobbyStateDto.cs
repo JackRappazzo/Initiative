@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Initiative.Lobby.Core.Services;
 
 namespace Initiative.Persistence.Models.Lobby
 {
@@ -18,6 +19,7 @@ namespace Initiative.Persistence.Models.Lobby
         public string[] Creatures { get; set; }
         public int TurnNumber { get; set; }
         public int CurrentCreatureIndex { get; set; }
+        public LobbyMode CurrentMode { get; set; } = LobbyMode.Waiting;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
     }

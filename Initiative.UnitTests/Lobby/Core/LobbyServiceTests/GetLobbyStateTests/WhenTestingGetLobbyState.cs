@@ -1,5 +1,6 @@
 ﻿using Initiative.Lobby.Core.Dtos;
 using LeapingGorilla.Testing.Core.Attributes;
+using System.Threading.Tasks;
 
 
 namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
@@ -10,9 +11,9 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
         protected EncounterDto Result;
 
         [When]
-        public void GetLobbyStateIsCalled()
+        public async Task GetLobbyStateIsCalled()
         {
-            Result = LobbyService.GetLobbyState(RoomCode);
+            Result = await LobbyService.GetLobbyState(RoomCode);
         }
     }
 }

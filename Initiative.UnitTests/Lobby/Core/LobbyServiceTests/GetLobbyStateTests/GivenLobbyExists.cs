@@ -40,7 +40,7 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
         }
 
         [Given]
-        public void InitialStateIsSet()
+        public async Task InitialStateIsSet()
         {
             InitialState = new EncounterDto
             {
@@ -49,7 +49,7 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
                 CurrentTurn = 2,
                 CurrentMode = LobbyMode.InProgress
             };
-            LobbyService.SetLobbyState(RoomCode, InitialState);
+            await LobbyService.SetLobbyState(RoomCode, InitialState);
         }
 
         [Then]

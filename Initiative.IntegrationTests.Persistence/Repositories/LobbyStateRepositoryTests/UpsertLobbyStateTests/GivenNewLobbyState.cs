@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Initiative.Lobby.Core.Services;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.Core.Composable;
 using LeapingGorilla.Testing.NUnit.Attributes;
@@ -13,6 +14,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
             .And(CreaturesAreSet)
             .And(TurnNumberIsSet)
             .And(CurrentCreatureIndexIsSet)
+            .And(CurrentModeIsSet)
             .When(UpsertLobbyStateIsCalled)
             .Then(ShouldReturnId)
             .And(ShouldStoreLobbyState);
@@ -41,6 +43,12 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
             CurrentCreatureIndex = 0;
         }
 
+        [Given]
+        public void CurrentModeIsSet()
+        {
+            CurrentMode = LobbyMode.InProgress;
+        }
+
         [Then]
         public void ShouldReturnId()
         {
@@ -59,6 +67,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
             Assert.That(storedState.Creatures, Is.EquivalentTo(Creatures));
             Assert.That(storedState.TurnNumber, Is.EqualTo(TurnNumber));
             Assert.That(storedState.CurrentCreatureIndex, Is.EqualTo(CurrentCreatureIndex));
+            Assert.That(storedState.CurrentMode, Is.EqualTo(CurrentMode));
         }
     }
 }

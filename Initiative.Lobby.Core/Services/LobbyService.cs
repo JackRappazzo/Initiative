@@ -74,7 +74,7 @@ namespace Initiative.Lobby.Core.Services
             return string.Empty;
         }
 
-        public EncounterDto GetLobbyState(string roomCode)
+        public async Task<EncounterDto> GetLobbyState(string roomCode)
         {
             if (lobbies.TryGetValue(roomCode, out var lobby))
             {
@@ -86,16 +86,41 @@ namespace Initiative.Lobby.Core.Services
                     CurrentMode = lobby.CurrentMode
                 };
             }
-            return new EncounterDto
+            else
             {
-                Creatures = Enumerable.Empty<string>(),
-                CurrentCreatureIndex = 0,
-                CurrentTurn = 0,
-                CurrentMode = LobbyMode.Waiting
-            };
+                var lobbyStateRepository = serviceScopeFactory
+                    .CreateScope()
+                    .ServiceProvider
+                    .GetRequiredService<ILobbyStateRepository>();
+
+                var storedState = await lobbyStateRepository.FetchLobbyStateByRoomCode(roomCode, CancellationToken.None);
+                if (storedState != null)
+                {
+                    var recoveredEncounterDto = new EncounterDto
+                    {
+                        Creatures = storedState.Creatures.ToImmutableList(),
+                        CurrentCreatureIndex = storedState.CurrentCreatureIndex,
+                        CurrentTurn = storedState.TurnNumber,
+                        CurrentMode = storedState.CurrentMode
+                    };
+
+                    await SetLobbyState(roomCode, recoveredEncounterDto);
+                    return recoveredEncounterDto;
+                }
+                else
+                {
+                    return new EncounterDto
+                    {
+                        Creatures = Enumerable.Empty<string>(),
+                        CurrentCreatureIndex = 0,
+                        CurrentTurn = 0,
+                        CurrentMode = LobbyMode.Waiting
+                    };
+                }
+            }
         }
 
-        public void SetLobbyState(string roomCode, EncounterDto encounter)
+        public async Task SetLobbyState(string roomCode, EncounterDto encounter)
         {
             if (lobbies.TryGetValue(roomCode, out var lobby))
             {
@@ -103,9 +128,21 @@ namespace Initiative.Lobby.Core.Services
                 lobby.CurrentCreatureIndex = encounter.CurrentCreatureIndex;
                 lobby.CurrentTurn = encounter.CurrentTurn;
                 lobby.CurrentMode = encounter.CurrentMode;
+
+                var lobbyStateRepository = serviceScopeFactory
+                    .CreateScope()
+                    .ServiceProvider
+                    .GetRequiredService<ILobbyStateRepository>();
+
+                await lobbyStateRepository.UpsertLobbyState(
+                    roomCode,
+                    lobby.Creatures.ToArray(),
+                    lobby.CurrentTurn,
+                    lobby.CurrentCreatureIndex,
+                    lobby.CurrentMode,
+                    CancellationToken.None);
             }
         }
-
     }
 
     public enum LobbyServiceError

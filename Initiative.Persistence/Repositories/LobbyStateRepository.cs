@@ -1,5 +1,6 @@
 ﻿using Initiative.Persistence.Configuration;
 using Initiative.Persistence.Models.Lobby;
+using Initiative.Lobby.Core.Services;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Initiative.Persistence.Repositories
 {
-    public class LobbyStateRepository : MongoDbRepository
+    public class LobbyStateRepository : MongoDbRepository, ILobbyStateRepository
     {
 
         public const string TableName = "LobbyStates";
@@ -21,10 +22,11 @@ namespace Initiative.Persistence.Repositories
         }
 
         public async Task<string> UpsertLobbyState(
-            string roomCode, 
-            string[] creatures, 
-            int turnNumber, 
-            int currentCreatureIndex, 
+            string roomCode,
+            string[] creatures,
+            int turnNumber,
+            int currentCreatureIndex,
+            LobbyMode currentMode,
             CancellationToken cancellationToken)
         {
             var db = GetMongoDatabase();
@@ -36,21 +38,23 @@ namespace Initiative.Persistence.Repositories
                 RoomCode = roomCode,
                 Creatures = creatures,
                 TurnNumber = turnNumber,
-                CurrentCreatureIndex = currentCreatureIndex
+                CurrentCreatureIndex = currentCreatureIndex,
+                CurrentMode = currentMode
             };
 
             var filter = Builders<LobbyStateDto>.Filter.Eq(x => x.RoomCode, roomCode);
             var update = Builders<LobbyStateDto>.Update
-                .SetOnInsert(x=> x.Id, lobbyState.Id)
+                .SetOnInsert(x => x.Id, lobbyState.Id)
                 .Set(x => x.Creatures, creatures)
                 .Set(x => x.TurnNumber, turnNumber)
                 .Set(x => x.CurrentCreatureIndex, currentCreatureIndex)
+                .Set(x => x.CurrentMode, currentMode)
                 .Set(x => x.LastUpdatedAt, DateTime.UtcNow);
 
             var result = await collection.UpdateOneAsync(
-                filter, 
+                filter,
                 update,
-                new UpdateOptions{ IsUpsert = true }, 
+                new UpdateOptions { IsUpsert = true },
                 cancellationToken);
 
             if (result.UpsertedId != null)

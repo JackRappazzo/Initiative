@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Initiative.Lobby.Core.Services;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.Core.Composable;
 using LeapingGorilla.Testing.NUnit.Attributes;
@@ -11,6 +12,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
         protected string[] OriginalCreatures;
         protected int OriginalTurnNumber;
         protected int OriginalCurrentCreatureIndex;
+        protected LobbyMode OriginalCurrentMode;
         protected string OriginalId;
 
         protected override ComposedTest ComposeTest() => TestComposer
@@ -19,6 +21,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
             .And(UpdatedCreaturesAreSet)
             .And(UpdatedTurnNumberIsSet)
             .And(UpdatedCurrentCreatureIndexIsSet)
+            .And(UpdatedCurrentModeIsSet)
             .When(UpsertLobbyStateIsCalled)
             .Then(ShouldReturnId)
             .And(ShouldUpdateLobbyState);
@@ -35,8 +38,9 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
             OriginalCreatures = new[] { "OriginalCreature1", "OriginalCreature2" };
             OriginalTurnNumber = 1;
             OriginalCurrentCreatureIndex = 0;
+            OriginalCurrentMode = LobbyMode.Waiting;
 
-            OriginalId = await LobbyStateRepository.UpsertLobbyState(RoomCode, OriginalCreatures, OriginalTurnNumber, OriginalCurrentCreatureIndex, CancellationToken);
+            OriginalId = await LobbyStateRepository.UpsertLobbyState(RoomCode, OriginalCreatures, OriginalTurnNumber, OriginalCurrentCreatureIndex, OriginalCurrentMode, CancellationToken);
         }
 
         [Given]
@@ -55,6 +59,12 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
         public void UpdatedCurrentCreatureIndexIsSet()
         {
             CurrentCreatureIndex = 2;
+        }
+
+        [Given]
+        public void UpdatedCurrentModeIsSet()
+        {
+            CurrentMode = LobbyMode.InProgress;
         }
 
         [Then]
@@ -77,11 +87,13 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
             Assert.That(storedState.Creatures, Is.EquivalentTo(Creatures));
             Assert.That(storedState.TurnNumber, Is.EqualTo(TurnNumber));
             Assert.That(storedState.CurrentCreatureIndex, Is.EqualTo(CurrentCreatureIndex));
+            Assert.That(storedState.CurrentMode, Is.EqualTo(CurrentMode));
             
             // Verify it was updated, not just inserted
             Assert.That(storedState.Creatures, Is.Not.EquivalentTo(OriginalCreatures));
             Assert.That(storedState.TurnNumber, Is.Not.EqualTo(OriginalTurnNumber));
             Assert.That(storedState.CurrentCreatureIndex, Is.Not.EqualTo(OriginalCurrentCreatureIndex));
+            Assert.That(storedState.CurrentMode, Is.Not.EqualTo(OriginalCurrentMode));
         }
     }
 }

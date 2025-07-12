@@ -56,6 +56,7 @@ builder.Services.AddSignalR(
 builder.Services.AddScoped<IDatabaseConnectionFactory, DatabaseConnectionFactory>();
 builder.Services.AddScoped<IJwtRefreshTokenRepository, JwtRefreshTokenRepository>();
 builder.Services.AddScoped<IEncounterRepository, EncounterRepository>();
+builder.Services.AddScoped<ILobbyStateRepository, LobbyStateRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IInitiativeUserRepository, InitiativeUserRepository>();

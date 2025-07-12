@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Initiative.Lobby.Core.Services;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.Core.Composable;
 using LeapingGorilla.Testing.NUnit.Attributes;
@@ -11,6 +12,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
         protected string[] ExpectedCreatures;
         protected int ExpectedTurnNumber;
         protected int ExpectedCurrentCreatureIndex;
+        protected LobbyMode ExpectedCurrentMode;
 
         protected override ComposedTest ComposeTest() => TestComposer
             .Given(RoomCodeIsSet)
@@ -30,8 +32,9 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
             ExpectedCreatures = new[] { "Creature1", "Creature2", "Creature3" };
             ExpectedTurnNumber = 2;
             ExpectedCurrentCreatureIndex = 1;
+            ExpectedCurrentMode = LobbyMode.InProgress;
 
-            await LobbyStateRepository.UpsertLobbyState(RoomCode, ExpectedCreatures, ExpectedTurnNumber, ExpectedCurrentCreatureIndex, CancellationToken);
+            await LobbyStateRepository.UpsertLobbyState(RoomCode, ExpectedCreatures, ExpectedTurnNumber, ExpectedCurrentCreatureIndex, ExpectedCurrentMode, CancellationToken);
         }
 
         [Then]
@@ -42,6 +45,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
             Assert.That(Result.Creatures, Is.EquivalentTo(ExpectedCreatures));
             Assert.That(Result.TurnNumber, Is.EqualTo(ExpectedTurnNumber));
             Assert.That(Result.CurrentCreatureIndex, Is.EqualTo(ExpectedCurrentCreatureIndex));
+            Assert.That(Result.CurrentMode, Is.EqualTo(ExpectedCurrentMode));
             Assert.That(Result.Id, Is.Not.Null);
             Assert.That(Result.Id, Is.Not.Empty);
         }
