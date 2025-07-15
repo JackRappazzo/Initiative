@@ -66,16 +66,16 @@ namespace Initiative.Import.Core.Models
         public int PassivePerception { get; set; }
 
         [JsonPropertyName("resist")]
-        public List<string>? DamageResistances { get; set; }
+        public List<JsonElement>? DamageResistances { get; set; } // Can be string or object
 
         [JsonPropertyName("immune")]
-        public List<string>? DamageImmunities { get; set; }
+        public List<JsonElement>? DamageImmunities { get; set; } // Can be string or object
 
         [JsonPropertyName("vulnerable")]
-        public List<string>? DamageVulnerabilities { get; set; }
+        public List<JsonElement>? DamageVulnerabilities { get; set; } // Can be string or object
 
         [JsonPropertyName("conditionImmune")]
-        public List<string>? ConditionImmunities { get; set; }
+        public List<JsonElement>? ConditionImmunities { get; set; } // Can be string or object
 
         [JsonPropertyName("languages")]
         public List<string>? Languages { get; set; }

@@ -23,7 +23,7 @@ namespace Initiative.Import.Core.Services
         /// <param name="filePath">Path to the JSON file</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>List of imported creatures</returns>
-        public async Task<List<Creature>> ImportFromFileAsync(string filePath, CancellationToken cancellationToken = default)
+        public async Task<List<Creature>> ImportFromFile(string filePath, CancellationToken cancellationToken = default)
         {
             if (!File.Exists(filePath))
             {
@@ -76,7 +76,7 @@ namespace Initiative.Import.Core.Services
         /// <param name="stream">Stream containing JSON data</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>List of imported creatures</returns>
-        public async Task<List<Creature>> ImportFromStreamAsync(Stream stream, CancellationToken cancellationToken = default)
+        public async Task<List<Creature>> ImportFromStream(Stream stream, CancellationToken cancellationToken = default)
         {
             if (stream == null)
             {

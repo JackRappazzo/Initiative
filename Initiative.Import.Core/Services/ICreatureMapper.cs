@@ -1,5 +1,6 @@
 ﻿using Initiative.Import.Core.Models;
 using Initiative.Persistence.Models.Encounters;
+using System.Text.Json;
 
 namespace Initiative.Import.Core.Services
 {
@@ -7,5 +8,6 @@ namespace Initiative.Import.Core.Services
     {
         Creature MapToCreature(MonsterJson monsterJson);
         List<Creature> MapToCreatures(IEnumerable<MonsterJson> monsters);
+        List<string> ExtractConditionImmunitiesPublic(List<JsonElement>? conditionImmunitiesList);
     }
 }

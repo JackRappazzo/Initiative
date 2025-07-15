@@ -29,7 +29,46 @@ namespace Initiative.Import.Core.Services
                 IsPlayer = false
             };
 
+            // Extract speed values
+            if (monsterJson.Speed != null)
+            {
+                creature.WalkSpeed = ExtractSpeedValue(monsterJson.Speed.Walk);
+                creature.FlySpeed = ExtractSpeedValue(monsterJson.Speed.Fly);
+                creature.SwimSpeed = ExtractSpeedValue(monsterJson.Speed.Swim);
+                creature.BurrowSpeed = ExtractSpeedValue(monsterJson.Speed.Burrow);
+                creature.ClimbSpeed = ExtractSpeedValue(monsterJson.Speed.Climb);
+                creature.CanHover = monsterJson.Speed.CanHover ?? false;
+            }
+
+            // Extract condition immunities for future use (currently not stored in Creature model)
+            var conditionImmunities = ExtractConditionImmunities(monsterJson.ConditionImmunities);
+            
+            // Extract damage resistances for future use (currently not stored in Creature model)
+            var damageResistances = ExtractDamageResistances(monsterJson.DamageResistances);
+            var damageImmunities = ExtractDamageResistances(monsterJson.DamageImmunities);
+            var damageVulnerabilities = ExtractDamageResistances(monsterJson.DamageVulnerabilities);
+            
             return creature;
+        }
+
+        /// <summary>
+        /// Public method to extract condition immunities for testing purposes
+        /// </summary>
+        /// <param name="conditionImmunitiesList">List of JSON elements representing condition immunities</param>
+        /// <returns>List of condition immunity names</returns>
+        public List<string> ExtractConditionImmunitiesPublic(List<JsonElement>? conditionImmunitiesList)
+        {
+            return ExtractConditionImmunities(conditionImmunitiesList);
+        }
+
+        /// <summary>
+        /// Public method to extract damage resistances for testing purposes
+        /// </summary>
+        /// <param name="damageResistancesList">List of JSON elements representing damage resistances</param>
+        /// <returns>List of damage resistance objects</returns>
+        public List<DamageResistanceJson> ExtractDamageResistancesPublic(List<JsonElement>? damageResistancesList)
+        {
+            return ExtractDamageResistances(damageResistancesList);
         }
 
         /// <summary>
@@ -69,6 +108,151 @@ namespace Initiative.Import.Core.Services
             }
 
             return 10; // Default fallback
+        }
+
+        /// <summary>
+        /// Extracts speed value from JSON element which can be a number or object with number/condition
+        /// </summary>
+        /// <param name="speedElement">JSON element representing speed (can be number or object)</param>
+        /// <returns>Speed value or null if not present</returns>
+        private int? ExtractSpeedValue(JsonElement? speedElement)
+        {
+            if (speedElement == null || !speedElement.HasValue)
+                return null;
+
+            var element = speedElement.Value;
+
+            if (element.ValueKind == JsonValueKind.Number)
+            {
+                return element.GetInt32();
+            }
+            else if (element.ValueKind == JsonValueKind.Object)
+            {
+                // If it's an object, look for a "number" property
+                if (element.TryGetProperty("number", out var numberProperty))
+                {
+                    return numberProperty.GetInt32();
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Extracts condition immunities from JSON elements which can be strings or objects
+        /// </summary>
+        /// <param name="conditionImmunitiesList">List of JSON elements representing condition immunities</param>
+        /// <returns>List of condition immunity names</returns>
+        private List<string> ExtractConditionImmunities(List<JsonElement>? conditionImmunitiesList)
+        {
+            if (conditionImmunitiesList == null || !conditionImmunitiesList.Any())
+                return new List<string>();
+
+            var conditions = new List<string>();
+
+            foreach (var element in conditionImmunitiesList)
+            {
+                if (element.ValueKind == JsonValueKind.String)
+                {
+                    // Simple string condition
+                    conditions.Add(element.GetString() ?? string.Empty);
+                }
+                else if (element.ValueKind == JsonValueKind.Object)
+                {
+                    // Complex object with conditionImmune array
+                    if (element.TryGetProperty("conditionImmune", out var conditionProperty) &&
+                        conditionProperty.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var condition in conditionProperty.EnumerateArray())
+                        {
+                            if (condition.ValueKind == JsonValueKind.String)
+                            {
+                                conditions.Add(condition.GetString() ?? string.Empty);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return conditions.Where(c => !string.IsNullOrEmpty(c)).ToList();
+        }
+
+        /// <summary>
+        /// Extracts damage resistances from JSON elements which can be strings or objects with special properties
+        /// </summary>
+        /// <param name="damageResistancesList">List of JSON elements representing damage resistances</param>
+        /// <returns>List of damage resistance objects</returns>
+        private List<DamageResistanceJson> ExtractDamageResistances(List<JsonElement>? damageResistancesList)
+        {
+            if (damageResistancesList == null || !damageResistancesList.Any())
+                return new List<DamageResistanceJson>();
+
+            var resistances = new List<DamageResistanceJson>();
+
+            foreach (var element in damageResistancesList)
+            {
+                if (element.ValueKind == JsonValueKind.String)
+                {
+                    // Simple string damage type
+                    var damageTypeString = element.GetString() ?? string.Empty;
+                    var resistance = new DamageResistanceJson
+                    {
+                        RawValue = damageTypeString,
+                        DamageType = ParseDamageType(damageTypeString)
+                    };
+                    resistances.Add(resistance);
+                }
+                else if (element.ValueKind == JsonValueKind.Object)
+                {
+                    // Object with special property
+                    if (element.TryGetProperty("special", out var specialProperty) &&
+                        specialProperty.ValueKind == JsonValueKind.String)
+                    {
+                        var specialValue = specialProperty.GetString() ?? string.Empty;
+                        var resistance = new DamageResistanceJson
+                        {
+                            Special = specialValue,
+                            DamageType = DamageType.Special,
+                            RawValue = specialValue
+                        };
+                        resistances.Add(resistance);
+                    }
+                }
+            }
+
+            return resistances;
+        }
+
+        /// <summary>
+        /// Parses a string into a DamageType enum value
+        /// </summary>
+        /// <param name="damageTypeString">The damage type string</param>
+        /// <returns>Corresponding DamageType enum value or null if not recognized</returns>
+        private DamageType? ParseDamageType(string damageTypeString)
+        {
+            if (string.IsNullOrEmpty(damageTypeString))
+                return null;
+
+            // Handle common string variations and map them to enum values
+            var normalizedString = damageTypeString.ToLowerInvariant().Trim();
+            
+            return normalizedString switch
+            {
+                "acid" => DamageType.Acid,
+                "bludgeoning" => DamageType.Bludgeoning,
+                "cold" => DamageType.Cold,
+                "fire" => DamageType.Fire,
+                "force" => DamageType.Force,
+                "lightning" => DamageType.Lightning,
+                "necrotic" => DamageType.Necrotic,
+                "piercing" => DamageType.Piercing,
+                "poison" => DamageType.Poison,
+                "psychic" => DamageType.Psychic,
+                "radiant" => DamageType.Radiant,
+                "slashing" => DamageType.Slashing,
+                "thunder" => DamageType.Thunder,
+                _ => null // Return null for unrecognized damage types
+            };
         }
 
         /// <summary>

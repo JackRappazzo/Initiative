@@ -15,7 +15,8 @@ namespace Initiative.UnitTests.Importer.CreatureMapperTests.MapToCreatureTests
             .And(ShouldMapBasicProperties)
             .And(ShouldGenerateSystemName)
             .And(ShouldCalculateInitiativeModifier)
-            .And(ShouldSetDefaultValues);
+            .And(ShouldSetDefaultValues)
+            .And(ShouldHandleMissingSpeedData);
 
         [Given]
         public void MonsterJsonIsSetWithBasicData()
@@ -26,7 +27,8 @@ namespace Initiative.UnitTests.Importer.CreatureMapperTests.MapToCreatureTests
                 ArmorClass = new List<JsonElement> { JsonDocument.Parse("15").RootElement },
                 HitPoints = new HitPointsJson { Average = 7, Formula = "2d6" },
                 Dexterity = 14, // Should give +2 modifier
-                Initiative = null
+                Initiative = null,
+                Speed = null // No speed data provided
             };
         }
 
@@ -64,6 +66,17 @@ namespace Initiative.UnitTests.Importer.CreatureMapperTests.MapToCreatureTests
             Assert.That(Result.Initiative, Is.EqualTo(0));
             Assert.That(Result.IsConcentrating, Is.False);
             Assert.That(Result.IsPlayer, Is.False);
+        }
+
+        [Then]
+        public void ShouldHandleMissingSpeedData()
+        {
+            Assert.That(Result.WalkSpeed, Is.Null);
+            Assert.That(Result.FlySpeed, Is.Null);
+            Assert.That(Result.SwimSpeed, Is.Null);
+            Assert.That(Result.BurrowSpeed, Is.Null);
+            Assert.That(Result.ClimbSpeed, Is.Null);
+            Assert.That(Result.CanHover, Is.False);
         }
     }
 }
