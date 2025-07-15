@@ -11,7 +11,7 @@ namespace Initiative.UnitTests.Importer.CreatureImporterTests.ImportFromStreamTe
         [When(DoNotRethrowExceptions: true)]
         public async Task ImportFromStreamAsyncIsCalled()
         {
-            Result = await CreatureImporter.ImportFromStreamAsync(Stream, CancellationToken);
+            Result = await CreatureImporter.ImportFromStream(Stream, CancellationToken);
         }
     }
 }

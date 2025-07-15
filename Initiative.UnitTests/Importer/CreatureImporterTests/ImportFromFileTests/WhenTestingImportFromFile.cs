@@ -11,7 +11,7 @@ namespace Initiative.UnitTests.Importer.CreatureImporterTests.ImportFromFileTest
         [When(DoNotRethrowExceptions: true)]
         public async Task ImportFromFileAsyncIsCalled()
         {
-            Result = await CreatureImporter.ImportFromFileAsync(FilePath, CancellationToken);
+            Result = await CreatureImporter.ImportFromFile(FilePath, CancellationToken);
         }
     }
 }

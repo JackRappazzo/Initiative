@@ -6,19 +6,19 @@ namespace Initiative.Import.Core.Models
     public class SpeedJson
     {
         [JsonPropertyName("walk")]
-        public int? Walk { get; set; }
+        public JsonElement? Walk { get; set; } // Can be number or object with condition
 
         [JsonPropertyName("fly")]
         public JsonElement? Fly { get; set; } // Can be number or object with condition
 
         [JsonPropertyName("swim")]
-        public int? Swim { get; set; }
+        public JsonElement? Swim { get; set; } // Can be number or object with condition
 
         [JsonPropertyName("burrow")]
-        public int? Burrow { get; set; }
+        public JsonElement? Burrow { get; set; } // Can be number or object with condition
 
         [JsonPropertyName("climb")]
-        public int? Climb { get; set; }
+        public JsonElement? Climb { get; set; } // Can be number or object with condition
 
         [JsonPropertyName("canHover")]
         public bool? CanHover { get; set; }

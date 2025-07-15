@@ -22,7 +22,14 @@ namespace Initiative.Persistence.Models.Encounters
         public int MaximumHitPoints { get; set; }
         public int ArmorClass { get; set; }
         public bool IsConcentrating { get; set; }
-
         public bool IsPlayer { get; set; }
+
+        // Speed properties
+        public int? WalkSpeed { get; set; }
+        public int? FlySpeed { get; set; }
+        public int? SwimSpeed { get; set; }
+        public int? BurrowSpeed { get; set; }
+        public int? ClimbSpeed { get; set; }
+        public bool CanHover { get; set; }
     }
 }
