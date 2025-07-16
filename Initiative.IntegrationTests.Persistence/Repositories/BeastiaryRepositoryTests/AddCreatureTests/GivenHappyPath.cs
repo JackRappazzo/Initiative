@@ -37,7 +37,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.BeastiaryReposito
         [Given]
         public async Task BeastiaryExists()
         {
-            BeastiaryId = await BeastiaryRepository.CreateSystemBeastiary("test_" + Guid.NewGuid(), CancellationToken);
+            BeastiaryId = await BeastiaryRepository.CreateSystemBestiary("test_" + Guid.NewGuid(), CancellationToken);
         }
 
         [Then]
@@ -50,7 +50,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.BeastiaryReposito
         [Then]
         public async Task ShouldStoreCreature()
         {
-            var beastiary = await BeastiaryRepository.GetSystemBeastiary(BeastiaryId, CancellationToken);
+            var beastiary = await BeastiaryRepository.GetSystemBestiary(BeastiaryId, CancellationToken);
             Assert.That(beastiary.Creatures, Is.Not.Empty);
             Assert.That(beastiary.Creatures.First().SystemName, Is.EqualTo(Creature.SystemName));
         }

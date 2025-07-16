@@ -24,7 +24,7 @@ namespace Initiative.IntegrationTests.Persistence.Utilities
             await ResetCollection(database, JwtRefreshTokenRepository.TableName);
             await ResetCollection(database, InitiativeUserRepository.TableName);
             await ResetCollection(database, EncounterRepository.TableName);
-            await ResetCollection(database, BeastiaryRepository.TableName);
+            await ResetCollection(database, BestiaryRepository.TableName);
             await ResetCollection(database, LobbyStateRepository.TableName);
         }
 

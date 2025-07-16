@@ -16,7 +16,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.BeastiaryReposito
         [When]
         public async Task CreateIsCalled()
         {
-            Result = await BeastiaryRepository.CreateUserBeastiary(OwnerId, Name, CancellationToken);
+            Result = await BeastiaryRepository.CreateUserBestiary(OwnerId, Name, CancellationToken);
         }
     }
 }
