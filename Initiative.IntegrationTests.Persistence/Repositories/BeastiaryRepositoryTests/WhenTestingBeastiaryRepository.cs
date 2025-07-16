@@ -13,7 +13,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.BeastiaryReposito
 {
     public abstract class WhenTestingBeastiaryRepository : WhenTestingWithMongoDb
     {
-        [ItemUnderTest] protected BeastiaryRepository BeastiaryRepository { get; set; }
+        [ItemUnderTest] protected BestiaryRepository BeastiaryRepository { get; set; }
 
         [Dependency] public IDatabaseConnectionFactory DatabaseConnectionFactory = new TestConnectionFactory();
 

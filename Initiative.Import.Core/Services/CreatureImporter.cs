@@ -8,7 +8,7 @@ namespace Initiative.Import.Core.Services
     /// <summary>
     /// Service for importing creatures from JSON files
     /// </summary>
-    public class CreatureImporter
+    public class CreatureImporter : ICreatureImporter
     {
         private readonly ICreatureMapper creatureMapper;
 
@@ -56,7 +56,7 @@ namespace Initiative.Import.Core.Services
             try
             {
                 var monsterManual = JsonSerializer.Deserialize<MonsterManualJson>(jsonContent, options);
-                
+
                 if (monsterManual?.Monsters == null || !monsterManual.Monsters.Any())
                 {
                     return new List<Creature>();

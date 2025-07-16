@@ -41,7 +41,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.BeastiaryReposito
         [Then]
         public async Task ShouldStoreBeastiary()
         {
-            var beastiary = await BeastiaryRepository.GetUserBeastiary(Result, OwnerId, CancellationToken);
+            var beastiary = await BeastiaryRepository.GetUserBestiary(Result, OwnerId, CancellationToken);
 
             Assert.That(beastiary.Id, Is.EqualTo(Result));
             Assert.That(beastiary.OwnerId, Is.EqualTo(OwnerId));
