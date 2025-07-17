@@ -12,9 +12,10 @@ namespace Initiative.Import.Core.Services
         private readonly ICreatureImporter creatureImporter;
         private readonly IBestiaryRepository bestiaryRepository;
 
-        public BestiaryImportService(ICreatureImporter creatureImporter)
+        public BestiaryImportService(ICreatureImporter creatureImporter, IBestiaryRepository bestiaryRepository)
         {
             this.creatureImporter = creatureImporter;
+            this.bestiaryRepository = bestiaryRepository;
         }
 
         /// <summary>
