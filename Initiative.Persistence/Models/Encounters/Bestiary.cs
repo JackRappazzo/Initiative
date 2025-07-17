@@ -8,7 +8,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Initiative.Persistence.Models.Encounters
 {
-    public class Beastiary
+    public class Bestiary
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]

@@ -10,7 +10,7 @@ namespace Initiative.Import.Core.Services
     public class BestiaryImportService
     {
         private readonly ICreatureImporter creatureImporter;
-        private readonly IBestiaryRepository beastiaryRepository;
+        private readonly IBestiaryRepository bestiaryRepository;
 
         public BestiaryImportService(ICreatureImporter creatureImporter)
         {
@@ -32,16 +32,11 @@ namespace Initiative.Import.Core.Services
             {
                 throw new ArgumentException("Bestiary name cannot be null or empty", nameof(bestiaryName));
             }
+
             var creatures = await creatureImporter.ImportFromFile(filePath, cancellationToken);
-            if (creatures == null || !creatures.Any())
-            {
-                throw new InvalidOperationException("No creatures found in the provided file.");
-            }
-            var bestiaryId = await beastiaryRepository.CreateSystemBestiary(bestiaryName, cancellationToken);
-            foreach (var creature in creatures)
-            {
-                await beastiaryRepository.AddCreature(bestiaryId, creature, cancellationToken);
-            }
+
+            await bestiaryRepository.UpsertSystemBestiary(bestiaryName, creatures, cancellationToken);
+           
         }
     }
 }
