@@ -22,9 +22,9 @@ namespace Initiative.Persistence.Repositories
         public async Task<string> CreateUserBestiary(string? ownerId, string name, CancellationToken cancellationToken)
         {
             var db = GetMongoDatabase();
-            var collection = db.GetCollection<Beastiary>(TableName);
+            var collection = db.GetCollection<Bestiary>(TableName);
 
-            var beastiary = new Beastiary()
+            var beastiary = new Bestiary()
             {
                 Name = name,
                 OwnerId = ownerId,
@@ -39,25 +39,48 @@ namespace Initiative.Persistence.Repositories
         public async Task<string> CreateSystemBestiary(string name, CancellationToken cancellationToken) =>
             await CreateUserBestiary(null, name, cancellationToken);
 
-        public async Task<Beastiary> GetUserBestiary(string bestiaryId, string ownerId, CancellationToken cancellationToken)
+        public async Task<Bestiary> GetUserBestiary(string bestiaryId, string ownerId, CancellationToken cancellationToken)
         {
-            var collection = GetMongoDatabase().GetCollection<Beastiary>(TableName);
+            var collection = GetMongoDatabase().GetCollection<Bestiary>(TableName);
 
-            var result = await collection.FindAsync<Beastiary>(b => b.Id == bestiaryId && b.OwnerId == ownerId, cancellationToken: cancellationToken);
+            var result = await collection.FindAsync<Bestiary>(b => b.Id == bestiaryId && b.OwnerId == ownerId, cancellationToken: cancellationToken);
             return result.First();
         }
 
-        public async Task<Beastiary> GetSystemBestiary(string beastiaryId, CancellationToken cancellationToken)
+        public async Task<Bestiary> GetSystemBestiary(string beastiaryId, CancellationToken cancellationToken)
         {
             return await GetUserBestiary(beastiaryId, null, cancellationToken: cancellationToken);
         }
 
+        public async Task<Bestiary> GetSystemBestiaryByName(string name, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<Bestiary>(TableName);
+            var result = await collection.FindAsync(b => b.Name == name && b.OwnerId == null, cancellationToken: cancellationToken);
+            return result.FirstOrDefault();
+        }
+
+        public async Task<string> UpsertSystemBestiary(string name, IEnumerable<Creature> creatures, CancellationToken cancellationToken)
+        {
+            var bestiary = await GetSystemBestiaryByName(name, cancellationToken);
+            if (bestiary == null)
+            {
+                var bestiaryId = await CreateSystemBestiary(name, cancellationToken);
+                bestiary = await GetSystemBestiary(bestiaryId, cancellationToken);
+            }
+
+            // Update existing bestiary
+            var collection = GetMongoDatabase().GetCollection<Bestiary>(TableName);
+            var update = Builders<Bestiary>.Update.Set(b => b.Creatures, creatures.ToList());
+            await collection.UpdateOneAsync(b => b.Id == bestiary.Id, update, cancellationToken: cancellationToken);
+            return bestiary.Id;
+        }
+
         public async Task<string> AddCreature(string bestiaryId, Creature creature, CancellationToken cancellationToken)
         {
-            var collection = GetMongoDatabase().GetCollection<Beastiary>(TableName);
+            var collection = GetMongoDatabase().GetCollection<Bestiary>(TableName);
             creature.Id = ObjectId.GenerateNewId().ToString();
 
-            var update = Builders<Beastiary>.Update.Push(b => b.Creatures, creature);
+            var update = Builders<Bestiary>.Update.Push(b => b.Creatures, creature);
             var result = await collection.UpdateOneAsync(b => b.Id == bestiaryId, update, cancellationToken: cancellationToken);
 
             if (result.ModifiedCount > 0)
