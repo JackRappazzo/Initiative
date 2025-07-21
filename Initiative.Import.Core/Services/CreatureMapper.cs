@@ -25,6 +25,7 @@ namespace Initiative.Import.Core.Services
                 MaximumHitPoints = monsterJson.HitPoints?.Average ?? 1,
                 InitiativeModifier = CalculateInitiativeModifier(monsterJson.Dexterity, monsterJson.Initiative),
                 Initiative = 0, // This will be rolled when added to an encounter
+                Actions = ExtractActions(monsterJson.Actions ?? new List<ActionJson>()),
                 IsConcentrating = false,
                 IsPlayer = false
             };
@@ -221,6 +222,18 @@ namespace Initiative.Import.Core.Services
             }
 
             return resistances;
+        }
+
+
+        private IEnumerable<CreatureAction> ExtractActions(List<ActionJson> actions)
+        {
+            if((actions?.Count ?? 0 ) == 0)
+                return Enumerable.Empty<CreatureAction>();
+            return actions.Select(a => new CreatureAction()
+            {
+                Name = a.Name,
+                Descriptions = a.Entries.ToArray()
+            });
         }
 
         /// <summary>

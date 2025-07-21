@@ -9,6 +9,6 @@ namespace Initiative.Import.Core.Models
         public string Name { get; set; } = string.Empty;
 
         [JsonPropertyName("entries")]
-        public List<JsonElement> Entries { get; set; } = new();
+        public List<string> Entries { get; set; } = new();
     }
 }
