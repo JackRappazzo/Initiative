@@ -11,7 +11,8 @@ namespace Initiative.UnitTests.Importer.CreatureMapperTests.MapToCreatureTests
             .Given(MonsterJsonHasMissingOptionalFields)
             .When(MapToCreatureIsCalled)
             .Then(ShouldNotThrowException)
-            .And(ShouldUseDefaultValues);
+            .And(ShouldUseDefaultValues)
+            .And(ShouldHandleNullActions);
 
         [Given]
         public void MonsterJsonHasMissingOptionalFields()
@@ -22,7 +23,8 @@ namespace Initiative.UnitTests.Importer.CreatureMapperTests.MapToCreatureTests
                 ArmorClass = null, // Missing AC
                 HitPoints = null, // Missing HP
                 Dexterity = 10, // Neutral dexterity
-                Initiative = null // No initiative proficiency
+                Initiative = null, // No initiative proficiency
+                Actions = null // No actions provided
             };
         }
 
@@ -39,6 +41,13 @@ namespace Initiative.UnitTests.Importer.CreatureMapperTests.MapToCreatureTests
             Assert.That(Result.HitPoints, Is.EqualTo(1)); // Default HP
             Assert.That(Result.MaximumHitPoints, Is.EqualTo(1)); // Default max HP
             Assert.That(Result.InitiativeModifier, Is.EqualTo(0)); // Dex 10 = 0 modifier
+        }
+
+        [Then]
+        public void ShouldHandleNullActions()
+        {
+            Assert.That(Result.Actions, Is.Not.Null);
+            Assert.That(Result.Actions, Is.Empty, "Actions should be empty when null actions are provided");
         }
     }
 }

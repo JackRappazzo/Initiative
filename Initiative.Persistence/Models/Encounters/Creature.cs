@@ -233,6 +233,11 @@ namespace Initiative.Persistence.Models.Encounters
         public int? BurrowSpeed { get; set; }
         public int? ClimbSpeed { get; set; }
         public bool CanHover { get; set; }
+
+        //Actions and spells
+        public IEnumerable<CreatureAction> Actions { get; set; } = new List<CreatureAction>();
+
+
         public bool IsPlayer { get; set; }
         public string? Notes { get; set; }
         public List<string> CurrentConditions { get; set; } = new();
