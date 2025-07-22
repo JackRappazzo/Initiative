@@ -80,26 +80,6 @@ namespace Initiative.Import.Core.Services
         }
 
         /// <summary>
-        /// Public method to extract condition immunities for testing purposes
-        /// </summary>
-        /// <param name="conditionImmunitiesList">List of JSON elements representing condition immunities</param>
-        /// <returns>List of condition immunity names</returns>
-        public List<string> ExtractConditionImmunitiesPublic(List<JsonElement>? conditionImmunitiesList)
-        {
-            return _conditionImmunitiesExtractor.ExtractConditionImmunities(conditionImmunitiesList);
-        }
-
-        /// <summary>
-        /// Public method to extract damage resistances for testing purposes
-        /// </summary>
-        /// <param name="damageResistancesList">List of JSON elements representing damage resistances</param>
-        /// <returns>List of damage resistance objects</returns>
-        public List<DamageResistanceJson> ExtractDamageResistancesPublic(List<JsonElement>? damageResistancesList)
-        {
-            return _damageResistancesExtractor.ExtractDamageResistances(damageResistancesList);
-        }
-
-        /// <summary>
         /// Maps a list of MonsterJson objects to Creature objects
         /// </summary>
         /// <param name="monsters">List of imported monsters</param>
