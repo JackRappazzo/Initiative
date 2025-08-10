@@ -64,7 +64,10 @@ namespace Initiative.Persistence.Models.Encounters
         Psychic,
         Radiant,
         Slashing,
-        Thunder
+        Thunder,
+        
+        // Special case for dynamic or custom resistances
+        Special
     }
 
     public enum Skill
@@ -105,7 +108,8 @@ namespace Initiative.Persistence.Models.Encounters
         Restrained,
         Stunned,
         Unconscious,
-        Exhaustion
+        Exhaustion,
+        None
     }
 
     public enum SenseType
@@ -179,6 +183,14 @@ namespace Initiative.Persistence.Models.Encounters
         // Movement
         public Speed Speed { get; set; } = new();
         
+        // Speed properties (for backward compatibility with mapper)
+        public int? WalkSpeed { get; set; }
+        public int? FlySpeed { get; set; }
+        public int? SwimSpeed { get; set; }
+        public int? BurrowSpeed { get; set; }
+        public int? ClimbSpeed { get; set; }
+        public bool CanHover { get; set; }
+        
         // Senses and Perception
         public Senses Senses { get; set; } = new();
         
@@ -206,7 +218,6 @@ namespace Initiative.Persistence.Models.Encounters
         
         // Special Abilities and Features
         public List<string> SpecialAbilities { get; set; } = new();
-        public List<string> Actions { get; set; } = new();
         public List<string> BonusActions { get; set; } = new();
         public List<string> Reactions { get; set; } = new();
         public List<string> LegendaryActions { get; set; } = new();
@@ -214,36 +225,27 @@ namespace Initiative.Persistence.Models.Encounters
         public List<string> LairActions { get; set; } = new();
         public List<string> RegionalEffects { get; set; } = new();
         
+        // Actions (structured actions)
+        public IEnumerable<CreatureAction> Actions { get; set; } = new List<CreatureAction>();
+        
         // Spellcasting
         public bool IsSpellcaster { get; set; }
         public string? SpellcastingAbility { get; set; }
         public int? SpellSaveDC { get; set; }
         public int? SpellAttackBonus { get; set; }
+        [BsonRepresentation(BsonType.Array)]
         public Dictionary<int, int> SpellSlots { get; set; } = new(); // Level -> Slots
+        [BsonRepresentation(BsonType.Array)]
         public Dictionary<int, List<string>> SpellsKnown { get; set; } = new(); // Level -> Spell names
         
         // Initiative Tracker specific properties
         public bool IsConcentrating { get; set; }
-        public bool IsPlayer { get; set; }
-
-        // Speed properties
-        public int? WalkSpeed { get; set; }
-        public int? FlySpeed { get; set; }
-        public int? SwimSpeed { get; set; }
-        public int? BurrowSpeed { get; set; }
-        public int? ClimbSpeed { get; set; }
-        public bool CanHover { get; set; }
-
-        //Actions and spells
-        public IEnumerable<CreatureAction> Actions { get; set; } = new List<CreatureAction>();
-
-
         public bool IsPlayer { get; set; }
         public string? Notes { get; set; }
         public List<string> CurrentConditions { get; set; } = new();
         
         // Optional: Source information
         public string? Source { get; set; }
-        public string? SourcePage { get; set; }
+        public int SourcePage { get; set; }
     }
 }

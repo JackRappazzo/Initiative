@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Initiative.Persistence.Models.Encounters;
 
 namespace Initiative.Import.Core.Models
 {

@@ -30,29 +30,29 @@ namespace Initiative.UnitTests.Importer.CreatureMapperTests.MapToCreatureTests
                     new ActionJson
                     {
                         Name = "Multiattack",
-                        Entries = new List<string>
+                        Entries = new List<JsonElement>
                         {
-                            "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."
+                            JsonDocument.Parse("\"The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws.\"").RootElement
                         }
                     },
                     new ActionJson
                     {
                         Name = "Bite",
-                        Entries = new List<string>
+                        Entries = new List<JsonElement>
                         {
-                            "Melee Weapon Attack: +17 to hit, reach 10 ft., one target.",
-                            "Hit: 21 (2d10 + 10) piercing damage plus 14 (4d6) fire damage."
+                            JsonDocument.Parse("\"Melee Weapon Attack: +17 to hit, reach 10 ft., one target.\"").RootElement,
+                            JsonDocument.Parse("\"Hit: 21 (2d10 + 10) piercing damage plus 14 (4d6) fire damage.\"").RootElement
                         }
                     },
                     new ActionJson
                     {
                         Name = "Fire Breath (Recharge 5-6)",
-                        Entries = new List<string>
+                        Entries = new List<JsonElement>
                         {
-                            "The dragon exhales fire in a 60-foot cone.",
-                            "Each creature in that area must make a DC 21 Dexterity saving throw.",
-                            "On a failed save, a creature takes 63 (18d6) fire damage.",
-                            "On a successful save, the creature takes half as much damage."
+                            JsonDocument.Parse("\"The dragon exhales fire in a 60-foot cone.\"").RootElement,
+                            JsonDocument.Parse("\"Each creature in that area must make a DC 21 Dexterity saving throw.\"").RootElement,
+                            JsonDocument.Parse("\"On a failed save, a creature takes 63 (18d6) fire damage.\"").RootElement,
+                            JsonDocument.Parse("\"On a successful save, the creature takes half as much damage.\"").RootElement
                         }
                     }
                 }

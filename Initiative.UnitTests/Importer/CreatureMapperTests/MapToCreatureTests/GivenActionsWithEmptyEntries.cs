@@ -28,14 +28,14 @@ namespace Initiative.UnitTests.Importer.CreatureMapperTests.MapToCreatureTests
                     new ActionJson
                     {
                         Name = "Incomplete Action",
-                        Entries = new List<string>() // Empty entries
+                        Entries = new List<JsonElement>() // Empty entries
                     },
                     new ActionJson
                     {
                         Name = "Normal Action",
-                        Entries = new List<string>
+                        Entries = new List<JsonElement>
                         {
-                            "This action has a description."
+                            JsonDocument.Parse("\"This action has a description.\"").RootElement
                         }
                     }
                 }

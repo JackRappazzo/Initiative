@@ -30,19 +30,19 @@ namespace Initiative.UnitTests.Importer.CreatureMapperTests.MapToCreatureTests
                     new ActionJson
                     {
                         Name = "Scimitar",
-                        Entries = new List<string>
+                        Entries = new List<JsonElement>
                         {
-                            "Melee Weapon Attack: +4 to hit, reach 5 ft., one target.",
-                            "Hit: 5 (1d6 + 2) slashing damage."
+                            JsonDocument.Parse("\"Melee Weapon Attack: +4 to hit, reach 5 ft., one target.\"").RootElement,
+                            JsonDocument.Parse("\"Hit: 5 (1d6 + 2) slashing damage.\"").RootElement
                         }
                     },
                     new ActionJson
                     {
                         Name = "Shortbow",
-                        Entries = new List<string>
+                        Entries = new List<JsonElement>
                         {
-                            "Ranged Weapon Attack: +4 to hit, range 80/320 ft., one target.",
-                            "Hit: 5 (1d6 + 2) piercing damage."
+                            JsonDocument.Parse("\"Ranged Weapon Attack: +4 to hit, range 80/320 ft., one target.\"").RootElement,
+                            JsonDocument.Parse("\"Hit: 5 (1d6 + 2) piercing damage.\"").RootElement
                         }
                     }
                 }

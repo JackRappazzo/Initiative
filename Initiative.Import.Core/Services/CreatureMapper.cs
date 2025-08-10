@@ -17,6 +17,7 @@ namespace Initiative.Import.Core.Services
         private readonly IActionsExtractor _actionsExtractor;
         private readonly IInitiativeCalculator _initiativeCalculator;
         private readonly ISystemNameGenerator _systemNameGenerator;
+        private readonly ISpellcastingExtractor _spellcastingExtractor;
 
         public CreatureMapper(
             IArmorClassExtractor armorClassExtractor,
@@ -25,7 +26,8 @@ namespace Initiative.Import.Core.Services
             IDamageResistancesExtractor damageResistancesExtractor,
             IActionsExtractor actionsExtractor,
             IInitiativeCalculator initiativeCalculator,
-            ISystemNameGenerator systemNameGenerator)
+            ISystemNameGenerator systemNameGenerator,
+            ISpellcastingExtractor spellcastingExtractor)
         {
             _armorClassExtractor = armorClassExtractor;
             _speedExtractor = speedExtractor;
@@ -34,6 +36,7 @@ namespace Initiative.Import.Core.Services
             _actionsExtractor = actionsExtractor;
             _initiativeCalculator = initiativeCalculator;
             _systemNameGenerator = systemNameGenerator;
+            _spellcastingExtractor = spellcastingExtractor;
         }
 
         /// <summary>
@@ -43,6 +46,9 @@ namespace Initiative.Import.Core.Services
         /// <returns>A Creature object for use in our system</returns>
         public Creature MapToCreature(MonsterJson monsterJson)
         {
+            var charismaModifier = (monsterJson.Charisma - 10) / 2;
+            var proficiencyBonus = CalculateProficiencyBonus(monsterJson.ChallengeRating);
+
             var creature = new Creature
             {
                 Name = monsterJson.Name,
@@ -54,7 +60,27 @@ namespace Initiative.Import.Core.Services
                 Initiative = 0, // This will be rolled when added to an encounter
                 Actions = _actionsExtractor.ExtractActions(monsterJson.Actions ?? new List<ActionJson>()),
                 IsConcentrating = false,
-                IsPlayer = false
+                IsPlayer = false,
+                
+                // Map ability scores
+                AbilityScores = new AbilityScores
+                {
+                    Strength = monsterJson.Strength,
+                    Dexterity = monsterJson.Dexterity,
+                    Constitution = monsterJson.Constitution,
+                    Intelligence = monsterJson.Intelligence,
+                    Wisdom = monsterJson.Wisdom,
+                    Charisma = monsterJson.Charisma
+                },
+                
+                // Map languages
+                Languages = monsterJson.Languages ?? new List<string>(),
+                
+                // Map senses
+                Senses = new Senses
+                {
+                    PassivePerception = monsterJson.PassivePerception
+                }
             };
 
             // Extract speed values
@@ -68,13 +94,29 @@ namespace Initiative.Import.Core.Services
                 creature.CanHover = monsterJson.Speed.CanHover ?? false;
             }
 
-            // Extract condition immunities for future use (currently not stored in Creature model)
-            var conditionImmunities = _conditionImmunitiesExtractor.ExtractConditionImmunities(monsterJson.ConditionImmunities);
+            // Extract and map condition immunities
+            var conditionImmunityStrings = _conditionImmunitiesExtractor.ExtractConditionImmunities(monsterJson.ConditionImmunities);
+            creature.ConditionImmunities = conditionImmunityStrings.ToPersistenceConditions();
             
-            // Extract damage resistances for future use (currently not stored in Creature model)
+            // Extract and map damage resistances, immunities, and vulnerabilities
             var damageResistances = _damageResistancesExtractor.ExtractDamageResistances(monsterJson.DamageResistances);
             var damageImmunities = _damageResistancesExtractor.ExtractDamageResistances(monsterJson.DamageImmunities);
             var damageVulnerabilities = _damageResistancesExtractor.ExtractDamageResistances(monsterJson.DamageVulnerabilities);
+            
+            creature.DamageResistances = damageResistances.ToPersistenceDamageTypes();
+            creature.DamageImmunities = damageImmunities.ToPersistenceDamageTypes();
+            creature.DamageVulnerabilities = damageVulnerabilities.ToPersistenceDamageTypes();
+
+            // Extract spellcasting information
+            var (isSpellcaster, spellcastingAbility, spellSaveDC, spellAttackBonus, spellSlots, spellsKnown) = 
+                _spellcastingExtractor.ExtractSpellcasting(monsterJson.Spellcasting, charismaModifier, proficiencyBonus);
+            
+            creature.IsSpellcaster = isSpellcaster;
+            creature.SpellcastingAbility = spellcastingAbility;
+            creature.SpellSaveDC = spellSaveDC;
+            creature.SpellAttackBonus = spellAttackBonus;
+            creature.SpellSlots = spellSlots;
+            creature.SpellsKnown = spellsKnown;
             
             return creature;
         }
@@ -87,6 +129,75 @@ namespace Initiative.Import.Core.Services
         public List<Creature> MapToCreatures(IEnumerable<MonsterJson> monsters)
         {
             return monsters.Select(MapToCreature).ToList();
+        }
+
+        /// <summary>
+        /// Calculates proficiency bonus based on challenge rating
+        /// </summary>
+        /// <param name="challengeRatingElement">Challenge rating JSON element</param>
+        /// <returns>Proficiency bonus</returns>
+        private int CalculateProficiencyBonus(JsonElement challengeRatingElement)
+        {
+            // Try to extract CR value from either string or object format
+            decimal cr = 0;
+            
+            if (challengeRatingElement.ValueKind == JsonValueKind.String)
+            {
+                var crString = challengeRatingElement.GetString();
+                if (decimal.TryParse(crString, out cr))
+                {
+                    // Use parsed value
+                }
+                else if (crString == "1/8")
+                {
+                    cr = 0.125m;
+                }
+                else if (crString == "1/4")
+                {
+                    cr = 0.25m;
+                }
+                else if (crString == "1/2")
+                {
+                    cr = 0.5m;
+                }
+            }
+            else if (challengeRatingElement.ValueKind == JsonValueKind.Object)
+            {
+                if (challengeRatingElement.TryGetProperty("cr", out var crProperty) && crProperty.ValueKind == JsonValueKind.String)
+                {
+                    var crString = crProperty.GetString();
+                    if (decimal.TryParse(crString, out cr))
+                    {
+                        // Use parsed value
+                    }
+                    else if (crString == "1/8")
+                    {
+                        cr = 0.125m;
+                    }
+                    else if (crString == "1/4")
+                    {
+                        cr = 0.25m;
+                    }
+                    else if (crString == "1/2")
+                    {
+                        cr = 0.5m;
+                    }
+                }
+            }
+
+            // Calculate proficiency bonus based on CR
+            return cr switch
+            {
+                >= 0 and < 5 => 2,
+                >= 5 and < 9 => 3,
+                >= 9 and < 13 => 4,
+                >= 13 and < 17 => 5,
+                >= 17 and < 21 => 6,
+                >= 21 and < 25 => 7,
+                >= 25 and < 29 => 8,
+                >= 29 => 9,
+                _ => 2
+            };
         }
     }
 }

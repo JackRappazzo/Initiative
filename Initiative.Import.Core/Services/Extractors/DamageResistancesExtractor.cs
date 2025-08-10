@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Initiative.Import.Core.Models;
+using Initiative.Persistence.Models.Encounters;
 
 namespace Initiative.Import.Core.Services.Extractors
 {
