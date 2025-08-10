@@ -14,6 +14,7 @@ var damageResistancesExtractor = new DamageResistancesExtractor();
 var actionsExtractor = new ActionsExtractor();
 var initiativeCalculator = new InitiativeCalculator();
 var systemNameGenerator = new SystemNameGenerator();
+var spellcastingExtractor = new SpellcastingExtractor();
 
 // Create the creature mapper with all dependencies
 var creatureMapper = new CreatureMapper(
@@ -23,7 +24,8 @@ var creatureMapper = new CreatureMapper(
     damageResistancesExtractor,
     actionsExtractor,
     initiativeCalculator,
-    systemNameGenerator);
+    systemNameGenerator,
+    spellcastingExtractor);
 
 var importer = new CreatureImporter(creatureMapper);
 var bestiaryRepository = new BestiaryRepository(new DatabaseConnectionFactory());

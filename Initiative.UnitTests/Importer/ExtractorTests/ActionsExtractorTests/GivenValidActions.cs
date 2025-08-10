@@ -2,6 +2,7 @@ using Initiative.Import.Core.Models;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.Core.Composable;
 using LeapingGorilla.Testing.NUnit.Attributes;
+using System.Text.Json;
 
 namespace Initiative.UnitTests.Importer.ExtractorTests.ActionsExtractorTests
 {
@@ -22,19 +23,19 @@ namespace Initiative.UnitTests.Importer.ExtractorTests.ActionsExtractorTests
                 new ActionJson
                 {
                     Name = "Bite",
-                    Entries = new List<string>
+                    Entries = new List<JsonElement>
                     {
-                        "Melee Weapon Attack: +5 to hit, reach 5 ft., one target.",
-                        "Hit: 8 (1d8 + 4) piercing damage."
+                        JsonDocument.Parse("\"Melee Weapon Attack: +5 to hit, reach 5 ft., one target.\"").RootElement,
+                        JsonDocument.Parse("\"Hit: 8 (1d8 + 4) piercing damage.\"").RootElement
                     }
                 },
                 new ActionJson
                 {
                     Name = "Claw",
-                    Entries = new List<string>
+                    Entries = new List<JsonElement>
                     {
-                        "Melee Weapon Attack: +5 to hit, reach 5 ft., one target.",
-                        "Hit: 6 (1d6 + 3) slashing damage."
+                        JsonDocument.Parse("\"Melee Weapon Attack: +5 to hit, reach 5 ft., one target.\"").RootElement,
+                        JsonDocument.Parse("\"Hit: 6 (1d6 + 3) slashing damage.\"").RootElement
                     }
                 }
             };
