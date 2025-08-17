@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Initiative.Persistence.Configuration;
 using Initiative.Persistence.Models.Encounters;
+using Initiative.Persistence.Models.Encounters.Dtos;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -91,6 +92,22 @@ namespace Initiative.Persistence.Repositories
             { 
                 return null; 
             }
+        }
+
+        public async Task<IEnumerable<GetAvailableBestiaryDto>> GetAvailableBestiaries(string userId, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<Bestiary>(TableName);
+            var filter = Builders<Bestiary>.Filter.Or(
+                Builders<Bestiary>.Filter.Eq(b => b.OwnerId, userId),
+                Builders<Bestiary>.Filter.Eq(b => b.OwnerId, null)
+            );
+            var results = await collection.FindAsync(filter, cancellationToken: cancellationToken);
+            return results.ToEnumerable().Select(b => new GetAvailableBestiaryDto
+            {
+                Id = b.Id,
+                Name = b.Name,
+                OwnerId = b.OwnerId
+            });
         }
     }
 }

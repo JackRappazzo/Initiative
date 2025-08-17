@@ -1,4 +1,5 @@
 ﻿using Initiative.Persistence.Models.Encounters;
+using Initiative.Persistence.Models.Encounters.Dtos;
 
 namespace Initiative.Persistence.Repositories
 {
@@ -11,5 +12,6 @@ namespace Initiative.Persistence.Repositories
         Task<Bestiary> GetSystemBestiaryByName(string name, CancellationToken cancellationToken);
         Task<Bestiary> GetUserBestiary(string beastiaryId, string ownerId, CancellationToken cancellationToken);
         Task<string> UpsertSystemBestiary(string name, IEnumerable<Creature> creatures, CancellationToken cancellationToken);
+        Task<IEnumerable<GetAvailableBestiaryDto>> GetAvailableBestiaries(string userId, CancellationToken cancellationToken);
     }
 }
