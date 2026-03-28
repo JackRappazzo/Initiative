@@ -25,6 +25,8 @@ namespace Initiative.IntegrationTests.Persistence.Utilities
             await ResetCollection(database, InitiativeUserRepository.TableName);
             await ResetCollection(database, EncounterRepository.TableName);
             await ResetCollection(database, LobbyStateRepository.TableName);
+            await ResetCollection(database, BestiaryRepository.BestiariesCollection);
+            await ResetCollection(database, BestiaryRepository.CreaturesCollection);
         }
 
         protected async Task ResetCollection(IMongoDatabase database, string collectionName)
