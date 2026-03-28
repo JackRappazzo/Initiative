@@ -1,14 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Initiative.Api.Messages;
-using Initiative.Api.Core.Identity;
-using System.Threading.Tasks;
-using Initiative.Api.Core.Services.Authentication;
-using Initiative.Api.Core.Services.Users;
-
 using Microsoft.AspNetCore.Authorization;
-using Initiative.Api.Core.Services.Authentication;
 using Initiative.Api.Extensions;
 using Initiative.Persistence.Repositories;
 
