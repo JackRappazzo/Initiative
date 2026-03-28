@@ -31,7 +31,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Initiative.Api.Core\Initiative.Api.Core.csproj" />
     <ProjectReference Include="..\Initiative.Api\Initiative.Api.csproj" />
-    <ProjectReference Include="..\Initiative.Import.Core\Initiative.Import.Core.csproj" />
   </ItemGroup>
 
 </Project>

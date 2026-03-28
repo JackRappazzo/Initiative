@@ -4,7 +4,6 @@ using Initiative.Api.Core;
 using Initiative.Api.Core.Identity;
 using Initiative.Api.Core.Identity.Roles;
 using Initiative.Api.Core.Services.Authentication;
-using Initiative.Api.Core.Services.Bestiaries;
 using Initiative.Api.Core.Services.Encounters;
 using Initiative.Api.Core.Services.Users;
 using Initiative.Api.Core.Utilities;
@@ -57,7 +56,6 @@ builder.Services.AddSignalR(
 builder.Services.AddScoped<IDatabaseConnectionFactory, DatabaseConnectionFactory>();
 builder.Services.AddScoped<IJwtRefreshTokenRepository, JwtRefreshTokenRepository>();
 builder.Services.AddScoped<IEncounterRepository, EncounterRepository>();
-builder.Services.AddScoped<IBestiaryRepository, BestiaryRepository>();
 builder.Services.AddScoped<ILobbyStateRepository, LobbyStateRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
@@ -68,7 +66,6 @@ builder.Services.AddScoped<ICredentialsFactory, CredentialsFactory>();
 
 builder.Services.AddScoped<IJwtRefreshService, JwtRefreshService>();
 builder.Services.AddScoped<IEncounterService, EncounterService>();
-builder.Services.AddScoped<IBestiaryService, BestiaryService>();
 builder.Services.AddScoped<IBase62CodeGenerator, Base62CodeGenerator>();
 
 builder.Services.AddScoped<IUserManager<ApplicationIdentity>, UserManagerFacade<ApplicationIdentity>>();
