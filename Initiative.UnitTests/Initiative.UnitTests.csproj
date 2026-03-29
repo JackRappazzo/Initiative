@@ -31,6 +31,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Initiative.Api.Core\Initiative.Api.Core.csproj" />
     <ProjectReference Include="..\Initiative.Api\Initiative.Api.csproj" />
+    <ProjectReference Include="..\Import.Bestiaries.Core\Import.Bestiaries.Core.csproj" />
   </ItemGroup>
 
 </Project>

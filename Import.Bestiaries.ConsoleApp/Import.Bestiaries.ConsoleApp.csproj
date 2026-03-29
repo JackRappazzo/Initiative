@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Sources\MonsterManual25.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Import.Bestiaries.Core\Import.Bestiaries.Core.csproj" />
+    <ProjectReference Include="..\Initiative.Persistence\Initiative.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>
