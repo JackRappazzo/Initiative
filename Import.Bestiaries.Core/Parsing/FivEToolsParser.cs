@@ -55,7 +55,8 @@ namespace Import.Bestiaries.Core.Parsing
             return typeToken.ValueKind switch
             {
                 JsonValueKind.String => typeToken.GetString(),
-                JsonValueKind.Object when typeToken.TryGetProperty("type", out var inner) => inner.GetString(),
+                JsonValueKind.Object when typeToken.TryGetProperty("type", out var inner)
+                    => inner.ValueKind == JsonValueKind.String ? inner.GetString() : null,
                 _ => null
             };
         }
