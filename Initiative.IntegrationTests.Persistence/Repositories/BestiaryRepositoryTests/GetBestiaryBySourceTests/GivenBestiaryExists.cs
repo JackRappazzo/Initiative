@@ -30,7 +30,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.BestiaryRepositor
             Assert.That(Result, Is.Not.Null);
             Assert.That(Result!.Source, Is.EqualTo("PHB"));
             Assert.That(Result.Name, Is.EqualTo("Player's Handbook"));
-            Assert.That(Result.IsSystem, Is.True);
+            Assert.That(Result.OwnerId, Is.Null);
         }
     }
 

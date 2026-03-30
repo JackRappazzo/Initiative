@@ -17,8 +17,9 @@ namespace Initiative.Persistence.Models.Bestiary
 
         /// <summary>
         /// Denormalised source code (e.g. "MM") for convenient filtering without a join.
+        /// Null for creatures belonging to a user-created custom bestiary.
         /// </summary>
-        public required string Source { get; set; }
+        public string? Source { get; set; }
 
         // ── Index / search fields (extracted at import time) ──────────────────
 

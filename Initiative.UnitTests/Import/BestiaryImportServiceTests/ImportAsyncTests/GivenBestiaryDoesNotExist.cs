@@ -53,7 +53,7 @@ namespace Initiative.UnitTests.Import.BestiaryImportServiceTests.ImportAsyncTest
                 Arg.Is<BestiaryDocument>(b =>
                     b.Name == "Monster Manual (2025)" &&
                     b.Source == "XMM" &&
-                    b.IsSystem),
+                    b.OwnerId == null),
                 CancellationToken);
         }
 

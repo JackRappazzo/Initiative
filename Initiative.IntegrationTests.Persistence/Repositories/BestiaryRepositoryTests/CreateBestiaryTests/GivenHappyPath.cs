@@ -34,7 +34,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.BestiaryRepositor
             Assert.That(stored!.Id, Is.EqualTo(Result));
             Assert.That(stored.Name, Is.EqualTo("Monster Manual"));
             Assert.That(stored.Source, Is.EqualTo("MM"));
-            Assert.That(stored.IsSystem, Is.True);
+            Assert.That(stored.OwnerId, Is.Null);
         }
     }
 }

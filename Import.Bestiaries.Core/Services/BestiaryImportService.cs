@@ -34,8 +34,7 @@ namespace Import.Bestiaries.Core.Services
                 var bestiary = new BestiaryDocument
                 {
                     Name = BestiaryName,
-                    Source = BestiarySource,
-                    IsSystem = true
+                    Source = BestiarySource
                 };
                 bestiaryId = await _repository.CreateBestiary(bestiary, cancellationToken);
                 Console.WriteLine($"Bestiary created with id: {bestiaryId}");

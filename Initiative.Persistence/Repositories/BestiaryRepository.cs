@@ -39,6 +39,14 @@ namespace Initiative.Persistence.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<IEnumerable<BestiaryDocument>> GetBestariesByOwner(string ownerId, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<BestiaryDocument>(BestiariesCollection);
+            return await collection.Find(b => b.OwnerId == ownerId)
+                .SortBy(b => b.Name)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task UpsertCreatures(IEnumerable<BestiaryCreatureDocument> creatures, CancellationToken cancellationToken)
         {
             var collection = GetMongoDatabase().GetCollection<BestiaryCreatureDocument>(CreaturesCollection);
@@ -162,12 +170,14 @@ namespace Initiative.Persistence.Repositories
                 uniqueIndex,
                 new CreateIndexOptions { Unique = true }));
 
-            // Bestiaries: index on Source for fast lookup during import
+            // Bestiaries: sparse unique index on Source.
+            // Uniqueness is enforced only for non-null Source values (system bestiaries).
+            // Null Source (custom/user bestiaries) is excluded from the uniqueness constraint.
             var bestiaryCollection = db.GetCollection<BestiaryDocument>(BestiariesCollection);
             var sourceIndex = Builders<BestiaryDocument>.IndexKeys.Ascending(b => b.Source);
             bestiaryCollection.Indexes.CreateOne(new CreateIndexModel<BestiaryDocument>(
                 sourceIndex,
-                new CreateIndexOptions { Unique = true }));
+                new CreateIndexOptions { Unique = true, Sparse = true }));
         }
     }
 }

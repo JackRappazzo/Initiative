@@ -20,6 +20,11 @@ namespace Initiative.Persistence.Repositories
         Task<IEnumerable<BestiaryDocument>> GetAllBestiaries(CancellationToken cancellationToken);
 
         /// <summary>
+        /// Returns all bestiaries owned by the given user, ordered by name.
+        /// </summary>
+        Task<IEnumerable<BestiaryDocument>> GetBestariesByOwner(string ownerId, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Inserts or replaces creatures belonging to the given bestiary.
         /// Matching is performed on (BestiaryId + Name); existing documents are replaced,
         /// new ones are inserted.

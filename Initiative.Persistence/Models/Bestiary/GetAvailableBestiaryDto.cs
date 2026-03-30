@@ -1,9 +1,9 @@
-﻿namespace Initiative.Api.Messages
+namespace Initiative.Persistence.Models.Bestiary
 {
-    public class GetBestiaryStubResponse
+    public class GetAvailableBestiaryDto
     {
-        public required string Name { get; set; }
         public required string Id { get; set; }
+        public required string Name { get; set; }
 
         /// <summary>
         /// Short source code (e.g. "XMM") for system bestiaries.

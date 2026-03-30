@@ -13,17 +13,12 @@ namespace Initiative.Persistence.Models.Bestiary
 
         /// <summary>
         /// Short source code as used in 5etools, e.g. "MM", "PHB", "XGE".
+        /// Null for user-created custom bestiaries.
         /// </summary>
-        public required string Source { get; set; }
+        public string? Source { get; set; }
 
         /// <summary>
-        /// True for bestiaries imported from 5etools source files.
-        /// False for future user-created bestiaries.
-        /// </summary>
-        public bool IsSystem { get; set; }
-
-        /// <summary>
-        /// Null for system bestiaries. Set to the owner's user ID for user bestiaries.
+        /// Null for system bestiaries. Set to the owner's user ID for user-created bestiaries.
         /// </summary>
         public string? OwnerId { get; set; }
     }

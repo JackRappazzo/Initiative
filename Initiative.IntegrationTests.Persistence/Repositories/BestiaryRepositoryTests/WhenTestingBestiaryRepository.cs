@@ -16,13 +16,20 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.BestiaryRepositor
 
         // ── Shared helpers ────────────────────────────────────────────────────
 
-        protected BestiaryDocument BuildBestiary(string name = "Test Bestiary", string source = "TST", bool isSystem = true)
+        protected BestiaryDocument BuildBestiary(string name = "Test Bestiary", string source = "TST")
             => new BestiaryDocument
             {
                 Name = name,
                 Source = source,
-                IsSystem = isSystem,
                 OwnerId = null
+            };
+
+        protected BestiaryDocument BuildCustomBestiary(string ownerId, string name = "My Custom Bestiary")
+            => new BestiaryDocument
+            {
+                Name = name,
+                Source = null,
+                OwnerId = ownerId
             };
 
         protected BestiaryCreatureDocument BuildCreature(string bestiaryId, string name = "Test Creature",

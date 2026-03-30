@@ -25,8 +25,7 @@ namespace Initiative.UnitTests.Import.BestiaryImportServiceTests.ImportAsyncTest
                 {
                     Id = _existingBestiaryId,
                     Name = "Monster Manual (2025)",
-                    Source = "XMM",
-                    IsSystem = true
+                    Source = "XMM"
                 });
         }
 

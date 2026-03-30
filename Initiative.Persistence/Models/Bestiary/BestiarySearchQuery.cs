@@ -33,6 +33,12 @@ namespace Initiative.Persistence.Models.Bestiary
         /// </summary>
         public bool? IsLegendary { get; set; }
 
+        /// <summary>
+        /// Filter creatures to those belonging to bestiaries owned by this user.
+        /// Null means no owner filter.
+        /// </summary>
+        public string? OwnerId { get; set; }
+
         /// <summary>Maximum number of results to return. Defaults to 20.</summary>
         public int PageSize { get; set; } = 20;
 
