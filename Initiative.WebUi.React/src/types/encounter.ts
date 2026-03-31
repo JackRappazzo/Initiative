@@ -1,6 +1,6 @@
-import { CreatureJsonModel } from '../api/encounterClient';
+import { EncounterCreatureJsonModel } from '../api/encounterClient';
 
-export interface EditableCreature extends CreatureJsonModel {
+export interface EditableCreature extends EncounterCreatureJsonModel {
   isEditing?: boolean;
 }
 

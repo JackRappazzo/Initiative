@@ -1,6 +1,4 @@
-﻿using Initiative.Persistence.Models.Encounters;
-
-namespace Initiative.Api.Messages
+﻿namespace Initiative.Api.Messages
 {
     public class FetchEncounterResponse
     {
@@ -8,13 +6,13 @@ namespace Initiative.Api.Messages
                
         public required string DisplayName { get; set; }
                
-        public IEnumerable<CreatureJsonModel> Creatures { get; set; }
+        public IEnumerable<EncounterCreatureJsonModel> Creatures { get; set; }
                
         public DateTime CreatedAt { get; set; }
         
         public FetchEncounterResponse()
         {
-            Creatures = new List<CreatureJsonModel>();
+            Creatures = new List<EncounterCreatureJsonModel>();
         }
     }
 }

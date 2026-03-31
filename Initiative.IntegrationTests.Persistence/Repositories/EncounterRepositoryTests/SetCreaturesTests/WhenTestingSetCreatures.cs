@@ -11,7 +11,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.EncounterReposito
     public abstract class WhenTestingSetCreatures : WhenTestingEncounterRepository
     {
         protected string EncounterId;
-        protected IEnumerable<Creature> Creatures;
+        protected IEnumerable<EncounterCreature> Creatures;
 
         [When]
         public async Task SetCreaturesIsCalled()

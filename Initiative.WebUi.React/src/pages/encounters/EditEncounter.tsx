@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EncounterClient, FetchEncounterResponse } from '../../api/encounterClient';
+import { CreatureListItem } from '../../api/bestiaryClient';
 import { EncounterState } from '../../types';
 import { useCreatureManagement, useLobbyConnection } from '../../hooks';
 import { EditableCreatureList, EncounterHeader, EncounterStatus } from '../../components';
+import BestiaryPicker from '../../components/bestiaries/BestiaryPicker';
 import { useUser } from '../../contexts/UserContext';
 
 import './EditEncounter.css';
@@ -29,6 +31,7 @@ const EditEncounter: React.FC = () => {
   const [encounter, setEncounter] = useState<FetchEncounterResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingName, setEditingName] = useState(false);
+  const [showBestiaryPicker, setShowBestiaryPicker] = useState(false);
   const [newName, setNewName] = useState('');
   const [encounterState, setEncounterState] = useState<EncounterState>({
     isRunning: false,
@@ -41,7 +44,7 @@ const EditEncounter: React.FC = () => {
     error,
     setError,
     updateCreature: originalUpdateCreature,
-    addCreature: originalAddCreature,
+    addCreatureFromBestiary: originalAddCreatureFromBestiary,
     removeCreature: originalRemoveCreature,
     sortByInitiative: originalSortByInitiative,
     setCreatureList
@@ -60,7 +63,7 @@ const EditEncounter: React.FC = () => {
     }
 
     try {
-      const creatureNames = creatureList.map(creature => creature.name || 'Unnamed Creature');
+      const creatureNames = creatureList.map(creature => creature.displayName || 'Unnamed Creature');
       const lobbyMode = isRunning ? 'InProgress' : 'Waiting';
       
       console.log('[EditEncounter] Sending lobby state:', {
@@ -87,9 +90,9 @@ const EditEncounter: React.FC = () => {
   const updateCreature = useCallback((index: number, creature: any) => {
     originalUpdateCreature(index, creature);
     
-    // Send lobby state if creature name changed (affects display) and encounter is running
+    // Send lobby state if creature displayName changed (affects display) and encounter is running
     const oldCreature = creatures[index];
-    if (encounterState.isRunning && oldCreature && oldCreature.name !== creature.name) {
+    if (encounterState.isRunning && oldCreature && oldCreature.displayName !== creature.displayName) {
       const updatedCreatures = [...creatures];
       updatedCreatures[index] = creature;
       
@@ -99,26 +102,16 @@ const EditEncounter: React.FC = () => {
     }
   }, [originalUpdateCreature, creatures, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, sendLobbyState]);
 
-  // Enhanced creature management functions that send lobby state updates
-  const addCreature = useCallback(async () => {
-    await originalAddCreature();
+  const handleAddFromBestiary = useCallback(async (creature: CreatureListItem) => {
+    await originalAddCreatureFromBestiary(creature);
     
     // Send lobby state after creature is added (if encounter is running)
     if (encounterState.isRunning) {
-      // Use setTimeout to ensure the creature is added to state first
       setTimeout(() => {
-        sendLobbyState([...creatures, { 
-          name: 'New Creature', 
-          hitPoints: 10, 
-          maximumHitPoints: 10, 
-          armorClass: 10, 
-          initiative: 10, 
-          initiativeModifier: 0, 
-          isEditing: true 
-        }], encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
-      }, 50);
+        sendLobbyState(creatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
+      }, 100);
     }
-  }, [originalAddCreature, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
+  }, [originalAddCreatureFromBestiary, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
 
   const removeCreature = useCallback(async (index: number) => {
     await originalRemoveCreature(index);
@@ -152,11 +145,7 @@ const EditEncounter: React.FC = () => {
     
     // Send lobby state after sorting (if encounter is running)
     if (encounterState.isRunning) {
-      // Get the sorted creatures
-      const sortedCreatures = [...creatures].sort((a, b) => 
-        (b.initiative + b.initiativeModifier) - (a.initiative + a.initiativeModifier)
-      );
-      
+      const sortedCreatures = [...creatures].sort((a, b) => b.initiative - a.initiative);
       sendLobbyState(sortedCreatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
     }
   }, [originalSortByInitiative, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
@@ -330,9 +319,16 @@ const EditEncounter: React.FC = () => {
         />
       </div>
 
-      <button className="add-creature-button" onClick={addCreature}>
+      <button className="add-creature-button" onClick={() => setShowBestiaryPicker(true)}>
         Add Creature
       </button>
+
+      {showBestiaryPicker && (
+        <BestiaryPicker
+          onCreatureSelect={handleAddFromBestiary}
+          onClose={() => setShowBestiaryPicker(false)}
+        />
+      )}
     </div>
   );
 };

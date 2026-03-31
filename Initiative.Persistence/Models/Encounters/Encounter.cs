@@ -20,7 +20,7 @@ namespace Initiative.Persistence.Models.Encounters
 
         public DateTime CreatedAt { get; set; }
 
-        public IEnumerable<Creature> Creatures { get; set; }
+        public IEnumerable<EncounterCreature> Creatures { get; set; }
 
     }
 }

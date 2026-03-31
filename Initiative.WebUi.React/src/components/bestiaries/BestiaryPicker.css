@@ -1,0 +1,81 @@
+/* ── Backdrop overlay ───────────────────────────────────────────────────────── */
+.bestiary-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+}
+
+/* ── Slide-in panel ─────────────────────────────────────────────────────────── */
+.bestiary-picker-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(900px, 90vw);
+  height: 100%;
+  background: var(--bg, #181825);
+  border-left: 1px solid var(--card-border, #313244);
+  overflow: hidden;
+}
+
+/* ── Panel header ────────────────────────────────────────────────────────────── */
+.bestiary-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--card-border, #313244);
+  flex-shrink: 0;
+}
+
+.bestiary-picker-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text, #cdd6f4);
+}
+
+.bestiary-picker-close {
+  background: none;
+  border: none;
+  color: var(--text-muted, #6c7086);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.bestiary-picker-close:hover {
+  color: var(--text, #cdd6f4);
+  background: var(--card-hover, #2a2a3e);
+}
+
+/* ── Panel body (sidebar + main) ─────────────────────────────────────────────── */
+.bestiary-picker-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: 0;
+  overflow: hidden;
+}
+
+/* ── Sidebar overrides for picker context ────────────────────────────────────── */
+.bestiary-picker-sidebar {
+  flex: 0 0 200px;
+  border: none;
+  border-right: 1px solid var(--card-border, #313244);
+  border-radius: 0;
+  position: static;
+  max-height: none;
+  overflow-y: auto;
+}
+
+/* ── Main area overrides for picker context ──────────────────────────────────── */
+.bestiary-picker-main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+}

@@ -34,33 +34,29 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.EncounterReposito
         [Given]
         public void CreaturesAreSet()
         {
-            Creature creatureOne = new Creature()
+            EncounterCreature creatureOne = new EncounterCreature()
             {
-                Name = "Test Creature One",
-                SystemName = "test-creature-one",
-                ArmorClass = 10,
-                HitPoints = 20,
+                DisplayName = "Test Creature One",
+                CreatureName = "test-creature-one",
+                AC = 10,
+                CurrentHP = 20,
+                MaxHP = 10,
                 Initiative = 15,
-                InitiativeModifier = 2,
-                IsConcentrating = false,
-                MaximumHitPoints = 10,
                 IsPlayer = false
             };
 
-            Creature creatureTwo = new Creature()
+            EncounterCreature creatureTwo = new EncounterCreature()
             {
-                Name = "Test Creature Two",
-                SystemName = "test-creature-two",
-                ArmorClass = 12,
-                HitPoints = 25,
+                DisplayName = "Test Creature Two",
+                CreatureName = "test-creature-two",
+                AC = 12,
+                CurrentHP = 25,
+                MaxHP = 5,
                 Initiative = 18,
-                InitiativeModifier = 3,
-                MaximumHitPoints = 5,
-                IsConcentrating = true,
                 IsPlayer = false
             };
 
-            Creatures = new List<Creature> { creatureOne, creatureTwo };
+            Creatures = new List<EncounterCreature> { creatureOne, creatureTwo };
         }
 
         [Then]
@@ -69,13 +65,15 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.EncounterReposito
             var encounter = await EncounterRepository.FetchEncounterById(EncounterId, OwnerId, CancellationToken);
             Assert.That(encounter.Creatures, Is.Not.Null);
             Assert.That(encounter.Creatures.Count(), Is.EqualTo(Creatures.Count()));
-            Assert.That(encounter.Creatures.Any(c => c.Name == "Test Creature One"), Is.True);
-            Assert.That(encounter.Creatures.Any(c => c.Name == "Test Creature Two"), Is.True);
+            Assert.That(encounter.Creatures.Any(c => c.DisplayName == "Test Creature One"), Is.True);
+            Assert.That(encounter.Creatures.Any(c => c.DisplayName == "Test Creature Two"), Is.True);
 
-            var creatureOne = encounter.Creatures.First(c => c.Name == "Test Creature One");
+            var creatureOne = encounter.Creatures.First(c => c.DisplayName == "Test Creature One");
 
-            Assert.That(creatureOne.MaximumHitPoints, Is.EqualTo(10));
-
+            Assert.That(creatureOne.MaxHP, Is.EqualTo(10));
+            Assert.That(creatureOne.AC, Is.EqualTo(10));
+            Assert.That(creatureOne.Initiative, Is.EqualTo(15));
+            Assert.That(creatureOne.IsPlayer, Is.False);
         }
     }
 }

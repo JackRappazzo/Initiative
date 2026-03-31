@@ -64,12 +64,12 @@ export const EditableCreatureList: React.FC<EditableCreatureListProps> = ({
       {/* Header Row */}
       <div className="creature-item creature-header">
         <div></div>
-        <div>Name</div>
+        <div>Init</div>
         <div>HP</div>
         <div>Max HP</div>
+        <div>Name</div>
         <div>AC</div>
-        <div>Init</div>
-        <div>Mod</div>
+        <div>Player</div>
         <div>Actions</div>
       </div>
 

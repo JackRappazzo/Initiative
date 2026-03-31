@@ -54,30 +54,6 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
       >
         ⋮⋮
       </div>
-      <input
-        type="text"
-        value={creature.name}
-        onChange={(e) => handleFieldChange('name', e.target.value)}
-      />
-      <NumericInput
-        value={creature.hitPoints}
-        onChange={(value) => handleFieldChange('hitPoints', value)}
-        ariaLabel="Hit Points"
-        placeholder="HP"
-      />
-      <NumericInput
-        value={creature.maximumHitPoints}
-        onChange={(value) => handleFieldChange('maximumHitPoints', value)}
-        ariaLabel="Maximum Hit Points"
-        placeholder="Max HP"
-      />
-      <NumericInput
-        value={creature.armorClass}
-        min={0}
-        onChange={(value) => handleFieldChange('armorClass', value)}
-        ariaLabel="Armor Class"
-        placeholder="AC"
-      />
       <NumericInput
         value={creature.initiative}
         onChange={(value) => handleFieldChange('initiative', value)}
@@ -85,10 +61,35 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
         placeholder="Init"
       />
       <NumericInput
-        value={creature.initiativeModifier}
-        onChange={(value) => handleFieldChange('initiativeModifier', value)}
-        ariaLabel="Initiative Modifier"
-        placeholder="Mod"
+        value={creature.currentHP}
+        onChange={(value) => handleFieldChange('currentHP', value)}
+        ariaLabel="Hit Points"
+        placeholder="HP"
+      />
+      <NumericInput
+        value={creature.maxHP}
+        onChange={(value) => handleFieldChange('maxHP', value)}
+        ariaLabel="Maximum Hit Points"
+        placeholder="Max HP"
+      />
+      <input
+        type="text"
+        value={creature.displayName}
+        onChange={(e) => handleFieldChange('displayName', e.target.value)}
+      />
+      <NumericInput
+        value={creature.ac}
+        min={0}
+        onChange={(value) => handleFieldChange('ac', value)}
+        ariaLabel="Armor Class"
+        placeholder="AC"
+      />
+      <input
+        type="checkbox"
+        checked={creature.isPlayer}
+        onChange={(e) => handleFieldChange('isPlayer', e.target.checked)}
+        aria-label="Is Player"
+        title="Player Character"
       />
       <div className="creature-controls">
         <button

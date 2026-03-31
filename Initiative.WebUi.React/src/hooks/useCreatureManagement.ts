@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { EditableCreature } from '../types';
 import { EncounterClient } from '../api/encounterClient';
+import { CreatureListItem } from '../api/bestiaryClient';
 
 export const useCreatureManagement = (encounterId: string | undefined, encounterClient: EncounterClient) => {
   const [creatures, setCreatures] = useState<EditableCreature[]>([]);
@@ -33,17 +34,22 @@ export const useCreatureManagement = (encounterId: string | undefined, encounter
     await updateCreatureAPI(newCreatures);
   }, [creatures, updateCreatureAPI]);
 
-  const addCreature = useCallback(async () => {
+  const addCreatureFromBestiary = useCallback(async (source: CreatureListItem) => {
+    const existingCount = creatures.filter(c => c.creatureName === source.name).length;
+    const displayName = `${source.name} ${existingCount + 1}`;
+
     const newCreature: EditableCreature = {
-      name: 'New Creature',
-      hitPoints: 10,
-      maximumHitPoints: 10,
-      armorClass: 10,
-      initiative: 10,
-      initiativeModifier: 0,
-      isEditing: true
+      isPlayer: false,
+      displayName,
+      creatureName: source.name,
+      creatureId: source.id,
+      initiative: 0,
+      maxHP: 10,
+      currentHP: 10,
+      ac: 10,
+      isEditing: false
     };
-    
+
     const newCreatures = [...creatures, newCreature];
     setCreatures(newCreatures);
     await updateCreatureAPI(newCreatures);
@@ -56,9 +62,7 @@ export const useCreatureManagement = (encounterId: string | undefined, encounter
   }, [creatures, updateCreatureAPI]);
 
   const sortByInitiative = useCallback(async () => {
-    const sortedCreatures = [...creatures].sort((a, b) => 
-      (b.initiative + b.initiativeModifier) - (a.initiative + a.initiativeModifier)
-    );
+    const sortedCreatures = [...creatures].sort((a, b) => b.initiative - a.initiative);
     setCreatures(sortedCreatures);
     await updateCreatureAPI(sortedCreatures);
   }, [creatures, updateCreatureAPI]);
@@ -77,10 +81,11 @@ export const useCreatureManagement = (encounterId: string | undefined, encounter
     setError,
     updateCreature,
     updateCreatureAndSave,
-    addCreature,
+    addCreatureFromBestiary,
     removeCreature,
     sortByInitiative,
     setCreatureList,
     saveCreatures
   };
 };
+

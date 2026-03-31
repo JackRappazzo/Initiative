@@ -12,7 +12,7 @@ namespace Initiative.UnitTests.Core.Services.EncounterServiceTests.SetCreaturesT
     {
         protected string EncounterId;
         protected string OwnerId;
-        protected IEnumerable<Creature> Creatures;
+        protected IEnumerable<EncounterCreature> Creatures;
 
         [When(DoNotRethrowExceptions:true)]
         public async Task SetCreaturesIsCalled()

@@ -88,7 +88,7 @@ namespace Initiative.Persistence.Repositories
 
         }
 
-        public async Task SetEncounterCreatures(string encounterId, IEnumerable<Creature> creatures, CancellationToken cancellationToken)
+        public async Task SetEncounterCreatures(string encounterId, IEnumerable<EncounterCreature> creatures, CancellationToken cancellationToken)
         {
             var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
             var update = Builders<Encounter>.Update.Set(e => e.Creatures, creatures);

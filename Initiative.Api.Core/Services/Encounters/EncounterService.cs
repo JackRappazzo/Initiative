@@ -43,13 +43,8 @@ namespace Initiative.Api.Core.Services.Encounters
             return result;
         }
 
-        public async Task SetEncounterCreatures(string encounterId, string ownerId, IEnumerable<Creature> creatures, CancellationToken cancellationToken)
+        public async Task SetEncounterCreatures(string encounterId, string ownerId, IEnumerable<EncounterCreature> creatures, CancellationToken cancellationToken)
         {
-            if (creatures == null || !creatures.Any())
-            {
-                throw new ArgumentException("At least one creature must be provided.", nameof(creatures));
-            }
-
             if (await encounterRepository.FetchEncounterById(encounterId, ownerId, cancellationToken) == null)
             {
                 throw new ArgumentException("Encounter not found.", nameof(encounterId));

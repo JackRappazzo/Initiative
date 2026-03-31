@@ -53,35 +53,39 @@ namespace Initiative.Api.Controllers
                 DisplayName = encounter.DisplayName,
                 EncounterId = encounter.Id,
                 CreatedAt = encounter.CreatedAt,
-                Creatures = encounter.Creatures.Select(c => new CreatureJsonModel()
+                Creatures = encounter.Creatures.Select(c => new EncounterCreatureJsonModel()
                 {
-                    Name = c.Name,
-                    HitPoints = c.HitPoints,
-                    MaximumHitPoints = c.MaximumHitPoints,
-                    ArmorClass = c.ArmorClass,
+                    IsPlayer = c.IsPlayer,
+                    DisplayName = c.DisplayName,
+                    CreatureName = c.CreatureName,
+                    CreatureId = c.CreatureId,
                     Initiative = c.Initiative,
-                    InitiativeModifier = c.InitiativeModifier
+                    MaxHP = c.MaxHP,
+                    CurrentHP = c.CurrentHP,
+                    AC = c.AC
                 }).ToList()
             };
             return Ok(response);
         }
 
         [HttpPost("{encounterId}/creatures"), Authorize]
-        public async Task<IActionResult> SetCreatures(string encounterId, [FromBody] IEnumerable<CreatureJsonModel> creatures, CancellationToken cancellationToken)
+        public async Task<IActionResult> SetCreatures(string encounterId, [FromBody] IEnumerable<EncounterCreatureJsonModel> creatures, CancellationToken cancellationToken)
         {
             if (creatures == null)
             {
                 return BadRequest("Creatures must not be null. Send empty array to set to no creatures");
             }
             var creaturesToSet = creatures.Select(c =>
-                new Creature()
+                new EncounterCreature()
                 {
-                    Name = c.Name,
-                    HitPoints = c.HitPoints,
-                    MaximumHitPoints = c.MaximumHitPoints,
-                    ArmorClass = c.ArmorClass,
+                    IsPlayer = c.IsPlayer,
+                    DisplayName = c.DisplayName,
+                    CreatureName = c.CreatureName,
+                    CreatureId = c.CreatureId,
                     Initiative = c.Initiative,
-                    InitiativeModifier = c.InitiativeModifier,
+                    MaxHP = c.MaxHP,
+                    CurrentHP = c.CurrentHP,
+                    AC = c.AC
                 }).ToList();
 
             await encounterService.SetEncounterCreatures(encounterId, User.GetUserId(), creaturesToSet, cancellationToken);

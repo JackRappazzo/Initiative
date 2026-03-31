@@ -28,7 +28,7 @@ export const EncounterStatus: React.FC<EncounterStatusProps> = ({
       {isRunning && (
         <div className="encounter-status">
           <span>Turn {turnNumber}</span>
-          <span>Active: {creatures[currentTurn]?.name || 'None'}</span>
+          <span>Active: {creatures[currentTurn]?.displayName || 'None'}</span>
           <button 
             className="control-button primary"
             onClick={onNextTurn}

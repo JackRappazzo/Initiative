@@ -1,12 +1,14 @@
 import { HttpClient } from "./httpClient";
 
-export interface CreatureJsonModel {
-  name: string;
-  hitPoints: number;
-  maximumHitPoints: number;
-  armorClass: number;
+export interface EncounterCreatureJsonModel {
+  isPlayer: boolean;
+  displayName: string;
+  creatureName?: string;
+  creatureId?: string;
   initiative: number;
-  initiativeModifier: number;
+  maxHP: number;
+  currentHP: number;
+  ac: number;
 }
 
 export interface EncounterListItem {
@@ -20,7 +22,7 @@ export interface FetchEncounterResponse {
   displayName: string;
   encounterId: string;
   createdAt: string;
-  creatures: CreatureJsonModel[];
+  creatures: EncounterCreatureJsonModel[];
 }
 
 export class EncounterClient {
@@ -46,7 +48,7 @@ export class EncounterClient {
   }
 
   // POST /api/encounter/{encounterId}/creatures
-  public async setCreatures(encounterId: string, creatures: CreatureJsonModel[]): Promise<void> {
+  public async setCreatures(encounterId: string, creatures: EncounterCreatureJsonModel[]): Promise<void> {
     return this.apiClient.post<void>(`encounter/${encodeURIComponent(encounterId)}/creatures`, creatures);
   }
 

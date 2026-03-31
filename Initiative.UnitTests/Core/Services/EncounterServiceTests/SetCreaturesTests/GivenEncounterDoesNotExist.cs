@@ -37,10 +37,10 @@ namespace Initiative.UnitTests.Core.Services.EncounterServiceTests.SetCreaturesT
         [Given]
         public void CreaturesAreSet()
         {
-            Creatures = new List<Creature>
+            Creatures = new List<EncounterCreature>
             {
-                new Creature { Id = Guid.NewGuid().ToString(), Name = "Creature 1" },
-                new Creature { Id = Guid.NewGuid().ToString(), Name = "Creature 2" }
+                new EncounterCreature { Id = Guid.NewGuid().ToString(), DisplayName = "Creature 1" },
+                new EncounterCreature { Id = Guid.NewGuid().ToString(), DisplayName = "Creature 2" }
             };
         }
 
