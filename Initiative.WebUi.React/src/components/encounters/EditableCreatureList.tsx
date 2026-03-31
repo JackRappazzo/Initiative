@@ -66,10 +66,8 @@ export const EditableCreatureList: React.FC<EditableCreatureListProps> = ({
         <div></div>
         <div>Init</div>
         <div>HP</div>
-        <div>Max HP</div>
         <div>Name</div>
         <div>AC</div>
-        <div>Player</div>
         <div>Actions</div>
       </div>
 

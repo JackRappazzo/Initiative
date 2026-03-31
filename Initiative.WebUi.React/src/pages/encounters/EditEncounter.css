@@ -46,10 +46,10 @@
 
 .creature-item {
   display: grid;
-  grid-template-columns: auto 1fr 1fr 1fr 2fr 1fr auto auto;
-  gap: 1rem;
+  grid-template-columns: 24px 48px 120px 1fr 48px auto;
+  gap: 0.5rem;
   align-items: center;
-  padding: 1rem;
+  padding: 0.35rem 0.5rem;
   border-bottom: 1px solid #eee;
 }
 
@@ -58,10 +58,89 @@
 }
 
 .creature-item input {
-  padding: 0.5rem;
+  padding: 0.25rem 0.4rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   width: 100%;
+  font-size: 0.875rem;
+  box-sizing: border-box;
+}
+
+/* Click-to-edit display cells */
+.creature-field-display {
+  display: block;
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  cursor: text;
+  font-size: 0.875rem;
+  min-height: 1.6rem;
+  line-height: 1.6rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #333;
+  border: 1px solid transparent;
+}
+
+.creature-field-display:hover {
+  background: #f0f4ff;
+  border-color: #aac4f0;
+}
+
+.creature-name-player {
+  font-weight: 700;
+}
+
+.creature-player-checkbox {
+  pointer-events: none;
+}
+
+/* Active input fields */
+.creature-field-input {
+  padding: 0.25rem 0.4rem !important;
+  border: 1px solid #4a90d9 !important;
+  border-radius: 4px;
+  width: 100%;
+  font-size: 0.875rem;
+  box-sizing: border-box;
+  outline: none;
+  background: #fff;
+}
+
+.creature-name-input {
+  font-weight: 500;
+}
+
+/* Combined HP cell */
+.creature-hp-cell {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.creature-hp-part {
+  min-width: 36px;
+  text-align: center;
+}
+
+.creature-hp-input {
+  width: 46px !important;
+  min-width: 0;
+  text-align: center;
+}
+
+.creature-hp-sep {
+  color: #aaa;
+  font-size: 0.85rem;
+  padding: 0 1px;
+  user-select: none;
+}
+
+.creature-player-checkbox {
+  justify-self: center;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
 }
 
 .creature-item[draggable] {
@@ -94,6 +173,11 @@
   font-weight: bold;
   background: #f8f9fa;
   border-radius: 4px 4px 0 0;
+  font-size: 0.8rem;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.4rem 0.5rem;
 }
 
 .creature-controls {
@@ -102,12 +186,13 @@
 }
 
 .control-button {
-  padding: 0.5rem 1rem;
+  padding: 0.2rem 0.5rem;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   transition: background-color 0.2s ease;
+  line-height: 1.4;
 }
 
 .control-button.primary {
