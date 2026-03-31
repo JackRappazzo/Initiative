@@ -21,5 +21,8 @@ namespace Initiative.Api.Core.Services.Bestiary
 
         public Task<IEnumerable<BestiaryCreatureDocument>> SearchCreatures(BestiarySearchQuery query, CancellationToken cancellationToken)
             => _repository.SearchCreatures(query, cancellationToken);
+
+        public Task<long> CountCreatures(BestiarySearchQuery query, CancellationToken cancellationToken)
+            => _repository.CountCreatures(query, cancellationToken);
     }
 }

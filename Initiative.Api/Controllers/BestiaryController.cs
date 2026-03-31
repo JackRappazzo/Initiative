@@ -66,5 +66,22 @@ namespace Initiative.Api.Controllers
                 })
             });
         }
+
+        [HttpGet("creatures/count")]
+        public async Task<IActionResult> CountCreatures([FromQuery] SearchCreaturesRequest request, CancellationToken cancellationToken)
+        {
+            var query = new BestiarySearchQuery
+            {
+                BestiaryIds = request.BestiaryIds,
+                NameSearch = request.Name,
+                CreatureType = request.CreatureType,
+                ChallengeRating = request.ChallengeRating,
+                IsLegendary = request.IsLegendary
+            };
+
+            var totalCount = await _bestiaryService.CountCreatures(query, cancellationToken);
+
+            return Ok(new CountCreaturesResponse { TotalCount = totalCount });
+        }
     }
 }

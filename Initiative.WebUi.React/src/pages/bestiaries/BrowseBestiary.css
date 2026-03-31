@@ -1,0 +1,106 @@
+.browse-container {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.browse-header {
+  margin-bottom: 1.5rem;
+}
+
+.browse-back-link {
+  display: inline-block;
+  font-size: 0.9rem;
+  color: var(--accent, #89b4fa);
+  text-decoration: none;
+  margin-bottom: 0.5rem;
+}
+
+.browse-back-link:hover {
+  text-decoration: underline;
+}
+
+.browse-header h1 {
+  font-size: 2rem;
+  margin: 0 0 0.25rem;
+}
+
+.browse-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted, #6c7086);
+}
+
+/* Creature table */
+.creature-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.creature-table th {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 2px solid var(--card-border, #313244);
+  font-weight: 600;
+  color: var(--text-muted, #6c7086);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.creature-row {
+  border-bottom: 1px solid var(--card-border, #313244);
+  transition: background 0.1s;
+}
+
+.creature-row:hover {
+  background: var(--card-hover, #2a2a3e);
+}
+
+.creature-table td {
+  padding: 0.6rem 0.75rem;
+  vertical-align: middle;
+}
+
+.creature-name {
+  font-weight: 500;
+}
+
+.creature-type {
+  color: var(--text-muted, #6c7086);
+  text-transform: capitalize;
+}
+
+.creature-cr {
+  color: var(--text-muted, #6c7086);
+  white-space: nowrap;
+}
+
+.creature-flags {
+  text-align: right;
+}
+
+.legendary-badge {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--legendary-bg, #f38ba8);
+  color: var(--legendary-text, #1e1e2e);
+}
+
+.table-loading,
+.table-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted, #6c7086);
+}
+
+/* Spacing for the pagination rows */
+.browse-container .pagination {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}

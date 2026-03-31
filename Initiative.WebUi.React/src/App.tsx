@@ -7,6 +7,8 @@ import HomePage from "./pages/HomePage";
 import ListEncounters from "./pages/encounters/ListEncounters";
 import EditEncounter from "./pages/encounters/EditEncounter";
 import { JoinLobby, Lobby } from "./pages/lobby";
+import ListBestiaries from "./pages/bestiaries/ListBestiaries";
+import BrowseBestiary from "./pages/bestiaries/BrowseBestiary";
 import { AuthProvider } from './contexts/AuthContext';
 import { UserProvider } from './contexts/UserContext';
 import './App.css'; 
@@ -27,6 +29,8 @@ const App: React.FC = () => {
               <Route path="/encounters/:encounterId" element={<EditEncounter />} />
               <Route path="/lobby" element={<JoinLobby />} />
               <Route path="/lobby/:roomCode" element={<Lobby />} />
+              <Route path="/bestiaries" element={<ListBestiaries />} />
+              <Route path="/bestiaries/:bestiaryId" element={<BrowseBestiary />} />
             </Route>
           </Routes>
         </Router>

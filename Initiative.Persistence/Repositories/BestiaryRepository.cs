@@ -1,4 +1,4 @@
-using Initiative.Persistence.Configuration;
+﻿using Initiative.Persistence.Configuration;
 using Initiative.Persistence.Models.Bestiary;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -83,7 +83,24 @@ namespace Initiative.Persistence.Repositories
         public async Task<IEnumerable<BestiaryCreatureDocument>> SearchCreatures(BestiarySearchQuery query, CancellationToken cancellationToken)
         {
             var collection = GetMongoDatabase().GetCollection<BestiaryCreatureDocument>(CreaturesCollection);
+            var combinedFilter = BuildCreatureFilter(query);
 
+            return await collection.Find(combinedFilter)
+                .SortBy(c => c.Name)
+                .Skip(query.Skip)
+                .Limit(query.PageSize)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<long> CountCreatures(BestiarySearchQuery query, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<BestiaryCreatureDocument>(CreaturesCollection);
+            var combinedFilter = BuildCreatureFilter(query);
+            return await collection.CountDocumentsAsync(combinedFilter, cancellationToken: cancellationToken);
+        }
+
+        private static FilterDefinition<BestiaryCreatureDocument> BuildCreatureFilter(BestiarySearchQuery query)
+        {
             var filters = new List<FilterDefinition<BestiaryCreatureDocument>>();
 
             // Bestiary filter
@@ -125,15 +142,9 @@ namespace Initiative.Persistence.Repositories
                 filters.Add(Builders<BestiaryCreatureDocument>.Filter.Eq(c => c.IsLegendary, query.IsLegendary.Value));
             }
 
-            var combinedFilter = filters.Count > 0
+            return filters.Count > 0
                 ? Builders<BestiaryCreatureDocument>.Filter.And(filters)
                 : FilterDefinition<BestiaryCreatureDocument>.Empty;
-
-            return await collection.Find(combinedFilter)
-                .SortBy(c => c.Name)
-                .Skip(query.Skip)
-                .Limit(query.PageSize)
-                .ToListAsync(cancellationToken);
         }
 
         public async Task<BestiaryCreatureDocument?> GetCreatureById(string creatureId, CancellationToken cancellationToken)

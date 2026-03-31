@@ -39,6 +39,12 @@ namespace Initiative.Persistence.Repositories
         Task<IEnumerable<BestiaryCreatureDocument>> SearchCreatures(BestiarySearchQuery query, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Returns the total number of creatures matching the supplied query filters,
+        /// ignoring the Skip and PageSize pagination fields.
+        /// </summary>
+        Task<long> CountCreatures(BestiarySearchQuery query, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Returns the full creature document by its ID, or null if not found.
         /// </summary>
         Task<BestiaryCreatureDocument?> GetCreatureById(string creatureId, CancellationToken cancellationToken);
