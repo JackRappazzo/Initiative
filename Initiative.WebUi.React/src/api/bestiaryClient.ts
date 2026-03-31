@@ -123,18 +123,11 @@ export class BestiaryClient {
     return response.data.bestiaries;
   }
 
-  public async searchCreatures(params: SearchCreaturesParams): Promise<CreatureListItem[]> {
-    const response = await this.apiClient.instance.get<{ creatures: CreatureListItem[] }>("bestiary/creatures", {
+  public async searchCreatures(params: SearchCreaturesParams): Promise<{ creatures: CreatureListItem[]; totalCount: number }> {
+    const response = await this.apiClient.instance.get<{ creatures: CreatureListItem[]; totalCount: number }>("bestiary/creatures", {
       params: this.buildParams(params),
     });
-    return response.data.creatures;
-  }
-
-  public async countCreatures(params: Omit<SearchCreaturesParams, "pageSize" | "skip">): Promise<number> {
-    const response = await this.apiClient.instance.get<{ totalCount: number }>("bestiary/creatures/count", {
-      params: this.buildParams(params),
-    });
-    return response.data.totalCount;
+    return response.data;
   }
 
   public async getCreatureById(creatureId: string): Promise<CreatureDetail> {

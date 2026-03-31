@@ -3,6 +3,7 @@ namespace Initiative.Api.Messages.Bestiary
     public class SearchCreaturesResponse
     {
         public required IEnumerable<CreatureItem> Creatures { get; set; }
+        public long TotalCount { get; set; }
 
         public class CreatureItem
         {

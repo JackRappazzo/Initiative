@@ -51,20 +51,25 @@ namespace Initiative.UnitTests.Api.Core.Services.Bestiary.BestiaryTriesServiceTe
                         RawData = new BsonDocument()
                     }
                 });
+
+            BestiaryRepository.CountCreatures(Arg.Any<BestiarySearchQuery>(), CancellationToken)
+                .Returns(1L);
         }
 
         [Then]
         public void ShouldReturnCreatures()
         {
             Assert.That(Result, Is.Not.Null);
-            Assert.That(Result.Count(), Is.EqualTo(1));
-            Assert.That(Result.First().Name, Is.EqualTo("Goblin"));
+            Assert.That(Result.Creatures.Count(), Is.EqualTo(1));
+            Assert.That(Result.Creatures.First().Name, Is.EqualTo("Goblin"));
+            Assert.That(Result.TotalCount, Is.EqualTo(1L));
         }
 
         [Then]
         public void ShouldForwardQueryToRepository()
         {
             BestiaryRepository.Received(1).SearchCreatures(Query, CancellationToken);
+            BestiaryRepository.Received(1).CountCreatures(Arg.Any<BestiarySearchQuery>(), CancellationToken);
         }
     }
 }

@@ -29,13 +29,17 @@ namespace Initiative.UnitTests.Api.Core.Services.Bestiary.BestiaryTriesServiceTe
         {
             BestiaryRepository.SearchCreatures(Query, CancellationToken)
                 .Returns(Enumerable.Empty<BestiaryCreatureDocument>());
+
+            BestiaryRepository.CountCreatures(Arg.Any<BestiarySearchQuery>(), CancellationToken)
+                .Returns(0L);
         }
 
         [Then]
         public void ShouldReturnEmptyCollection()
         {
             Assert.That(Result, Is.Not.Null);
-            Assert.That(Result, Is.Empty);
+            Assert.That(Result.Creatures, Is.Empty);
+            Assert.That(Result.TotalCount, Is.EqualTo(0L));
         }
     }
 }

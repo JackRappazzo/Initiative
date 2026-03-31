@@ -10,15 +10,10 @@ namespace Initiative.Api.Core.Services.Bestiary
         Task<IEnumerable<BestiaryDocument>> GetAvailableBestiaries(string userId, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Searches creatures using the supplied filters.
+        /// Searches creatures using the supplied filters and returns the matching page together
+        /// with the total count of all matching creatures (for pagination).
         /// </summary>
-        Task<IEnumerable<BestiaryCreatureDocument>> SearchCreatures(BestiarySearchQuery query, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Returns the total number of creatures matching the supplied filters,
-        /// ignoring the Skip and PageSize pagination fields.
-        /// </summary>
-        Task<long> CountCreatures(BestiarySearchQuery query, CancellationToken cancellationToken);
+        Task<SearchCreaturesResult> SearchCreatures(BestiarySearchQuery query, CancellationToken cancellationToken);
 
         /// <summary>
         /// Returns a single creature by its ID, or null if not found.

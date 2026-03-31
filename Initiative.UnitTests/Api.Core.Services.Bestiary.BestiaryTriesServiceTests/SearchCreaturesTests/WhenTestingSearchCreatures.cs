@@ -1,3 +1,4 @@
+using Initiative.Api.Core.Services.Bestiary;
 using Initiative.Persistence.Models.Bestiary;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.NUnit.Attributes;
@@ -7,7 +8,7 @@ namespace Initiative.UnitTests.Api.Core.Services.Bestiary.BestiaryTriesServiceTe
     public abstract class WhenTestingSearchCreatures : WhenTestingBestiaryService
     {
         protected BestiarySearchQuery Query;
-        protected IEnumerable<BestiaryCreatureDocument> Result;
+        protected SearchCreaturesResult Result;
 
         [When]
         public async Task SearchCreaturesIsCalled()

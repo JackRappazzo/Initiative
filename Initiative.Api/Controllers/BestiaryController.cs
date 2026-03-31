@@ -54,11 +54,11 @@ namespace Initiative.Api.Controllers
                 Skip = request.Skip
             };
 
-            var creatures = await _bestiaryService.SearchCreatures(query, cancellationToken);
+            var result = await _bestiaryService.SearchCreatures(query, cancellationToken);
 
             return Ok(new SearchCreaturesResponse
             {
-                Creatures = creatures.Select(c => new SearchCreaturesResponse.CreatureItem
+                Creatures = result.Creatures.Select(c => new SearchCreaturesResponse.CreatureItem
                 {
                     Id = c.Id,
                     Name = c.Name,
@@ -67,25 +67,9 @@ namespace Initiative.Api.Controllers
                     CreatureType = c.CreatureType,
                     ChallengeRating = c.ChallengeRating,
                     IsLegendary = c.IsLegendary
-                })
+                }),
+                TotalCount = result.TotalCount
             });
-        }
-
-        [HttpGet("creatures/count")]
-        public async Task<IActionResult> CountCreatures([FromQuery] SearchCreaturesRequest request, CancellationToken cancellationToken)
-        {
-            var query = new BestiarySearchQuery
-            {
-                BestiaryIds = request.BestiaryIds,
-                NameSearch = request.Name,
-                CreatureType = request.CreatureType,
-                ChallengeRating = request.ChallengeRating,
-                IsLegendary = request.IsLegendary
-            };
-
-            var totalCount = await _bestiaryService.CountCreatures(query, cancellationToken);
-
-            return Ok(new CountCreaturesResponse { TotalCount = totalCount });
         }
 
         [HttpGet("creatures/{creatureId}")]

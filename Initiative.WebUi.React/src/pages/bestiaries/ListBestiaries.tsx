@@ -62,10 +62,7 @@ const ListBestiaries: React.FC = () => {
           pageSize: PAGE_SIZE,
           skip,
         };
-        const [results, count] = await Promise.all([
-          bestiaryClient.searchCreatures(params),
-          bestiaryClient.countCreatures({ bestiaryIds: idArray, name: nameFilter || undefined }),
-        ]);
+        const { creatures: results, totalCount: count } = await bestiaryClient.searchCreatures(params);
         if (!cancelled) { setCreatures(results); setTotalCount(count); }
       } catch {
         if (!cancelled) setCreaturesError('Failed to load creatures');
