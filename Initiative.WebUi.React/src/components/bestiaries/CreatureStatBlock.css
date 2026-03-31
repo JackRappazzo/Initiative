@@ -97,3 +97,95 @@
   color: var(--stat-block-text, #1a1a1a);
   font-style: italic;
 }
+
+/* ── Dice chips ───────────────────────────────────────────────────────────── */
+
+.stat-block__dice-chip {
+  display: inline;
+  background: var(--stat-block-border, #8b2323);
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 0 0.25em;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1.3;
+  vertical-align: baseline;
+  transition: background 0.15s;
+}
+
+.stat-block__dice-chip:hover,
+.stat-block__dice-chip:focus-visible {
+  background: #6a1010;
+  outline: 2px solid #6a1010;
+  outline-offset: 1px;
+}
+
+/* Ability score modifier variant — lighter styling to match surrounding text */
+.stat-block__dice-chip--mod {
+  background: transparent;
+  color: inherit;
+  border: 1px solid var(--stat-block-border, #8b2323);
+  font-weight: normal;
+  padding: 0 0.15em;
+}
+
+.stat-block__dice-chip--mod:hover,
+.stat-block__dice-chip--mod:focus-visible {
+  background: var(--stat-block-border, #8b2323);
+  color: #fff;
+}
+
+/* ── Roll result banner ───────────────────────────────────────────────────── */
+
+.stat-block__roll-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #7a1e1e;
+  color: #fff;
+  border-radius: 3px;
+  padding: 0.35rem 0.6rem;
+  margin-bottom: 0.6rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.stat-block__roll-expression {
+  opacity: 0.8;
+  font-size: 0.8rem;
+}
+
+.stat-block__roll-expression::after {
+  content: '→';
+  margin-left: 0.35rem;
+}
+
+.stat-block__roll-total {
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stat-block__roll-detail {
+  opacity: 0.75;
+  font-size: 0.78rem;
+}
+
+.stat-block__roll-dismiss {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 0.1rem;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.stat-block__roll-dismiss:hover {
+  opacity: 1;
+}

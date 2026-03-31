@@ -1,10 +1,51 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { FiveEToolsRawData, FiveEToolsEntry } from '../../api/bestiaryClient';
 import './CreatureStatBlock.css';
+
+// ── Dice rolling ──────────────────────────────────────────────────────────────
+
+interface RollResult {
+  expression: string;
+  rolls: number[];
+  total: number;
+}
+
+/** Roll a single die with `sides` faces. */
+function rollDie(sides: number): number {
+  return Math.floor(Math.random() * sides) + 1;
+}
+
+/**
+ * Evaluate a dice expression like "2d6+3", "1d20", "4d8-1".
+ * Returns individual rolls and the final total.
+ */
+function rollExpression(expr: string): RollResult {
+  // Normalise: remove spaces, lower-case 'd'
+  const normalised = expr.replace(/\s+/g, '').toLowerCase();
+  // Pattern: optional count 'd' sides optional modifier
+  const match = normalised.match(/^(\d*)d(\d+)([+-]\d+)?$/);
+  if (!match) {
+    // Plain number — treat as a flat bonus
+    const flat = parseInt(normalised, 10);
+    return { expression: expr, rolls: [], total: isNaN(flat) ? 0 : flat };
+  }
+  const count = parseInt(match[1] || '1', 10);
+  const sides = parseInt(match[2], 10);
+  const modifier = match[3] ? parseInt(match[3], 10) : 0;
+  const rolls = Array.from({ length: count }, () => rollDie(sides));
+  const total = rolls.reduce((s, r) => s + r, 0) + modifier;
+  return { expression: expr, rolls, total };
+}
+
+// ── Dice regex (matches expressions like 2d6, 1d20+5, 3d8-2) ─────────────────
+const DICE_RE = /\b(\d*d\d+(?:[+-]\d+)?)\b/gi;
 
 interface Props {
   data: FiveEToolsRawData;
 }
+
+// Passed down so dice buttons in nested components can trigger a roll
+type OnRoll = (result: RollResult) => void;
 
 // ── Lookup tables ─────────────────────────────────────────────────────────────
 
@@ -40,7 +81,7 @@ const CR_XP: Record<string, string> = {
  * e.g. {@hit 5} → +5, {@damage 2d6 + 3} → 2d6 + 3, {@dc 14} → DC 14,
  *      {@spell Fireball|PHB} → Fireball, {@condition Grappled|XPHB} → Grappled
  */
-function renderText(text: string): string {
+function cleanTags(text: string): string {
   return text
     .replace(/\{@hit ([^}]+)\}/g, (_, n) => `+${n}`)
     .replace(/\{@damage ([^}]+)\}/g, (_, d) => d)
@@ -60,6 +101,40 @@ function renderText(text: string): string {
     .trim();
 }
 
+/** Plain text — used for attribute values that aren't rendered as React nodes */
+function renderText(text: string): string {
+  return cleanTags(text);
+}
+
+/**
+ * Render a cleaned string as React nodes, turning dice expressions into
+ * clickable <button> chips that call onRoll when clicked.
+ *
+ * split() with a capturing group produces alternating [text, dice, text, dice, …]
+ * so odd indices are always the captured dice expression — no re-test needed.
+ */
+function renderDiceNodes(raw: string, onRoll: OnRoll, keyPrefix: string): React.ReactNode {
+  const cleaned = cleanTags(raw);
+  // Use a non-stateful copy so the global flag doesn't bleed between calls
+  const parts = cleaned.split(/\b(\d*d\d+(?:[+-]\d+)?)\b/i);
+  return parts.map((part, i) => {
+    if (i % 2 === 1) {
+      // odd index → captured dice expression
+      return (
+        <button
+          key={`${keyPrefix}-${i}`}
+          className="stat-block__dice-chip"
+          title={`Roll ${part}`}
+          onClick={() => onRoll(rollExpression(part))}
+        >
+          {part}
+        </button>
+      );
+    }
+    return <React.Fragment key={`${keyPrefix}-${i}`}>{part}</React.Fragment>;
+  });
+}
+
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
@@ -74,23 +149,54 @@ function renderEntries(entries: (string | FiveEToolsEntry)[]): string {
   }).filter(Boolean).join(' ');
 }
 
+function renderEntriesAsNodes(
+  entries: (string | FiveEToolsEntry)[],
+  onRoll: OnRoll,
+  keyPrefix: string
+): React.ReactNode {
+  return entries.map((e, i) => {
+    if (typeof e === 'string') return renderDiceNodes(e, onRoll, `${keyPrefix}-${i}`);
+    if (e.entries) return renderEntriesAsNodes(e.entries, onRoll, `${keyPrefix}-${i}`);
+    return null;
+  });
+}
+
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function AbilityScores({ data }: { data: FiveEToolsRawData }) {
+function AbilityScores({ data, onRoll }: { data: FiveEToolsRawData; onRoll: OnRoll }) {
   const scores: [string, number | undefined][] = [
     ['STR', data.str], ['DEX', data.dex], ['CON', data.con],
     ['INT', data.int], ['WIS', data.wis], ['CHA', data.cha],
   ];
   return (
     <div className="stat-block__abilities">
-      {scores.map(([label, score]) => (
-        <div key={label} className="stat-block__ability">
-          <div className="stat-block__ability-label">{label}</div>
-          <div className="stat-block__ability-score">
-            {score ?? '—'} {score !== undefined ? `(${SCORE_MOD(score)})` : ''}
+      {scores.map(([label, score]) => {
+        const modStr = score !== undefined ? SCORE_MOD(score) : null;
+        const modNum = score !== undefined ? Math.floor((score - 10) / 2) : null;
+        const rollExpr = modNum !== null
+          ? `1d20${modNum >= 0 ? '+' : ''}${modNum}`
+          : '1d20';
+        return (
+          <div key={label} className="stat-block__ability">
+            <div className="stat-block__ability-label">{label}</div>
+            <div className="stat-block__ability-score">
+              {score ?? '—'}
+              {modStr !== null && (
+                <>
+                  {' '}
+                  <button
+                    className="stat-block__dice-chip stat-block__dice-chip--mod"
+                    title={`Roll 1d20 ${modStr}`}
+                    onClick={() => onRoll(rollExpression(rollExpr))}
+                  >
+                    ({modStr})
+                  </button>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -103,7 +209,7 @@ function PropertyLine({ label, value }: { label: string; value: React.ReactNode 
   );
 }
 
-function Section({ title, entries }: { title: string; entries: FiveEToolsEntry[] }) {
+function Section({ title, entries, onRoll }: { title: string; entries: FiveEToolsEntry[]; onRoll: OnRoll }) {
   if (!entries.length) return null;
   return (
     <>
@@ -112,7 +218,7 @@ function Section({ title, entries }: { title: string; entries: FiveEToolsEntry[]
       {entries.map((entry, i) => (
         <div key={i} className="stat-block__feature">
           {entry.name && <strong className="stat-block__feature-name">{entry.name}. </strong>}
-          <span>{entry.entries ? renderEntries(entry.entries) : ''}</span>
+          <span>{entry.entries ? renderEntriesAsNodes(entry.entries, onRoll, `${title}-${i}`) : ''}</span>
         </div>
       ))}
     </>
@@ -190,8 +296,32 @@ const CreatureStatBlock: React.FC<Props> = ({ data }) => {
   const vulnerableStr = formatList(data.vulnerable);
   const condImmStr = formatList(data.conditionImmune);
 
+  const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
+
+  const onRoll = useCallback((result: RollResult) => {
+    setLastRoll(result);
+  }, []);
+
+  const rollDetail = lastRoll && lastRoll.rolls.length > 1
+    ? ` [${lastRoll.rolls.join(', ')}]`
+    : '';
+
   return (
     <div className="stat-block">
+      {/* Dice roll result banner */}
+      {lastRoll && (
+        <div className="stat-block__roll-banner">
+          <span className="stat-block__roll-expression">{lastRoll.expression}</span>
+          <span className="stat-block__roll-total">{lastRoll.total}</span>
+          {rollDetail && <span className="stat-block__roll-detail">{rollDetail}</span>}
+          <button
+            className="stat-block__roll-dismiss"
+            aria-label="Dismiss"
+            onClick={() => setLastRoll(null)}
+          >×</button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="stat-block__header">
         <h2 className="stat-block__name">{data.name}</h2>
@@ -213,7 +343,7 @@ const CreatureStatBlock: React.FC<Props> = ({ data }) => {
       <div className="stat-block__divider stat-block__divider--thick" />
 
       {/* Ability scores */}
-      <AbilityScores data={data} />
+      <AbilityScores data={data} onRoll={onRoll} />
 
       <div className="stat-block__divider stat-block__divider--thick" />
 
@@ -245,14 +375,15 @@ const CreatureStatBlock: React.FC<Props> = ({ data }) => {
       <PropertyLine label="Challenge" value={formatCr(data.cr)} />
 
       {/* Feature sections */}
-      {data.trait?.length ? <Section title="Traits" entries={data.trait} /> : null}
-      {data.action?.length ? <Section title="Actions" entries={data.action} /> : null}
-      {data.bonus?.length ? <Section title="Bonus Actions" entries={data.bonus} /> : null}
-      {data.reaction?.length ? <Section title="Reactions" entries={data.reaction} /> : null}
+      {data.trait?.length ? <Section title="Traits" entries={data.trait} onRoll={onRoll} /> : null}
+      {data.action?.length ? <Section title="Actions" entries={data.action} onRoll={onRoll} /> : null}
+      {data.bonus?.length ? <Section title="Bonus Actions" entries={data.bonus} onRoll={onRoll} /> : null}
+      {data.reaction?.length ? <Section title="Reactions" entries={data.reaction} onRoll={onRoll} /> : null}
       {data.legendary?.length ? (
         <Section
           title={`Legendary Actions${crStr ? ` (CR ${crStr})` : ''}`}
           entries={data.legendary}
+          onRoll={onRoll}
         />
       ) : null}
     </div>
