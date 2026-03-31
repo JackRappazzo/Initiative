@@ -1,6 +1,7 @@
 ﻿using Initiative.Persistence.Configuration;
 using Initiative.Persistence.Models.Bestiary;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
 namespace Initiative.Persistence.Repositories
@@ -85,12 +86,75 @@ namespace Initiative.Persistence.Repositories
             var collection = GetMongoDatabase().GetCollection<BestiaryCreatureDocument>(CreaturesCollection);
             var combinedFilter = BuildCreatureFilter(query);
 
-            return await collection.Find(combinedFilter)
-                .SortBy(c => c.Name)
+            if (query.SortBy == CreatureSortBy.ChallengeRating)
+            {
+                return await SearchCreaturesSortedByCr(collection, combinedFilter, query, cancellationToken);
+            }
+
+            var findFluent = collection.Find(combinedFilter);
+
+            if (query.SortBy == CreatureSortBy.Type)
+            {
+                findFluent = query.SortDescending
+                    ? findFluent.SortByDescending(c => c.CreatureType).ThenBy(c => c.Name)
+                    : findFluent.SortBy(c => c.CreatureType).ThenBy(c => c.Name);
+            }
+            else
+            {
+                findFluent = query.SortDescending
+                    ? findFluent.SortByDescending(c => c.Name)
+                    : findFluent.SortBy(c => c.Name);
+            }
+
+            return await findFluent
                 .Skip(query.Skip)
                 .Limit(query.PageSize)
                 .ToListAsync(cancellationToken);
         }
+
+        /// <summary>
+        /// Sorts by CR numerically (e.g. "1/4" → 0.25) using an aggregation pipeline,
+        /// then by Name as a tie-breaker. Required because CR is stored as a string.
+        /// </summary>
+        private static async Task<IEnumerable<BestiaryCreatureDocument>> SearchCreaturesSortedByCr(
+            IMongoCollection<BestiaryCreatureDocument> collection,
+            FilterDefinition<BestiaryCreatureDocument> filter,
+            BestiarySearchQuery query,
+            CancellationToken cancellationToken)
+        {
+            var pipeline = new[]
+            {
+                new BsonDocument("$match", filter.Render(new RenderArgs<BestiaryCreatureDocument>(collection.DocumentSerializer, BsonSerializer.SerializerRegistry))),
+                new BsonDocument("$addFields", new BsonDocument("_crSort", new BsonDocument("$switch", new BsonDocument
+                {
+                    { "branches", new BsonArray
+                        {
+                            CrBranch("0",    0),
+                            CrBranch("1/8",  0.125),
+                            CrBranch("1/4",  0.25),
+                            CrBranch("1/2",  0.5),
+                        }
+                        .AddRange(Enumerable.Range(1, 30).Select(i => CrBranch(i.ToString(), i)))
+                    },
+                    { "default", -1 }
+                }))),
+                new BsonDocument("$sort", new BsonDocument { { "_crSort", query.SortDescending ? -1 : 1 }, { "Name", 1 } }),
+                new BsonDocument("$skip",  query.Skip),
+                new BsonDocument("$limit", query.PageSize),
+                new BsonDocument("$unset", "_crSort")
+            };
+
+            return await collection
+                .Aggregate<BestiaryCreatureDocument>(pipeline, cancellationToken: cancellationToken)
+                .ToListAsync(cancellationToken);
+        }
+
+        private static BsonDocument CrBranch(string crValue, double numericValue)
+            => new BsonDocument
+            {
+                { "case", new BsonDocument("$eq", new BsonArray { "$ChallengeRating", crValue }) },
+                { "then", numericValue }
+            };
 
         public async Task<long> CountCreatures(BestiarySearchQuery query, CancellationToken cancellationToken)
         {
@@ -115,11 +179,11 @@ namespace Initiative.Persistence.Repositories
                 filters.Add(Builders<BestiaryCreatureDocument>.Filter.In(c => c.BestiaryId, objectIds));
             }
 
-            // Name type-ahead: case-insensitive prefix regex
+            // Name filter: case-insensitive substring match
             if (!string.IsNullOrWhiteSpace(query.NameSearch))
             {
                 var escapedName = System.Text.RegularExpressions.Regex.Escape(query.NameSearch.Trim());
-                var regex = new BsonRegularExpression($"^{escapedName}", "i");
+                var regex = new BsonRegularExpression(escapedName, "i");
                 filters.Add(Builders<BestiaryCreatureDocument>.Filter.Regex(c => c.Name, regex));
             }
 

@@ -17,8 +17,13 @@ export interface CreatureListItem {
   isLegendary: boolean;
 }
 
+export type CreatureSortBy = 'Name' | 'ChallengeRating' | 'Type';
+
 export interface SearchCreaturesParams {
   bestiaryIds?: string[];
+  name?: string;
+  sortBy?: CreatureSortBy;
+  sortDescending?: boolean;
   pageSize?: number;
   skip?: number;
 }
@@ -142,6 +147,9 @@ export class BestiaryClient {
   private buildParams(params: SearchCreaturesParams): Record<string, unknown> {
     const result: Record<string, unknown> = {};
     if (params.bestiaryIds?.length) result["bestiaryIds"] = params.bestiaryIds;
+    if (params.name) result["name"] = params.name;
+    if (params.sortBy) result["sortBy"] = params.sortBy;
+    if (params.sortDescending) result["sortDescending"] = params.sortDescending;
     if (params.pageSize !== undefined) result["pageSize"] = params.pageSize;
     if (params.skip !== undefined) result["skip"] = params.skip;
     return result;

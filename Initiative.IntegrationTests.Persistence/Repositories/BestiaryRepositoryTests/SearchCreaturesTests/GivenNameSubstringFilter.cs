@@ -5,25 +5,26 @@ using LeapingGorilla.Testing.NUnit.Attributes;
 
 namespace Initiative.IntegrationTests.Persistence.Repositories.BestiaryRepositoryTests.SearchCreaturesTests
 {
-    public class GivenNameTypeAheadFilter : GivenSeededBestiary
+    public class GivenNameSubstringFilter : GivenSeededBestiary
     {
         protected override ComposedTest ComposeTest() => TestComposer
             .Given(BestiaryAndCreaturesExist)
-            .And(QueryHasNamePrefix)
+            .And(QueryHasNameSubstring)
             .When(SearchCreaturesIsCalled)
             .Then(ShouldReturnOnlyMatchingCreatures);
 
         [Given]
-        public void QueryHasNamePrefix()
+        public void QueryHasNameSubstring()
         {
-            Query = new BestiarySearchQuery { BestiaryIds = [BestiaryId], NameSearch = "Gob" };
+            // "lin" matches mid-word in "Goblin" and "Goblin Boss", but not "Ancient Dragon" or "Zombie"
+            Query = new BestiarySearchQuery { BestiaryIds = [BestiaryId], NameSearch = "lin" };
         }
 
         [Then]
         public void ShouldReturnOnlyMatchingCreatures()
         {
             Assert.That(Result.Count(), Is.EqualTo(2));
-            Assert.That(Result.All(c => c.Name.StartsWith("Goblin")), Is.True);
+            Assert.That(Result.All(c => c.Name.Contains("lin", StringComparison.OrdinalIgnoreCase)), Is.True);
         }
     }
 }

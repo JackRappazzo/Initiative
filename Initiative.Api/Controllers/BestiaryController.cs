@@ -48,6 +48,8 @@ namespace Initiative.Api.Controllers
                 CreatureType = request.CreatureType,
                 ChallengeRating = request.ChallengeRating,
                 IsLegendary = request.IsLegendary,
+                SortBy = request.SortBy,
+                SortDescending = request.SortDescending,
                 PageSize = request.PageSize,
                 Skip = request.Skip
             };

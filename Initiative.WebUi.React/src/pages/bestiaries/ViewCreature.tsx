@@ -1,18 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Link, useParams, useLocation } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { BestiaryClient, CreatureDetail } from '../../api/bestiaryClient';
 import CreatureStatBlock from '../../components/bestiaries/CreatureStatBlock';
 import './ViewCreature.css';
 
-interface LocationState {
-  bestiaryId?: string;
-  bestiaryName?: string;
-}
-
 const ViewCreature: React.FC = () => {
   const { creatureId } = useParams<{ creatureId: string }>();
-  const location = useLocation();
-  const state = location.state as LocationState | null;
 
   const [creature, setCreature] = useState<CreatureDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,13 +23,13 @@ const ViewCreature: React.FC = () => {
       .finally(() => setLoading(false));
   }, [creatureId, bestiaryClient]);
 
-  const backPath = state?.bestiaryId ? `/bestiaries/${state.bestiaryId}` : '/bestiaries';
-  const backLabel = state?.bestiaryName ? `\u2190 ${state.bestiaryName}` : '\u2190 Bestiary';
+  const backPath = '/bestiaries';
+  const backLabel = '\u2190 Bestiaries';
 
   return (
     <div className="view-creature-container">
       <div className="view-creature-nav">
-        <Link to={backPath} state={state} className="view-creature-back">{backLabel}</Link>
+        <Link to={backPath} className="view-creature-back">{backLabel}</Link>
       </div>
 
       {loading && <p className="view-creature-loading">Loading...</p>}

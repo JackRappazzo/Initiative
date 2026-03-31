@@ -1,62 +1,121 @@
-.bestiaries-container {
+/* ── Page layout ────────────────────────────────────────────────────────────── */
+.bestiaries-layout {
+  display: flex;
+  gap: 1.5rem;
   padding: 2rem;
-  max-width: 1100px;
+  max-width: 1300px;
   margin: 0 auto;
+  align-items: flex-start;
 }
 
-.bestiaries-header {
-  margin-bottom: 1.5rem;
-}
-
-.bestiaries-header h1 {
-  font-size: 2rem;
-  margin: 0;
-}
-
-.bestiaries-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 1rem;
-}
-
-.bestiary-card {
+/* ── Sidebar ─────────────────────────────────────────────────────────────────── */
+.bestiaries-sidebar {
+  flex: 0 0 220px;
   background: var(--card-bg, #1e1e2e);
   border: 1px solid var(--card-border, #313244);
   border-radius: 8px;
-  padding: 1.25rem 1rem;
+  padding: 1rem;
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.sidebar-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted, #6c7086);
+}
+
+.sidebar-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.sidebar-ctrl-btn {
+  background: none;
+  border: none;
+  color: var(--accent, #89b4fa);
   cursor: pointer;
-  transition: border-color 0.15s, transform 0.1s;
+  font-size: 0.78rem;
+  padding: 0;
+}
+
+.sidebar-ctrl-btn:hover {
+  text-decoration: underline;
+}
+
+.sidebar-ctrl-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.sidebar-ctrl-sep {
+  color: var(--text-muted, #6c7086);
+  font-size: 0.78rem;
+}
+
+.sidebar-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.15rem;
 }
 
-.bestiary-card:hover {
-  border-color: var(--accent, #89b4fa);
-  transform: translateY(-2px);
+.sidebar-item {
+  border-radius: 4px;
 }
 
-.bestiary-card:focus {
-  outline: 2px solid var(--accent, #89b4fa);
-  outline-offset: 2px;
-}
-
-.bestiary-card-name {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.bestiary-card-meta {
+.sidebar-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.3rem 0.25rem;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  flex-wrap: wrap;
 }
 
-.bestiary-badge {
-  padding: 0.15rem 0.6rem;
+.sidebar-label:hover {
+  background: var(--card-hover, #2a2a3e);
+}
+
+.sidebar-checkbox {
+  accent-color: var(--accent, #89b4fa);
+  flex-shrink: 0;
+}
+
+.sidebar-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-source {
+  font-size: 0.72rem;
+  color: var(--text-muted, #6c7086);
+}
+
+.sidebar-badge {
+  padding: 0.1rem 0.45rem;
   border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.65rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -71,13 +130,150 @@
   color: var(--badge-custom-text, #a6e3a1);
 }
 
-.bestiary-source {
-  font-size: 0.8rem;
+.sidebar-loading,
+.sidebar-error {
+  font-size: 0.85rem;
+  color: var(--text-muted, #6c7086);
+  margin: 0.5rem 0;
+}
+
+/* ── Main content ────────────────────────────────────────────────────────────── */
+.bestiaries-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.bestiaries-toolbar {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.bestiaries-title {
+  font-size: 2rem;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.bestiary-search-bar {
+  flex: 1;
+  min-width: 160px;
+  max-width: 360px;
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--card-border, #313244);
+  background: var(--card-bg, #1e1e2e);
+  color: inherit;
+  font-size: 0.95rem;
+}
+
+.bestiary-search-bar:focus {
+  outline: 2px solid var(--accent, #89b4fa);
+  outline-offset: 1px;
+}
+
+.bestiary-count {
+  font-size: 0.85rem;
+  color: var(--text-muted, #6c7086);
+  white-space: nowrap;
+}
+
+/* ── Creature table (imported from BrowseBestiary style) ─────────────────────── */
+.creature-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.creature-table th {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 2px solid var(--card-border, #313244);
+  font-weight: 600;
+  color: var(--text-muted, #6c7086);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.sortable-th:hover {
+  color: var(--text, #cdd6f4);
+}
+
+.sortable-th--active {
+  color: var(--accent, #89b4fa);
+}
+
+.creature-row {
+  border-bottom: 1px solid var(--card-border, #313244);
+  transition: background 0.1s;
+}
+
+.creature-row:hover {
+  background: var(--card-hover, #2a2a3e);
+}
+
+.creature-row--clickable {
+  cursor: pointer;
+}
+
+.creature-row--clickable:focus {
+  outline: 2px solid var(--accent, #89b4fa);
+  outline-offset: -2px;
+}
+
+.creature-table td {
+  padding: 0.6rem 0.75rem;
+  vertical-align: middle;
+}
+
+.creature-name {
+  font-weight: 500;
+}
+
+.creature-type {
+  color: var(--text-muted, #6c7086);
+  text-transform: capitalize;
+}
+
+.creature-cr {
+  color: var(--text-muted, #6c7086);
+  white-space: nowrap;
+}
+
+.creature-flags {
+  text-align: right;
+}
+
+.legendary-badge {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--legendary-bg, #f38ba8);
+  color: var(--legendary-text, #1e1e2e);
+}
+
+.table-loading,
+.table-empty {
+  text-align: center;
+  padding: 2rem;
   color: var(--text-muted, #6c7086);
 }
 
-/* Spacing for the pagination rows */
-.bestiaries-container .pagination {
-  margin-top: 1.5rem;
+/* Pagination spacing */
+.bestiaries-main .pagination {
+  margin-top: 1rem;
   margin-bottom: 0.5rem;
 }
+

@@ -39,6 +39,15 @@ namespace Initiative.Persistence.Models.Bestiary
         /// </summary>
         public string? OwnerId { get; set; }
 
+        /// <summary>
+        /// Column to sort by. Defaults to Name.
+        /// When sorting by Type or ChallengeRating, Name is used as a tie-breaker.
+        /// </summary>
+        public CreatureSortBy SortBy { get; set; } = CreatureSortBy.Name;
+
+        /// <summary>When true, sort in descending order. Defaults to false.</summary>
+        public bool SortDescending { get; set; } = false;
+
         /// <summary>Maximum number of results to return. Defaults to 20.</summary>
         public int PageSize { get; set; } = 20;
 
