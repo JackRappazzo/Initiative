@@ -9,6 +9,7 @@ import EditEncounter from "./pages/encounters/EditEncounter";
 import { JoinLobby, Lobby } from "./pages/lobby";
 import ListBestiaries from "./pages/bestiaries/ListBestiaries";
 import BrowseBestiary from "./pages/bestiaries/BrowseBestiary";
+import ViewCreature from "./pages/bestiaries/ViewCreature";
 import { AuthProvider } from './contexts/AuthContext';
 import { UserProvider } from './contexts/UserContext';
 import './App.css'; 
@@ -31,6 +32,7 @@ const App: React.FC = () => {
               <Route path="/lobby/:roomCode" element={<Lobby />} />
               <Route path="/bestiaries" element={<ListBestiaries />} />
               <Route path="/bestiaries/:bestiaryId" element={<BrowseBestiary />} />
+              <Route path="/bestiaries/:bestiaryId/creatures/:creatureId" element={<ViewCreature />} />
             </Route>
           </Routes>
         </Router>

@@ -58,6 +58,15 @@
   background: var(--card-hover, #2a2a3e);
 }
 
+.creature-row--clickable {
+  cursor: pointer;
+}
+
+.creature-row--clickable:focus {
+  outline: 2px solid var(--accent, #89b4fa);
+  outline-offset: -2px;
+}
+
 .creature-table td {
   padding: 0.6rem 0.75rem;
   vertical-align: middle;

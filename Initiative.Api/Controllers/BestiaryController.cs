@@ -4,6 +4,8 @@ using Initiative.Api.Messages.Bestiary;
 using Initiative.Persistence.Models.Bestiary;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
+using MongoDB.Bson.IO;
 
 namespace Initiative.Api.Controllers
 {
@@ -82,6 +84,21 @@ namespace Initiative.Api.Controllers
             var totalCount = await _bestiaryService.CountCreatures(query, cancellationToken);
 
             return Ok(new CountCreaturesResponse { TotalCount = totalCount });
+        }
+
+        [HttpGet("creatures/{creatureId}")]
+        public async Task<IActionResult> GetCreatureById(string creatureId, CancellationToken cancellationToken)
+        {
+            var creature = await _bestiaryService.GetCreatureById(creatureId, cancellationToken);
+            if (creature is null) return NotFound();
+
+            var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.RelaxedExtendedJson };
+            var rawJson = creature.RawData.ToJson(jsonWriterSettings);
+
+            return Content(
+                $$"""{ "id": "{{creature.Id}}", "name": {{System.Text.Json.JsonSerializer.Serialize(creature.Name)}}, "bestiaryId": "{{creature.BestiaryId}}", "source": {{System.Text.Json.JsonSerializer.Serialize(creature.Source)}}, "rawData": {{rawJson}} }""",
+                "application/json"
+            );
         }
     }
 }

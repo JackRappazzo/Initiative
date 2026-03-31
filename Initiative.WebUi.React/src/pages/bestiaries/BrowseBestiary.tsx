@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { Link, useParams, useLocation } from 'react-router-dom';
+import { Link, useParams, useLocation, useNavigate } from 'react-router-dom';
 import { BestiaryClient, CreatureListItem } from '../../api/bestiaryClient';
 import Pagination from '../../components/Pagination';
 import './BrowseBestiary.css';
@@ -13,6 +13,7 @@ interface LocationState {
 const BrowseBestiary: React.FC = () => {
   const { bestiaryId } = useParams<{ bestiaryId: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
   const locationState = location.state as LocationState | null;
 
   const [bestiaryName, setBestiaryName] = useState<string>(locationState?.bestiaryName ?? '');
@@ -61,6 +62,12 @@ const BrowseBestiary: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleCreatureClick = (creature: CreatureListItem) => {
+    navigate(`/bestiaries/${bestiaryId}/creatures/${creature.id}`, {
+      state: { bestiaryId, bestiaryName },
+    });
+  };
+
   return (
     <div className="browse-container">
       <div className="browse-header">
@@ -95,7 +102,13 @@ const BrowseBestiary: React.FC = () => {
                 </tr>
               ) : (
                 creatures.map((creature) => (
-                  <tr key={creature.id} className="creature-row">
+                  <tr
+                    key={creature.id}
+                    className="creature-row creature-row--clickable"
+                    onClick={() => handleCreatureClick(creature)}
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === 'Enter' && handleCreatureClick(creature)}
+                  >
                     <td className="creature-name">{creature.name}</td>
                     <td className="creature-type">{creature.creatureType ?? '—'}</td>
                     <td className="creature-cr">{creature.challengeRating ?? '—'}</td>

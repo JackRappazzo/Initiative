@@ -19,5 +19,10 @@ namespace Initiative.Api.Core.Services.Bestiary
         /// ignoring the Skip and PageSize pagination fields.
         /// </summary>
         Task<long> CountCreatures(BestiarySearchQuery query, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Returns a single creature by its ID, or null if not found.
+        /// </summary>
+        Task<BestiaryCreatureDocument?> GetCreatureById(string creatureId, CancellationToken cancellationToken);
     }
 }

@@ -1,0 +1,99 @@
+/* Classic D&D stat block styling */
+.stat-block {
+  background: var(--stat-block-bg, #fdf1dc);
+  color: var(--stat-block-text, #1a1a1a);
+  border: 2px solid var(--stat-block-border, #8b2323);
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  font-family: 'Noto Serif', 'Georgia', 'Times New Roman', serif;
+  font-size: 0.9rem;
+  max-width: 680px;
+  box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.4);
+  line-height: 1.4;
+}
+
+/* Header */
+.stat-block__header {
+  margin-bottom: 0.25rem;
+}
+
+.stat-block__name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--stat-block-heading, #7a1e1e);
+  margin: 0 0 0.1rem;
+  font-variant: small-caps;
+}
+
+.stat-block__meta {
+  font-style: italic;
+  margin: 0;
+  color: var(--stat-block-text, #1a1a1a);
+}
+
+/* Dividers */
+.stat-block__divider {
+  border: none;
+  border-top: 1px solid var(--stat-block-border, #8b2323);
+  margin: 0.4rem 0;
+  opacity: 0.4;
+}
+
+.stat-block__divider--thick {
+  border-top-width: 3px;
+  opacity: 1;
+}
+
+/* Property lines */
+.stat-block__property {
+  margin: 0.2rem 0;
+}
+
+.stat-block__property strong {
+  color: var(--stat-block-heading, #7a1e1e);
+}
+
+/* Ability scores */
+.stat-block__abilities {
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+  padding: 0.25rem 0;
+}
+
+.stat-block__ability {
+  flex: 1;
+}
+
+.stat-block__ability-label {
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--stat-block-heading, #7a1e1e);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-block__ability-score {
+  font-size: 0.85rem;
+}
+
+/* Section titles */
+.stat-block__section-title {
+  color: var(--stat-block-heading, #7a1e1e);
+  font-size: 1rem;
+  font-variant: small-caps;
+  font-weight: 700;
+  border-bottom: 1px solid var(--stat-block-border, #8b2323);
+  padding-bottom: 0.1rem;
+  margin: 0.5rem 0 0.25rem;
+}
+
+/* Features / actions */
+.stat-block__feature {
+  margin: 0.3rem 0;
+}
+
+.stat-block__feature-name {
+  color: var(--stat-block-text, #1a1a1a);
+  font-style: italic;
+}
