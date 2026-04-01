@@ -8,8 +8,8 @@ import ListEncounters from "./pages/encounters/ListEncounters";
 import EditEncounter from "./pages/encounters/EditEncounter";
 import { JoinLobby, Lobby } from "./pages/lobby";
 import ListBestiaries from "./pages/bestiaries/ListBestiaries";
-import ViewCreature from "./pages/bestiaries/ViewCreature";
-import { AuthProvider } from './contexts/AuthContext';
+import ViewCreature from "./pages/bestiaries/ViewCreature";import ListParties from './pages/parties/ListParties';
+import EditParty from './pages/parties/EditParty';import { AuthProvider } from './contexts/AuthContext';
 import { UserProvider } from './contexts/UserContext';
 import './App.css'; 
 
@@ -31,6 +31,9 @@ const App: React.FC = () => {
               <Route path="/lobby/:roomCode" element={<Lobby />} />
               <Route path="/bestiaries" element={<ListBestiaries />} />
               <Route path="/bestiaries/creatures/:creatureId" element={<ViewCreature />} />
+              <Route path="/parties" element={<ListParties />} />
+              <Route path="/parties/new" element={<EditParty />} />
+              <Route path="/parties/:partyId/edit" element={<EditParty />} />
             </Route>
           </Routes>
         </Router>

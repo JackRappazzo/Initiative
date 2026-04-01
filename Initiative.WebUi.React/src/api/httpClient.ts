@@ -137,6 +137,13 @@ public static GetInstance() {
     })).data;
   }
 
+  public async delete<T>(url: string): Promise<T> {
+    return (await this.api.delete(url, {
+      headers: {'Content-Type': 'application/json' },
+      withCredentials: true,
+    })).data;
+  }
+
   // Or expose full Axios instance
   public get instance(): AxiosInstance {
     return this.api;

@@ -1,0 +1,155 @@
+.edit-party-container {
+  padding: 2rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.edit-party-container h1 {
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.party-name-field {
+  margin-bottom: 2rem;
+}
+
+.party-name-field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.party-name-field input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.party-name-field input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.members-section h2 {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.members-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+}
+
+.member-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.member-name-display {
+  flex: 1;
+  font-size: 1rem;
+  color: #333;
+  cursor: text;
+  padding: 0.3rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  transition: border-color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.member-name-display:hover {
+  border-color: #ccc;
+  background: #fafafa;
+}
+
+.member-name-display.placeholder {
+  color: #aaa;
+  font-style: italic;
+}
+
+.member-name-input {
+  flex: 1;
+  padding: 0.3rem 0.4rem;
+  font-size: 1rem;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  outline: none;
+}
+
+.member-level-label {
+  font-size: 0.85rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.member-level-input {
+  width: 60px;
+  padding: 0.3rem 0.4rem;
+  font-size: 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.member-level-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.btn-remove-member {
+  background: none;
+  border: none;
+  color: #dc3545;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.btn-remove-member:hover {
+  color: #a71d2a;
+}
+
+.btn-add-member {
+  background: none;
+  border: 1px dashed #007bff;
+  color: #007bff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  width: 100%;
+  margin-bottom: 2rem;
+  transition: background 0.15s;
+}
+
+.btn-add-member:hover {
+  background: #f0f7ff;
+}
+
+.edit-party-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.error-message {
+  color: #dc3545;
+  padding: 1rem;
+  background: #fff5f5;
+  border-radius: 4px;
+  border: 1px solid #f5c6cb;
+  margin-bottom: 1rem;
+}

@@ -1,0 +1,109 @@
+.parties-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.parties-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.parties-header .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 0.75rem 1.5rem;
+}
+
+.parties-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.party-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.party-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.party-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.party-title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.party-member-count {
+  color: #666;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.party-members-preview {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+  color: #555;
+}
+
+.party-members-preview li {
+  padding: 0.2rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.member-level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  padding: 0.1rem 0.35rem;
+  background: #e9ecef;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #495057;
+  flex-shrink: 0;
+}
+
+.party-overflow {
+  color: #999;
+  font-style: italic;
+}
+
+.party-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.error-message {
+  color: #dc3545;
+  padding: 1rem;
+  background: #fff5f5;
+  border-radius: 4px;
+  border: 1px solid #f5c6cb;
+  margin: 1rem 0;
+}
