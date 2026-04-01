@@ -9,6 +9,7 @@ import BestiaryPicker from '../../components/bestiaries/BestiaryPicker';
 import PartyPicker from '../../components/encounters/PartyPicker';
 import CreatureStatBlock from '../../components/bestiaries/CreatureStatBlock';
 import { useUser } from '../../contexts/UserContext';
+import { isTaleSpire } from '../../utils/talespire';
 
 import './EditEncounter.css';
 
@@ -338,6 +339,9 @@ const EditEncounter: React.FC = () => {
 
   return (
     <div className="edit-encounter-container">
+      {isTaleSpire() && (
+        <div className="talespire-badge">TaleSpire Connected</div>
+      )}
       <div className="edit-encounter-header">
         <EncounterHeader
           displayName={encounter.displayName}

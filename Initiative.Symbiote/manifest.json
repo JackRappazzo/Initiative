@@ -2,15 +2,10 @@
   "manifestVersion": 1,
   "name": "Initiative",
   "summary": "D&D combat tracker and encounter manager",
-  "entryPoint": "https://<your-azure-app>.azurewebsites.net",
+  "entryPoint": "http://localhost:3000",
   "api": {
     "version": "0.1",
-    "initTimeout": 10,
-    "subscriptions": {
-      "symbiote": {
-        "onStateChangeEvent": "handleSymbioteStateChange"
-      }
-    }
+    "initTimeout": 10
   },
   "controls": {
     "reload": true
