@@ -99,11 +99,6 @@ function cleanTags(text: string): string {
     .trim();
 }
 
-/** Plain text — used for attribute values that aren't rendered as React nodes */
-function renderText(text: string): string {
-  return cleanTags(text);
-}
-
 /**
  * Split a plain-text segment on standalone to-hit modifiers like +4 or -1.
  * A to-hit modifier is a sign followed by digits that is NOT immediately
