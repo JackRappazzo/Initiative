@@ -130,42 +130,48 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
 
       {/* HP: current / max */}
       <div className="creature-hp-cell">
-        {editingField === 'currentHP' ? (
-          <NumericInput
-            value={creature.currentHP}
-            onChange={(value) => handleFieldChange('currentHP', value)}
-            onBlur={stopEditing}
-            ariaLabel="Hit Points"
-            placeholder="–"
-            className="creature-field-input creature-hp-input"
-          />
+        {creature.isPlayer ? (
+          <span className="creature-field-display creature-player-dash">--</span>
         ) : (
-          <span
-            className="creature-field-display creature-hp-part"
-            onClick={() => startEditing('currentHP')}
-            title="Click to edit current HP"
-          >
-            {displayValue(creature.currentHP, '–')}
-          </span>
-        )}
-        <span className="creature-hp-sep">/</span>
-        {editingField === 'maxHP' ? (
-          <NumericInput
-            value={creature.maxHP}
-            onChange={(value) => handleFieldChange('maxHP', value)}
-            onBlur={stopEditing}
-            ariaLabel="Maximum Hit Points"
-            placeholder="–"
-            className="creature-field-input creature-hp-input"
-          />
-        ) : (
-          <span
-            className="creature-field-display creature-hp-part"
-            onClick={() => startEditing('maxHP')}
-            title="Click to edit max HP"
-          >
-            {displayValue(creature.maxHP, '–')}
-          </span>
+          <>
+            {editingField === 'currentHP' ? (
+              <NumericInput
+                value={creature.currentHP}
+                onChange={(value) => handleFieldChange('currentHP', value)}
+                onBlur={stopEditing}
+                ariaLabel="Hit Points"
+                placeholder="–"
+                className="creature-field-input creature-hp-input"
+              />
+            ) : (
+              <span
+                className="creature-field-display creature-hp-part"
+                onClick={() => startEditing('currentHP')}
+                title="Click to edit current HP"
+              >
+                {displayValue(creature.currentHP, '–')}
+              </span>
+            )}
+            <span className="creature-hp-sep">/</span>
+            {editingField === 'maxHP' ? (
+              <NumericInput
+                value={creature.maxHP}
+                onChange={(value) => handleFieldChange('maxHP', value)}
+                onBlur={stopEditing}
+                ariaLabel="Maximum Hit Points"
+                placeholder="–"
+                className="creature-field-input creature-hp-input"
+              />
+            ) : (
+              <span
+                className="creature-field-display creature-hp-part"
+                onClick={() => startEditing('maxHP')}
+                title="Click to edit max HP"
+              >
+                {displayValue(creature.maxHP, '–')}
+              </span>
+            )}
+          </>
         )}
       </div>
 
@@ -191,7 +197,9 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
       )}
 
       {/* AC */}
-      {editingField === 'ac' ? (
+      {creature.isPlayer ? (
+        <span className="creature-field-display creature-player-dash">--</span>
+      ) : editingField === 'ac' ? (
         <NumericInput
           value={creature.ac}
           min={0}

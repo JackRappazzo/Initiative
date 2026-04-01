@@ -6,6 +6,7 @@ import { EncounterState } from '../../types';
 import { useCreatureManagement, useLobbyConnection } from '../../hooks';
 import { EditableCreatureList, EncounterHeader, EncounterStatus } from '../../components';
 import BestiaryPicker from '../../components/bestiaries/BestiaryPicker';
+import PartyPicker from '../../components/encounters/PartyPicker';
 import CreatureStatBlock from '../../components/bestiaries/CreatureStatBlock';
 import { useUser } from '../../contexts/UserContext';
 
@@ -34,6 +35,7 @@ const EditEncounter: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [editingName, setEditingName] = useState(false);
   const [showBestiaryPicker, setShowBestiaryPicker] = useState(false);
+  const [showPartyPicker, setShowPartyPicker] = useState(false);
   const [newName, setNewName] = useState('');
   const [encounterState, setEncounterState] = useState<EncounterState>({
     isRunning: false,
@@ -184,7 +186,27 @@ const EditEncounter: React.FC = () => {
       const modifier = c.initiativeModifier ?? 0;
       return { ...c, initiative: roll + modifier };
     });
-    handleCreaturesChange(rolled);
+    const sorted = [...rolled].sort((a, b) => b.initiative - a.initiative);
+    handleCreaturesChange(sorted);
+  }, [creatures, handleCreaturesChange]);
+
+  const handleChooseParty = useCallback((party: import('../../api/partyClient').Party) => {
+    setShowPartyPicker(false);
+    // Remove existing player characters, keep non-player creatures
+    const nonPlayers = creatures.filter((c) => !c.isPlayer);
+    const partyCreatures = party.members.map((m) => ({
+      isPlayer: true,
+      displayName: m.name,
+      creatureName: undefined,
+      creatureId: undefined,
+      initiative: 0,
+      initiativeModifier: 0,
+      maxHP: 0,
+      currentHP: 0,
+      ac: 0,
+      isEditing: false,
+    }));
+    handleCreaturesChange([...nonPlayers, ...partyCreatures]);
   }, [creatures, handleCreaturesChange]);
 
   const loadEncounter = useCallback(async () => {
@@ -379,6 +401,9 @@ const EditEncounter: React.FC = () => {
           <button className="add-creature-button" onClick={() => setShowBestiaryPicker(true)}>
             Add Creature
           </button>
+          <button className="add-creature-button" onClick={() => setShowPartyPicker(true)}>
+            Choose Party
+          </button>
         </div>
 
         {encounterState.isRunning && (
@@ -395,6 +420,12 @@ const EditEncounter: React.FC = () => {
         <BestiaryPicker
           onCreatureSelect={handleAddFromBestiary}
           onClose={() => setShowBestiaryPicker(false)}
+        />
+      )}
+      {showPartyPicker && (
+        <PartyPicker
+          onPartySelect={handleChooseParty}
+          onClose={() => setShowPartyPicker(false)}
         />
       )}
     </div>

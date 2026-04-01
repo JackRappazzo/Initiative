@@ -56,6 +56,24 @@ export const EditableCreatureList: React.FC<EditableCreatureListProps> = ({
 
       if (oldIndex !== newIndex) {
         const newCreatures = arrayMove(creatures, oldIndex, newIndex);
+
+        // Adjust the moved creature's initiative to fit between its new neighbours
+        const above = newCreatures[newIndex - 1];
+        const below = newCreatures[newIndex + 1];
+
+        let newInitiative: number | undefined;
+        if (above !== undefined && below !== undefined) {
+          newInitiative = Math.floor((above.initiative + below.initiative) / 2);
+        } else if (above !== undefined) {
+          newInitiative = above.initiative;
+        } else if (below !== undefined) {
+          newInitiative = below.initiative;
+        }
+
+        if (newInitiative !== undefined) {
+          newCreatures[newIndex] = { ...newCreatures[newIndex], initiative: newInitiative };
+        }
+
         onCreaturesChange(newCreatures);
       }
     }
