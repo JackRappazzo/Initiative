@@ -29,6 +29,20 @@ public static GetInstance() {
     this.api = axios.create({
       baseURL,
       withCredentials: true, // for refresh cookies
+      paramsSerializer: (params) => {
+        const parts: string[] = [];
+        for (const [key, value] of Object.entries(params)) {
+          if (value === undefined || value === null) continue;
+          if (Array.isArray(value)) {
+            for (const item of value) {
+              parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(item)}`);
+            }
+          } else {
+            parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+          }
+        }
+        return parts.join('&');
+      },
     });
 
     this.setupInterceptors();

@@ -139,7 +139,7 @@ export class BestiaryClient {
 
   private buildParams(params: SearchCreaturesParams): Record<string, unknown> {
     const result: Record<string, unknown> = {};
-    if (params.bestiaryIds?.length) result["bestiaryIds"] = params.bestiaryIds;
+    if (params.bestiaryIds !== undefined) result["bestiaryIds"] = params.bestiaryIds;
     if (params.name) result["name"] = params.name;
     if (params.sortBy) result["sortBy"] = params.sortBy;
     if (params.sortDescending) result["sortDescending"] = params.sortDescending;
