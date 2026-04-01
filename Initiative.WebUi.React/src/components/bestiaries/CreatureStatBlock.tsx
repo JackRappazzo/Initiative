@@ -38,9 +38,6 @@ function rollExpression(expr: string): RollResult {
   return { expression: expr, rolls, total };
 }
 
-// ── Dice regex (matches expressions like 2d6, 1d20+5, 3d8-2, 1d6 + 4) ─────────
-const DICE_RE = /\b(\d*d\d+(?:\s*[+-]\s*\d+)?)\b/gi;
-
 interface Props {
   data: FiveEToolsRawData;
 }
@@ -174,14 +171,6 @@ function capitalize(s: string): string {
 }
 
 // ── Entry rendering ───────────────────────────────────────────────────────────
-
-function renderEntries(entries: (string | FiveEToolsEntry)[]): string {
-  return entries.map((e) => {
-    if (typeof e === 'string') return renderText(e);
-    if (e.entries) return renderEntries(e.entries);
-    return '';
-  }).filter(Boolean).join(' ');
-}
 
 function renderEntriesAsNodes(
   entries: (string | FiveEToolsEntry)[],
