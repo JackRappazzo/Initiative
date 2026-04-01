@@ -6,13 +6,15 @@ interface EncounterStatusProps {
   creatures: EditableCreature[];
   onToggleEncounter: () => void;
   onNextTurn: () => void;
+  onPrevTurn: () => void;
 }
 
 export const EncounterStatus: React.FC<EncounterStatusProps> = ({
   encounterState,
   creatures,
   onToggleEncounter,
-  onNextTurn
+  onNextTurn,
+  onPrevTurn
 }) => {
   const { isRunning, currentTurn, turnNumber } = encounterState;
 
@@ -27,14 +29,12 @@ export const EncounterStatus: React.FC<EncounterStatusProps> = ({
 
       {isRunning && (
         <div className="encounter-status">
-          <span>Turn {turnNumber}</span>
-          <span>Active: {creatures[currentTurn]?.displayName || 'None'}</span>
-          <button 
-            className="control-button primary"
-            onClick={onNextTurn}
-          >
-            Next Turn
-          </button>
+          <span className="encounter-turn-number">Turn {turnNumber}</span>
+          <div className="encounter-turn-nav">
+            <button className="control-button secondary" onClick={onPrevTurn} title="Previous turn">◀</button>
+            <span className="encounter-active-creature">{creatures[currentTurn]?.displayName || 'None'}</span>
+            <button className="control-button primary" onClick={onNextTurn} title="Next turn">▶</button>
+          </div>
         </div>
       )}
     </>

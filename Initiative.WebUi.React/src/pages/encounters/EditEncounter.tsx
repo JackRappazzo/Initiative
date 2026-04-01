@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EncounterClient, FetchEncounterResponse } from '../../api/encounterClient';
-import { CreatureListItem, BestiaryClient } from '../../api/bestiaryClient';
+import { CreatureListItem, BestiaryClient, FiveEToolsRawData } from '../../api/bestiaryClient';
 import { EncounterState } from '../../types';
 import { useCreatureManagement, useLobbyConnection } from '../../hooks';
 import { EditableCreatureList, EncounterHeader, EncounterStatus } from '../../components';
 import BestiaryPicker from '../../components/bestiaries/BestiaryPicker';
+import CreatureStatBlock from '../../components/bestiaries/CreatureStatBlock';
 import { useUser } from '../../contexts/UserContext';
 
 import './EditEncounter.css';
@@ -39,6 +40,7 @@ const EditEncounter: React.FC = () => {
     currentTurn: 0,
     turnNumber: 1
   });
+  const [activeStatBlock, setActiveStatBlock] = useState<FiveEToolsRawData | null>(null);
 
   const {
     creatures,
@@ -206,6 +208,24 @@ const EditEncounter: React.FC = () => {
     loadEncounter();
   }, [loadEncounter]);
 
+  // Fetch stat block for the current creature whenever the active turn changes
+  useEffect(() => {
+    if (!encounterState.isRunning) {
+      setActiveStatBlock(null);
+      return;
+    }
+    const current = creatures[encounterState.currentTurn];
+    if (!current?.creatureId || current.isPlayer) {
+      setActiveStatBlock(null);
+      return;
+    }
+    let cancelled = false;
+    bestiaryClient.getCreatureById(current.creatureId)
+      .then(detail => { if (!cancelled) setActiveStatBlock(detail.rawData); })
+      .catch(() => { if (!cancelled) setActiveStatBlock(null); });
+    return () => { cancelled = true; };
+  }, [encounterState.isRunning, encounterState.currentTurn, creatures, bestiaryClient]);
+
   const handleNameEdit = async () => {
     if (!encounter || !encounterId || !newName.trim()) return;
     
@@ -264,6 +284,28 @@ const EditEncounter: React.FC = () => {
     });
   };
 
+  const prevTurn = () => {
+    if (creatures.length === 0) return;
+
+    setEncounterState(prev => {
+      let pt = prev.currentTurn - 1;
+      let ptNumber = prev.turnNumber;
+
+      if (pt < 0) {
+        pt = creatures.length - 1;
+        ptNumber = Math.max(1, ptNumber - 1);
+      }
+
+      const newState = { ...prev, currentTurn: pt, turnNumber: ptNumber };
+
+      if (newState.isRunning) {
+        sendLobbyState(creatures, pt, ptNumber, newState.isRunning);
+      }
+
+      return newState;
+    });
+  };
+
   if (loading) {
     return <div className="edit-encounter-container">Loading encounter...</div>;
   }
@@ -301,6 +343,7 @@ const EditEncounter: React.FC = () => {
           creatures={creatures}
           onToggleEncounter={toggleEncounter}
           onNextTurn={nextTurn}
+          onPrevTurn={prevTurn}
         />
       </div>
 
@@ -310,30 +353,43 @@ const EditEncounter: React.FC = () => {
         </div>
       )}
 
-      <div className="creature-list">
-        <div className="creature-list-header">
-          <button 
-            className="control-button secondary sort-initiative-button"
-            onClick={sortByInitiative}
-            title="Sort by Initiative (Descending)"
-          >
-            Sort by Initiative
+      <div className={`encounter-body${encounterState.isRunning ? ' encounter-body--running' : ''}`}>
+        <div className="encounter-left">
+          <div className="creature-list">
+            <div className="creature-list-header">
+              <button 
+                className="control-button secondary sort-initiative-button"
+                onClick={sortByInitiative}
+                title="Sort by Initiative (Descending)"
+              >
+                Sort by Initiative
+              </button>
+            </div>
+            
+            <EditableCreatureList
+              creatures={creatures}
+              highlightedCreatureIndex={encounterState.isRunning ? encounterState.currentTurn : undefined}
+              onCreaturesChange={handleCreaturesChange}
+              onCreatureUpdate={updateCreature}
+              onCreatureRemove={removeCreature}
+              onRollAllInitiative={rollAllInitiative}
+            />
+          </div>
+
+          <button className="add-creature-button" onClick={() => setShowBestiaryPicker(true)}>
+            Add Creature
           </button>
         </div>
-        
-        <EditableCreatureList
-          creatures={creatures}
-          highlightedCreatureIndex={encounterState.isRunning ? encounterState.currentTurn : undefined}
-          onCreaturesChange={handleCreaturesChange}
-          onCreatureUpdate={updateCreature}
-          onCreatureRemove={removeCreature}
-          onRollAllInitiative={rollAllInitiative}
-        />
-      </div>
 
-      <button className="add-creature-button" onClick={() => setShowBestiaryPicker(true)}>
-        Add Creature
-      </button>
+        {encounterState.isRunning && (
+          <div className="encounter-statblock-panel">
+            {activeStatBlock
+              ? <CreatureStatBlock data={activeStatBlock} />
+              : <div className="encounter-statblock-empty">No stat block available</div>
+            }
+          </div>
+        )}
+      </div>
 
       {showBestiaryPicker && (
         <BestiaryPicker

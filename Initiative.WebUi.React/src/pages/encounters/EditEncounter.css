@@ -1,7 +1,51 @@
 .edit-encounter-container {
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
+}
+
+/* Two-column layout when encounter is running */
+.encounter-body {
+  display: block;
+}
+
+.encounter-body--running {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .encounter-body--running {
+    grid-template-columns: 1fr;
+  }
+
+  .encounter-statblock-panel {
+    position: static;
+    max-height: none;
+  }
+}
+
+.encounter-left {
+  min-width: 0;
+}
+
+.encounter-statblock-panel {
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.encounter-statblock-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #888;
+  font-style: italic;
 }
 
 .edit-encounter-header {
@@ -230,10 +274,30 @@
   display: flex;
   gap: 1rem;
   align-items: center;
+  justify-content: center;
   margin-top: 2rem;
   padding: 1rem;
   background: #f8f9fa;
   border-radius: 4px;
+}
+
+.encounter-turn-number {
+  font-size: 1rem;
+  color: #666;
+  min-width: 60px;
+}
+
+.encounter-turn-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.encounter-active-creature {
+  font-size: 1.1rem;
+  font-weight: 600;
+  min-width: 160px;
+  text-align: center;
 }
 
 .encounter-status span {
