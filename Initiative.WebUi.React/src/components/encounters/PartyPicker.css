@@ -84,35 +84,24 @@
   margin-bottom: 0.4rem;
 }
 
-.party-picker-item-members {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+.party-picker-item-summary {
+  font-size: 0.85rem;
+  color: #666;
 }
 
-.party-picker-member {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.82rem;
-  color: #555;
-  background: #f0f0f0;
+.party-picker-tooltip {
+  position: fixed;
+  transform: none;
+  white-space: pre;
+  background: #333;
+  color: #fff;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  padding: 0.4rem 0.65rem;
   border-radius: 4px;
-  padding: 0.15rem 0.5rem 0.15rem 0.25rem;
-}
-
-.party-picker-member-level {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1.6rem;
-  padding: 0.05rem 0.25rem;
-  background: #e9ecef;
-  border: 1px solid #ced4da;
-  border-radius: 3px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #495057;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  pointer-events: none;
 }
 
 .party-picker-no-members {
