@@ -32,7 +32,7 @@ namespace Initiative.UnitTests.Import.BestiaryImportServiceTests.ImportAsyncTest
         [Given]
         public void SourceProviderReturnsMonsterJson()
         {
-            SourceProvider.OpenMonsterManual25().Returns(JsonStream(MinimalMonsterJson()));
+            SourceProvider.OpenSource("MonsterManual25.json").Returns(JsonStream(MinimalMonsterJson()));
             Parser.Parse(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>())
                 .Returns([new BestiaryCreatureDocument
                 {

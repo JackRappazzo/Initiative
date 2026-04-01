@@ -8,7 +8,7 @@ namespace Initiative.UnitTests.Import.BestiaryImportServiceTests.ImportAsyncTest
         [When]
         public async Task ImportAsyncIsCalled()
         {
-            await BestiaryImportService.ImportAsync(CancellationToken);
+            await BestiaryImportService.ImportAsync("XMM", "Monster Manual (2025)", "MonsterManual25.json", CancellationToken);
         }
     }
 }
