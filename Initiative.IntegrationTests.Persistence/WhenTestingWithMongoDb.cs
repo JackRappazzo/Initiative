@@ -9,5 +9,12 @@ namespace Initiative.IntegrationTests.Persistence
     public abstract class WhenTestingWithMongoDb : ComposableTestingTheBehaviourOf
     {
         protected const string ConnectionString = ConnectionStrings.LocalTest;
+        protected readonly MongoTestResetService mongoTestResetService = new MongoTestResetService(ConnectionStrings.LocalTest);
+
+        public override async Task SetupAsync()
+        {
+            await mongoTestResetService.ResetDatabase();
+            await base.SetupAsync();
+        }
     }
 }
