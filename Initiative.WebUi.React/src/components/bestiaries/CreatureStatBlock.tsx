@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { FiveEToolsRawData, FiveEToolsEntry } from '../../api/bestiaryClient';
+import { isTaleSpire, rollInTray } from '../../utils/talespire';
 import './CreatureStatBlock.css';
 
 // ── Dice rolling ──────────────────────────────────────────────────────────────
@@ -299,7 +300,11 @@ const CreatureStatBlock: React.FC<Props> = ({ data }) => {
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
 
   const onRoll = useCallback((result: RollResult) => {
-    setLastRoll(result);
+    if (isTaleSpire()) {
+      rollInTray(result.expression, result.expression);
+    } else {
+      setLastRoll(result);
+    }
   }, []);
 
   const rollDetail = lastRoll && lastRoll.rolls.length > 1

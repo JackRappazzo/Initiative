@@ -1,0 +1,26 @@
+{
+  "manifestVersion": 1,
+  "name": "Initiative",
+  "summary": "D&D combat tracker and encounter manager",
+  "entryPoint": "https://<your-azure-app>.azurewebsites.net",
+  "api": {
+    "version": "0.1",
+    "initTimeout": 10,
+    "subscriptions": {
+      "symbiote": {
+        "onStateChangeEvent": "handleSymbioteStateChange"
+      }
+    }
+  },
+  "controls": {
+    "reload": true
+  },
+  "icons": {
+    "64x64": "/icon.png"
+  },
+  "environment": {
+    "extras": [
+      "colorStyles"
+    ]
+  }
+}
