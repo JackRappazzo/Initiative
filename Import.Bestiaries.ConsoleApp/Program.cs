@@ -18,13 +18,23 @@ using var scope = provider.CreateScope();
 
 var importer = scope.ServiceProvider.GetRequiredService<IBestiaryImportService>();
 
-try
+var sources = new[]
 {
-    await importer.ImportAsync(CancellationToken.None);
-}
-catch (Exception ex)
+    (Source: "XMM",  Name: "Monster Manual 2025",          File: "MonsterManual25.json"),
+    (Source: "XDMG", Name: "Dungeon Masters Guide (2024)", File: "DMG2024.json"),
+    (Source: "XPHB", Name: "Player's Handbook (2024)",     File: "PHB2024.json"),
+};
+
+foreach (var (source, name, file) in sources)
 {
-    Console.Error.WriteLine($"Import failed: {ex.Message}");
-    Environment.Exit(1);
+    try
+    {
+        await importer.ImportAsync(source, name, file, CancellationToken.None);
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Import of '{name}' failed: {ex.Message}");
+        Environment.Exit(1);
+    }
 }
 

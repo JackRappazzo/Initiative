@@ -2,6 +2,6 @@ namespace Import.Bestiaries.Core.Services
 {
     public interface ISourceProvider
     {
-        Stream OpenMonsterManual25();
+        Stream OpenSource(string resourceFileName);
     }
 }

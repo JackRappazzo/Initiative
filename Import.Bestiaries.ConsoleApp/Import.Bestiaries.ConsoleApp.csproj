@@ -13,6 +13,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Sources\MonsterManual25.json" />
+    <EmbeddedResource Include="Sources\DMG2024.json" />
+    <EmbeddedResource Include="Sources\PHB2024.json" />
   </ItemGroup>
 
   <ItemGroup>

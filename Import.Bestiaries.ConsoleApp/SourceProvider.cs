@@ -4,15 +4,16 @@ namespace Import.Bestiaries.ConsoleApp
 {
     public class SourceProvider : ISourceProvider
     {
-        private const string ResourceName = "Import.Bestiaries.ConsoleApp.Sources.MonsterManual25.json";
+        private const string ResourceNamespace = "Import.Bestiaries.ConsoleApp.Sources";
 
-        public Stream OpenMonsterManual25()
+        public Stream OpenSource(string resourceFileName)
         {
-            var stream = typeof(SourceProvider).Assembly.GetManifestResourceStream(ResourceName);
+            var resourceName = $"{ResourceNamespace}.{resourceFileName}";
+            var stream = typeof(SourceProvider).Assembly.GetManifestResourceStream(resourceName);
             if (stream is null)
                 throw new InvalidOperationException(
-                    $"Embedded resource '{ResourceName}' not found. " +
-                    "Ensure Sources/MonsterManual25.json is marked as EmbeddedResource in the project file.");
+                    $"Embedded resource '{resourceName}' not found. " +
+                    $"Ensure Sources/{resourceFileName} is marked as EmbeddedResource in the project file.");
             return stream;
         }
     }

@@ -6,9 +6,6 @@ namespace Import.Bestiaries.Core.Services
 {
     public class BestiaryImportService : IBestiaryImportService
     {
-        private const string BestiarySource = "XMM";
-        private const string BestiaryName = "Monster Manual (2025)";
-
         private readonly IBestiaryRepository _repository;
         private readonly IFivEToolsParser _parser;
         private readonly ISourceProvider _sourceProvider;
@@ -23,18 +20,18 @@ namespace Import.Bestiaries.Core.Services
             _sourceProvider = sourceProvider;
         }
 
-        public async Task ImportAsync(CancellationToken cancellationToken)
+        public async Task ImportAsync(string bestiarySource, string bestiaryName, string resourceFileName, CancellationToken cancellationToken)
         {
-            var existing = await _repository.GetBestiaryBySource(BestiarySource, cancellationToken);
+            var existing = await _repository.GetBestiaryBySource(bestiarySource, cancellationToken);
 
             string bestiaryId;
             if (existing is null)
             {
-                Console.WriteLine($"Creating bestiary '{BestiaryName}' (source: {BestiarySource})...");
+                Console.WriteLine($"Creating bestiary '{bestiaryName}' (source: {bestiarySource})...");
                 var bestiary = new BestiaryDocument
                 {
-                    Name = BestiaryName,
-                    Source = BestiarySource
+                    Name = bestiaryName,
+                    Source = bestiarySource
                 };
                 bestiaryId = await _repository.CreateBestiary(bestiary, cancellationToken);
                 Console.WriteLine($"Bestiary created with id: {bestiaryId}");
@@ -42,13 +39,13 @@ namespace Import.Bestiaries.Core.Services
             else
             {
                 bestiaryId = existing.Id;
-                Console.WriteLine($"Bestiary '{BestiaryName}' already exists (id: {bestiaryId}). Upserting creatures...");
+                Console.WriteLine($"Bestiary '{bestiaryName}' already exists (id: {bestiaryId}). Upserting creatures...");
             }
 
             List<BestiaryCreatureDocument> creatures;
-            using (var stream = _sourceProvider.OpenMonsterManual25())
+            using (var stream = _sourceProvider.OpenSource(resourceFileName))
             {
-                creatures = _parser.Parse(bestiaryId, BestiarySource, stream);
+                creatures = _parser.Parse(bestiaryId, bestiarySource, stream);
             }
 
             Console.WriteLine($"Parsed {creatures.Count} creatures. Upserting...");
