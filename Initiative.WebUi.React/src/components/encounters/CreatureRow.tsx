@@ -3,8 +3,12 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { NumericInput } from '../ui';
 import { EditableCreature } from '../../types';
+import { BestiaryClient, FiveEToolsRawData } from '../../api/bestiaryClient';
+import CreatureStatBlock from '../bestiaries/CreatureStatBlock';
 
 type EditingField = 'initiative' | 'currentHP' | 'maxHP' | 'displayName' | 'ac' | null;
+
+const bestiaryClient = new BestiaryClient();
 
 interface CreatureRowProps {
   creature: EditableCreature;
@@ -23,6 +27,8 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
 }) => {
   const [editingField, setEditingField] = useState<EditingField>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const [statBlockData, setStatBlockData] = useState<FiveEToolsRawData | null>(null);
+  const [statBlockLoading, setStatBlockLoading] = useState(false);
 
   const {
     attributes,
@@ -39,9 +45,9 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const handleFieldChange = (field: keyof EditableCreature, value: any) => {
+  const handleFieldChange = useCallback((field: keyof EditableCreature, value: any) => {
     onCreatureChange(index, { ...creature, [field]: value });
-  };
+  }, [onCreatureChange, index, creature]);
 
   const startEditing = useCallback((field: EditingField) => {
     setEditingField(field);
@@ -55,10 +61,28 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
     setEditingField(null);
   }, []);
 
+  const openStatBlock = useCallback(async () => {
+    if (!creature.creatureId) return;
+    setStatBlockLoading(true);
+    try {
+      const detail = await bestiaryClient.getCreatureById(creature.creatureId);
+      setStatBlockData(detail.rawData);
+    } finally {
+      setStatBlockLoading(false);
+    }
+  }, [creature.creatureId]);
+
+  const rollInitiative = useCallback(() => {
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const modifier = creature.initiativeModifier ?? 0;
+    handleFieldChange('initiative', roll + modifier);
+  }, [creature.initiativeModifier, handleFieldChange]);
+
   const displayValue = (val: number | undefined, placeholder: string) =>
     val !== undefined && val !== null ? val.toString() : placeholder;
 
   return (
+    <>
     <div 
       ref={setNodeRef}
       style={{
@@ -76,24 +100,33 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
       </div>
 
       {/* Initiative */}
-      {editingField === 'initiative' ? (
-        <NumericInput
-          value={creature.initiative}
-          onChange={(value) => handleFieldChange('initiative', value)}
-          onBlur={stopEditing}
-          ariaLabel="Initiative"
-          placeholder="–"
-          className="creature-field-input"
-        />
-      ) : (
-        <span
-          className="creature-field-display"
-          onClick={() => startEditing('initiative')}
-          title="Click to edit initiative"
+      <div className="creature-init-cell">
+        {editingField === 'initiative' ? (
+          <NumericInput
+            value={creature.initiative}
+            onChange={(value) => handleFieldChange('initiative', value)}
+            onBlur={stopEditing}
+            ariaLabel="Initiative"
+            placeholder="–"
+            className="creature-field-input creature-init-input"
+          />
+        ) : (
+          <span
+            className="creature-field-display creature-init-value"
+            onClick={() => startEditing('initiative')}
+            title="Click to edit initiative"
+          >
+            {displayValue(creature.initiative, '–')}
+          </span>
+        )}
+        <button
+          className="die-button"
+          onClick={rollInitiative}
+          title={`Roll 1d20${(creature.initiativeModifier ?? 0) >= 0 ? '+' : ''}${creature.initiativeModifier ?? 0}`}
         >
-          {displayValue(creature.initiative, '–')}
-        </span>
-      )}
+          🎲
+        </button>
+      </div>
 
       {/* HP: current / max */}
       <div className="creature-hp-cell">
@@ -179,6 +212,16 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
       )}
 
       <div className="creature-controls">
+        {!creature.isPlayer && creature.creatureId && (
+          <button
+            className="control-button secondary"
+            onClick={openStatBlock}
+            disabled={statBlockLoading}
+            title="View stat block"
+          >
+            {statBlockLoading ? '…' : '📋'}
+          </button>
+        )}
         <button
           className="control-button danger"
           onClick={() => onCreatureRemove(index)}
@@ -187,5 +230,16 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
         </button>
       </div>
     </div>
+
+    {/* Stat block modal */}
+    {statBlockData && (
+      <div className="stat-block-overlay" onClick={() => setStatBlockData(null)}>
+        <div className="stat-block-modal" onClick={(e) => e.stopPropagation()}>
+          <button className="stat-block-close" onClick={() => setStatBlockData(null)}>✕</button>
+          <CreatureStatBlock data={statBlockData} />
+        </div>
+      </div>
+    )}
+  </>
   );
 };

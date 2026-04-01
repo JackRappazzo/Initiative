@@ -22,6 +22,7 @@ interface EditableCreatureListProps {
   onCreaturesChange: (creatures: EditableCreature[]) => void;
   onCreatureUpdate: (index: number, creature: EditableCreature) => void;
   onCreatureRemove: (index: number) => void;
+  onRollAllInitiative: () => void;
 }
 
 export const EditableCreatureList: React.FC<EditableCreatureListProps> = ({
@@ -30,6 +31,7 @@ export const EditableCreatureList: React.FC<EditableCreatureListProps> = ({
   onCreaturesChange,
   onCreatureUpdate,
   onCreatureRemove,
+  onRollAllInitiative,
 }) => {
   // Set up sensors for @dnd-kit
   const sensors = useSensors(
@@ -64,7 +66,16 @@ export const EditableCreatureList: React.FC<EditableCreatureListProps> = ({
       {/* Header Row */}
       <div className="creature-item creature-header">
         <div></div>
-        <div>Init</div>
+        <div className="creature-header-init">
+          Init
+          <button
+            className="die-button die-button-header"
+            onClick={onRollAllInitiative}
+            title="Roll initiative for all non-player creatures"
+          >
+            🎲
+          </button>
+        </div>
         <div>HP</div>
         <div>Name</div>
         <div>AC</div>

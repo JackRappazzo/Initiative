@@ -42,6 +42,7 @@ export const useCreatureManagement = (encounterId: string | undefined, encounter
       creatureName: source.name,
       creatureId: source.id,
       initiative: 0,
+      initiativeModifier: 0,
       maxHP: 10,
       currentHP: 10,
       ac: 10,

@@ -46,7 +46,7 @@
 
 .creature-item {
   display: grid;
-  grid-template-columns: 24px 48px 120px 1fr 48px auto;
+  grid-template-columns: 24px 90px 120px minmax(120px, 240px) 48px auto;
   gap: 0.5rem;
   align-items: center;
   padding: 0.35rem 0.5rem;
@@ -344,4 +344,92 @@
 
 .drag-handle:hover {
   color: #495057;
+}
+
+/* Stat block modal */
+.stat-block-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+}
+
+.stat-block-modal {
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
+  max-width: 680px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.stat-block-close {
+  position: sticky;
+  top: 0.5rem;
+  float: right;
+  margin: 0.5rem 0.5rem 0 0;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  z-index: 1;
+}
+
+/* Initiative cell with inline die button */
+.creature-init-cell {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.creature-init-value {
+  flex: 1;
+  min-width: 0;
+}
+
+.creature-init-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.die-button {
+  background: none;
+  border: none;
+  padding: 0 2px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.die-button:hover {
+  opacity: 1;
+}
+
+.creature-header-init {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.die-button-header {
+  opacity: 0.6;
+  font-size: 0.85rem;
+}
+
+.die-button-header:hover {
+  opacity: 1;
 }

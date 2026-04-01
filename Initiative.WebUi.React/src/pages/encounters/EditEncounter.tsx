@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EncounterClient, FetchEncounterResponse } from '../../api/encounterClient';
-import { CreatureListItem } from '../../api/bestiaryClient';
+import { CreatureListItem, BestiaryClient } from '../../api/bestiaryClient';
 import { EncounterState } from '../../types';
 import { useCreatureManagement, useLobbyConnection } from '../../hooks';
 import { EditableCreatureList, EncounterHeader, EncounterStatus } from '../../components';
@@ -13,6 +13,7 @@ import './EditEncounter.css';
 const EditEncounter: React.FC = () => {
   const { encounterId } = useParams<{ encounterId: string }>();
   const encounterClient = useMemo(() => new EncounterClient(), []);
+  const bestiaryClient = useMemo(() => new BestiaryClient(), []);
   const { userInfo } = useUser();
   
   // Get room code from UserContext
@@ -48,7 +49,7 @@ const EditEncounter: React.FC = () => {
     removeCreature: originalRemoveCreature,
     sortByInitiative: originalSortByInitiative,
     setCreatureList
-  } = useCreatureManagement(encounterId, encounterClient);
+  } = useCreatureManagement(encounterId, encounterClient, bestiaryClient);
 
   // Method to send lobby state
   const sendLobbyState = useCallback(async (
@@ -173,6 +174,16 @@ const EditEncounter: React.FC = () => {
       }, 100);
     }
   }, [setCreatureList, encounterId, encounterClient, setError, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, sendLobbyState]);
+
+  const rollAllInitiative = useCallback(() => {
+    const rolled = creatures.map(c => {
+      if (c.isPlayer) return c;
+      const roll = Math.floor(Math.random() * 20) + 1;
+      const modifier = c.initiativeModifier ?? 0;
+      return { ...c, initiative: roll + modifier };
+    });
+    handleCreaturesChange(rolled);
+  }, [creatures, handleCreaturesChange]);
 
   const loadEncounter = useCallback(async () => {
     if (!encounterId) return;
@@ -316,6 +327,7 @@ const EditEncounter: React.FC = () => {
           onCreaturesChange={handleCreaturesChange}
           onCreatureUpdate={updateCreature}
           onCreatureRemove={removeCreature}
+          onRollAllInitiative={rollAllInitiative}
         />
       </div>
 

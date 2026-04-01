@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import { EditableCreature } from '../types';
 import { EncounterClient } from '../api/encounterClient';
-import { CreatureListItem } from '../api/bestiaryClient';
+import { BestiaryClient, CreatureListItem, FiveEToolsAc } from '../api/bestiaryClient';
 
-export const useCreatureManagement = (encounterId: string | undefined, encounterClient: EncounterClient) => {
+export const useCreatureManagement = (encounterId: string | undefined, encounterClient: EncounterClient, bestiaryClient?: BestiaryClient) => {
   const [creatures, setCreatures] = useState<EditableCreature[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,22 +38,52 @@ export const useCreatureManagement = (encounterId: string | undefined, encounter
     const existingCount = creatures.filter(c => c.creatureName === source.name).length;
     const displayName = `${source.name} ${existingCount + 1}`;
 
+    let maxHP = 0;
+    let currentHP = 0;
+    let ac = 0;
+    let initiativeModifier = 0;
+
+    if (bestiaryClient) {
+      try {
+        const detail = await bestiaryClient.getCreatureById(source.id);
+        const raw = detail.rawData;
+
+        // Parse HP
+        maxHP = raw.hp?.average ?? 0;
+        currentHP = maxHP;
+
+        // Parse AC: entries can be a bare number or an object { ac, from, ... }
+        if (raw.ac && raw.ac.length > 0) {
+          const first = raw.ac[0];
+          ac = typeof first === 'number' ? first : (first as FiveEToolsAc).ac ?? 0;
+        }
+
+        // Initiative modifier = DEX modifier = floor((dex - 10) / 2)
+        if (raw.dex !== undefined) {
+          initiativeModifier = Math.floor((raw.dex - 10) / 2);
+        }
+      } catch {
+        // fall through with defaults
+      }
+    }
+
     const newCreature: EditableCreature = {
       isPlayer: false,
       displayName,
       creatureName: source.name,
       creatureId: source.id,
       initiative: 0,
-      maxHP: 10,
-      currentHP: 10,
-      ac: 10,
+      initiativeModifier,
+      maxHP,
+      currentHP,
+      ac,
       isEditing: false
     };
 
     const newCreatures = [...creatures, newCreature];
     setCreatures(newCreatures);
     await updateCreatureAPI(newCreatures);
-  }, [creatures, updateCreatureAPI]);
+  }, [creatures, updateCreatureAPI, bestiaryClient]);
 
   const removeCreature = useCallback(async (index: number) => {
     const newCreatures = creatures.filter((_, i) => i !== index);

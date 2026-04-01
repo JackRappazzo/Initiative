@@ -6,6 +6,7 @@ export interface EncounterCreatureJsonModel {
   creatureName?: string;
   creatureId?: string;
   initiative: number;
+  initiativeModifier: number;
   maxHP: number;
   currentHP: number;
   ac: number;
