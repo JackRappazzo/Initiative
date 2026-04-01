@@ -38,8 +38,8 @@ function rollExpression(expr: string): RollResult {
   return { expression: expr, rolls, total };
 }
 
-// ── Dice regex (matches expressions like 2d6, 1d20+5, 3d8-2) ─────────────────
-const DICE_RE = /\b(\d*d\d+(?:[+-]\d+)?)\b/gi;
+// ── Dice regex (matches expressions like 2d6, 1d20+5, 3d8-2, 1d6 + 4) ─────────
+const DICE_RE = /\b(\d*d\d+(?:\s*[+-]\s*\d+)?)\b/gi;
 
 interface Props {
   data: FiveEToolsRawData;
@@ -108,16 +108,44 @@ function renderText(text: string): string {
 }
 
 /**
+ * Split a plain-text segment on standalone to-hit modifiers like +4 or -1.
+ * A to-hit modifier is a sign followed by digits that is NOT immediately
+ * preceded by a digit or 'd' (which would make it part of a dice expression).
+ */
+function renderToHitNodes(text: string, onRoll: OnRoll, keyPrefix: string): React.ReactNode {
+  // Negative lookbehind: not preceded by a digit or 'd'
+  const parts = text.split(/((?<![\dd])[+-]\d+)/);
+  return parts.map((part, i) => {
+    if (i % 2 === 1) {
+      const expr = `1d20${part.replace(/\s/g, '')}`;
+      return (
+        <button
+          key={`${keyPrefix}-hit-${i}`}
+          className="stat-block__dice-chip"
+          title={`Roll ${expr}`}
+          onClick={() => onRoll(rollExpression(expr))}
+        >
+          {part}
+        </button>
+      );
+    }
+    return <React.Fragment key={`${keyPrefix}-hit-${i}`}>{part}</React.Fragment>;
+  });
+}
+
+/**
  * Render a cleaned string as React nodes, turning dice expressions into
  * clickable <button> chips that call onRoll when clicked.
+ * A second pass over plain-text segments converts standalone to-hit modifiers
+ * (e.g. +4) into 1d20+4 chips.
  *
  * split() with a capturing group produces alternating [text, dice, text, dice, …]
  * so odd indices are always the captured dice expression — no re-test needed.
  */
 function renderDiceNodes(raw: string, onRoll: OnRoll, keyPrefix: string): React.ReactNode {
   const cleaned = cleanTags(raw);
-  // Use a non-stateful copy so the global flag doesn't bleed between calls
-  const parts = cleaned.split(/\b(\d*d\d+(?:[+-]\d+)?)\b/i);
+  // First pass: dice expressions (e.g. 2d6+3, 1d6 + 4)
+  const parts = cleaned.split(/\b(\d*d\d+(?:\s*[+-]\s*\d+)?)\b/i);
   return parts.map((part, i) => {
     if (i % 2 === 1) {
       // odd index → captured dice expression
@@ -132,7 +160,12 @@ function renderDiceNodes(raw: string, onRoll: OnRoll, keyPrefix: string): React.
         </button>
       );
     }
-    return <React.Fragment key={`${keyPrefix}-${i}`}>{part}</React.Fragment>;
+    // Even index → plain text; second pass for standalone to-hit modifiers
+    return (
+      <React.Fragment key={`${keyPrefix}-${i}`}>
+        {renderToHitNodes(part, onRoll, `${keyPrefix}-${i}`)}
+      </React.Fragment>
+    );
   });
 }
 
