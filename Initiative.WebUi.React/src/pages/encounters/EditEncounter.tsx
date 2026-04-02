@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EncounterClient, FetchEncounterResponse } from '../../api/encounterClient';
 import { CreatureListItem, BestiaryClient, FiveEToolsRawData } from '../../api/bestiaryClient';
@@ -39,11 +39,13 @@ const EditEncounter: React.FC = () => {
   const [showPartyPicker, setShowPartyPicker] = useState(false);
   const [newName, setNewName] = useState('');
   const [encounterState, setEncounterState] = useState<EncounterState>({
-    isRunning: false,
     currentTurn: 0,
-    turnNumber: 1
+    turnNumber: 1,
+    viewersAllowed: false
   });
   const [activeStatBlock, setActiveStatBlock] = useState<FiveEToolsRawData | null>(null);
+  const [showStatBlock, setShowStatBlock] = useState(true);
+  const turnStateLoaded = useRef(false);
 
   const {
     creatures,
@@ -61,7 +63,7 @@ const EditEncounter: React.FC = () => {
     creatureList: typeof creatures, 
     currentTurn: number, 
     turnNumber: number,
-    isRunning: boolean = encounterState.isRunning
+    viewersAllowed: boolean = encounterState.viewersAllowed
   ) => {
     if (!lobbyClient) {
       console.log('[EditEncounter] Not sending lobby state - no lobby client');
@@ -70,7 +72,7 @@ const EditEncounter: React.FC = () => {
 
     try {
       const creatureNames = creatureList.map(creature => creature.displayName || 'Unnamed Creature');
-      const lobbyMode = isRunning ? 'InProgress' : 'Waiting';
+      const lobbyMode = viewersAllowed ? 'InProgress' : 'Waiting';
       
       console.log('[EditEncounter] Sending lobby state:', {
         creatures: creatureNames,
@@ -90,71 +92,65 @@ const EditEncounter: React.FC = () => {
     } catch (err) {
       console.error('[EditEncounter] Failed to send lobby state:', err);
     }
-  }, [encounterState.isRunning, lobbyClient]);
+  }, [encounterState.viewersAllowed, lobbyClient]);
 
   // Enhanced creature management functions that send lobby state updates
   const updateCreature = useCallback((index: number, creature: any) => {
     originalUpdateCreature(index, creature);
     
-    // Send lobby state if creature displayName changed (affects display) and encounter is running
+    // Send lobby state if creature displayName changed (affects display) and viewers are allowed
     const oldCreature = creatures[index];
-    if (encounterState.isRunning && oldCreature && oldCreature.displayName !== creature.displayName) {
+    if (encounterState.viewersAllowed && oldCreature && oldCreature.displayName !== creature.displayName) {
       const updatedCreatures = [...creatures];
       updatedCreatures[index] = creature;
       
       setTimeout(() => {
-        sendLobbyState(updatedCreatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
+        sendLobbyState(updatedCreatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.viewersAllowed);
       }, 50);
     }
-  }, [originalUpdateCreature, creatures, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, sendLobbyState]);
+  }, [originalUpdateCreature, creatures, encounterState.viewersAllowed, encounterState.currentTurn, encounterState.turnNumber, sendLobbyState]);
 
   const handleAddFromBestiary = useCallback(async (creature: CreatureListItem) => {
     await originalAddCreatureFromBestiary(creature);
     
-    // Send lobby state after creature is added (if encounter is running)
-    if (encounterState.isRunning) {
+    // Send lobby state after creature is added (if viewers are allowed)
+    if (encounterState.viewersAllowed) {
       setTimeout(() => {
-        sendLobbyState(creatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
+        sendLobbyState(creatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.viewersAllowed);
       }, 100);
     }
-  }, [originalAddCreatureFromBestiary, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
+  }, [originalAddCreatureFromBestiary, encounterState.viewersAllowed, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
 
   const removeCreature = useCallback(async (index: number) => {
     await originalRemoveCreature(index);
     
-    // Send lobby state after creature is removed (if encounter is running)
-    if (encounterState.isRunning) {
-      const newCreatures = creatures.filter((_, i) => i !== index);
-      let newCurrentTurn = encounterState.currentTurn;
-      
-      // Adjust current turn if needed
-      if (encounterState.currentTurn >= newCreatures.length && newCreatures.length > 0) {
-        newCurrentTurn = 0;
-      } else if (encounterState.currentTurn > index) {
-        newCurrentTurn = encounterState.currentTurn - 1;
-      }
-      
-      // Update the encounter state with the new current turn
-      if (newCurrentTurn !== encounterState.currentTurn) {
-        setEncounterState(prev => ({
-          ...prev,
-          currentTurn: newCurrentTurn
-        }));
-      }
-      
-      sendLobbyState(newCreatures, newCurrentTurn, encounterState.turnNumber, encounterState.isRunning);
+    const newCreatures = creatures.filter((_, i) => i !== index);
+    let newCurrentTurn = encounterState.currentTurn;
+    
+    // Adjust current turn if needed
+    if (encounterState.currentTurn >= newCreatures.length && newCreatures.length > 0) {
+      newCurrentTurn = 0;
+    } else if (encounterState.currentTurn > index) {
+      newCurrentTurn = encounterState.currentTurn - 1;
     }
-  }, [originalRemoveCreature, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
+    
+    if (newCurrentTurn !== encounterState.currentTurn) {
+      setEncounterState(prev => ({ ...prev, currentTurn: newCurrentTurn }));
+    }
+
+    if (encounterState.viewersAllowed) {
+      sendLobbyState(newCreatures, newCurrentTurn, encounterState.turnNumber, encounterState.viewersAllowed);
+    }
+  }, [originalRemoveCreature, encounterState.viewersAllowed, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
 
   const sortByInitiative = useCallback(async () => {
     await originalSortByInitiative();
     
-    // Send lobby state after sorting (if encounter is running)
-    if (encounterState.isRunning) {
+    if (encounterState.viewersAllowed) {
       const sortedCreatures = [...creatures].sort((a, b) => b.initiative - a.initiative);
-      sendLobbyState(sortedCreatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
+      sendLobbyState(sortedCreatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.viewersAllowed);
     }
-  }, [originalSortByInitiative, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
+  }, [originalSortByInitiative, encounterState.viewersAllowed, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
 
   // Handle creature list changes from EditableCreatureList
   const handleCreaturesChange = useCallback(async (newCreatures: typeof creatures) => {
@@ -170,15 +166,14 @@ const EditEncounter: React.FC = () => {
       setError('Failed to save creature order');
     }
     
-    // Send lobby state after drag and drop reorder (if encounter is running)
-    if (encounterState.isRunning) {
+    // Send lobby state after drag and drop reorder (if viewers are allowed)
+    if (encounterState.viewersAllowed) {
       console.log('[EditEncounter] Sending lobby state after creature reorder');
-      // Use setTimeout to ensure the reorder is fully applied
       setTimeout(() => {
-        sendLobbyState(newCreatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
+        sendLobbyState(newCreatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.viewersAllowed);
       }, 100);
     }
-  }, [setCreatureList, encounterId, encounterClient, setError, encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, sendLobbyState]);
+  }, [setCreatureList, encounterId, encounterClient, setError, encounterState.viewersAllowed, encounterState.currentTurn, encounterState.turnNumber, sendLobbyState]);
 
   const rollAllInitiative = useCallback(() => {
     const rolled = creatures.map(c => {
@@ -218,6 +213,12 @@ const EditEncounter: React.FC = () => {
       setEncounter(data);
       setNewName(data.displayName);
       setCreatureList(data.creatures.map(c => ({ ...c, isEditing: false })));
+      setEncounterState({
+        currentTurn: data.turnIndex ?? 0,
+        turnNumber: data.turnCount ?? 1,
+        viewersAllowed: data.viewersAllowed ?? false
+      });
+      turnStateLoaded.current = true;
       setError(null);
     } catch (err) {
       setError('Failed to load encounter');
@@ -233,10 +234,6 @@ const EditEncounter: React.FC = () => {
 
   // Fetch stat block for the current creature whenever the active turn changes
   useEffect(() => {
-    if (!encounterState.isRunning) {
-      setActiveStatBlock(null);
-      return;
-    }
     const current = creatures[encounterState.currentTurn];
     if (!current?.creatureId || current.isPlayer) {
       setActiveStatBlock(null);
@@ -247,7 +244,7 @@ const EditEncounter: React.FC = () => {
       .then(detail => { if (!cancelled) setActiveStatBlock(detail.rawData); })
       .catch(() => { if (!cancelled) setActiveStatBlock(null); });
     return () => { cancelled = true; };
-  }, [encounterState.isRunning, encounterState.currentTurn, creatures, bestiaryClient]);
+  }, [encounterState.currentTurn, creatures, bestiaryClient]);
 
   const handleNameEdit = async () => {
     if (!encounter || !encounterId || !newName.trim()) return;
@@ -263,47 +260,51 @@ const EditEncounter: React.FC = () => {
     }
   };
 
-  const toggleEncounter = () => {
-    setEncounterState(prev => ({
-      ...prev,
-      isRunning: !prev.isRunning,
-      currentTurn: prev.isRunning ? 0 : prev.currentTurn,
-      turnNumber: prev.isRunning ? 1 : prev.turnNumber
-    }));
+  const toggleViewersAllowed = async () => {
+    if (!encounterId) return;
+    const newValue = !encounterState.viewersAllowed;
+    setEncounterState(prev => ({ ...prev, viewersAllowed: newValue }));
+    try {
+      await encounterClient.setViewersAllowed(encounterId, newValue);
+      sendLobbyState(creatures, encounterState.currentTurn, encounterState.turnNumber, newValue);
+    } catch (err) {
+      console.error('[EditEncounter] Failed to persist viewersAllowed:', err);
+    }
   };
 
-  // Send lobby state when encounter starts/stops or when encounter state changes
+  // Persist turn state and send lobby state when turn changes
+  useEffect(() => {
+    if (!turnStateLoaded.current) return;
+    if (encounterId) {
+      encounterClient.setTurnState(encounterId, encounterState.currentTurn, encounterState.turnNumber).catch(err =>
+        console.error('[EditEncounter] Failed to persist turn state:', err)
+      );
+    }
+    if (lobbyClient && creatures.length > 0 && encounterState.viewersAllowed) {
+      sendLobbyState(creatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.viewersAllowed);
+    }
+  }, [encounterState.currentTurn, encounterState.turnNumber]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Send lobby state when viewersAllowed changes
   useEffect(() => {
     if (lobbyClient && creatures.length > 0) {
-      console.log('[EditEncounter] Encounter state changed, sending lobby state. IsRunning:', encounterState.isRunning);
-      sendLobbyState(creatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.isRunning);
+      sendLobbyState(creatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.viewersAllowed);
     }
-  }, [encounterState.isRunning, encounterState.currentTurn, encounterState.turnNumber, creatures, lobbyClient, sendLobbyState]);
+  }, [encounterState.viewersAllowed]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const nextTurn = () => {
     if (creatures.length === 0) return;
-    
+
     setEncounterState(prev => {
-      let nextTurn = prev.currentTurn + 1;
+      let next = prev.currentTurn + 1;
       let nextTurnNumber = prev.turnNumber;
-      
-      if (nextTurn >= creatures.length) {
-        nextTurn = 0;
+
+      if (next >= creatures.length) {
+        next = 0;
         nextTurnNumber++;
       }
-      
-      const newState = {
-        ...prev,
-        currentTurn: nextTurn,
-        turnNumber: nextTurnNumber
-      };
-      
-      // Send lobby state after turn advance if encounter is running
-      if (newState.isRunning) {
-        sendLobbyState(creatures, nextTurn, nextTurnNumber, newState.isRunning);
-      }
-      
-      return newState;
+
+      return { ...prev, currentTurn: next, turnNumber: nextTurnNumber };
     });
   };
 
@@ -319,13 +320,7 @@ const EditEncounter: React.FC = () => {
         ptNumber = Math.max(1, ptNumber - 1);
       }
 
-      const newState = { ...prev, currentTurn: pt, turnNumber: ptNumber };
-
-      if (newState.isRunning) {
-        sendLobbyState(creatures, pt, ptNumber, newState.isRunning);
-      }
-
-      return newState;
+      return { ...prev, currentTurn: pt, turnNumber: ptNumber };
     });
   };
 
@@ -363,14 +358,6 @@ const EditEncounter: React.FC = () => {
             }
           }}
         />
-
-        <EncounterStatus
-          encounterState={encounterState}
-          creatures={creatures}
-          onToggleEncounter={toggleEncounter}
-          onNextTurn={nextTurn}
-          onPrevTurn={prevTurn}
-        />
       </div>
 
       {error && (
@@ -379,8 +366,16 @@ const EditEncounter: React.FC = () => {
         </div>
       )}
 
-      <div className={`encounter-body${encounterState.isRunning ? ' encounter-body--running' : ''}`}>
+      <div className="encounter-body">
         <div className="encounter-left">
+          <EncounterStatus
+            encounterState={encounterState}
+            creatures={creatures}
+            onToggleViewersAllowed={toggleViewersAllowed}
+            onNextTurn={nextTurn}
+            onPrevTurn={prevTurn}
+          />
+
           <div className="creature-list">
             <div className="creature-list-header">
               <button 
@@ -394,7 +389,7 @@ const EditEncounter: React.FC = () => {
             
             <EditableCreatureList
               creatures={creatures}
-              highlightedCreatureIndex={encounterState.isRunning ? encounterState.currentTurn : undefined}
+              highlightedCreatureIndex={encounterState.currentTurn}
               onCreaturesChange={handleCreaturesChange}
               onCreatureUpdate={updateCreature}
               onCreatureRemove={removeCreature}
@@ -410,14 +405,20 @@ const EditEncounter: React.FC = () => {
           </button>
         </div>
 
-        {encounterState.isRunning && (
-          <div className="encounter-statblock-panel">
-            {activeStatBlock
+        <div className="encounter-statblock-panel">
+          <button
+            className="control-button secondary"
+            onClick={() => setShowStatBlock(prev => !prev)}
+            style={{ marginBottom: '0.5rem' }}
+          >
+            {showStatBlock ? 'Hide Stat Block' : 'Show Stat Block'}
+          </button>
+          {showStatBlock && (
+            activeStatBlock
               ? <CreatureStatBlock data={activeStatBlock} />
               : <div className="encounter-statblock-empty">No stat block available</div>
-            }
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {showBestiaryPicker && (

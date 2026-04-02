@@ -121,6 +121,22 @@ namespace Initiative.Persistence.Repositories
             return count > 0;
         }
 
+        public async Task SetEncounterTurnState(string encounterId, int turnIndex, int turnCount, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
+            var update = Builders<Encounter>.Update
+                .Set(e => e.TurnIndex, turnIndex)
+                .Set(e => e.TurnCount, turnCount);
+            await collection.UpdateOneAsync(e => e.Id == encounterId, update, cancellationToken: cancellationToken);
+        }
+
+        public async Task SetEncounterViewersAllowed(string encounterId, bool viewersAllowed, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
+            var update = Builders<Encounter>.Update.Set(e => e.ViewersAllowed, viewersAllowed);
+            await collection.UpdateOneAsync(e => e.Id == encounterId, update, cancellationToken: cancellationToken);
+        }
+
         public async Task<bool> DeleteEncounter(string encounterId, CancellationToken cancellationToken)
         {
             var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);

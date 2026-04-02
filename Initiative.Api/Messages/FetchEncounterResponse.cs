@@ -9,7 +9,13 @@
         public IEnumerable<EncounterCreatureJsonModel> Creatures { get; set; }
                
         public DateTime CreatedAt { get; set; }
-        
+
+        public int TurnIndex { get; set; }
+
+        public int TurnCount { get; set; }
+
+        public bool ViewersAllowed { get; set; }
+
         public FetchEncounterResponse()
         {
             Creatures = new List<EncounterCreatureJsonModel>();

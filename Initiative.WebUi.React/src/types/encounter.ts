@@ -11,7 +11,7 @@ export interface DragState {
 }
 
 export interface EncounterState {
-  isRunning: boolean;
   currentTurn: number;
   turnNumber: number;
+  viewersAllowed: boolean;
 }

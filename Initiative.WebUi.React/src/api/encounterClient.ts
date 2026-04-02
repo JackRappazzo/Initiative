@@ -24,6 +24,9 @@ export interface FetchEncounterResponse {
   encounterId: string;
   createdAt: string;
   creatures: EncounterCreatureJsonModel[];
+  turnIndex: number;
+  turnCount: number;
+  viewersAllowed: boolean;
 }
 
 export class EncounterClient {
@@ -57,6 +60,16 @@ export class EncounterClient {
   public async renameEncounter(encounterId: string, newName: string): Promise<void> {
     const request = { newName };
     return this.apiClient.put<void>(`encounter/${encodeURIComponent(encounterId)}/setName`, request);
+  }
+
+  // PUT /api/encounter/{encounterId}/turnState
+  public async setTurnState(encounterId: string, turnIndex: number, turnCount: number): Promise<void> {
+    return this.apiClient.put<void>(`encounter/${encodeURIComponent(encounterId)}/turnState`, { turnIndex, turnCount });
+  }
+
+  // PUT /api/encounter/{encounterId}/viewersAllowed
+  public async setViewersAllowed(encounterId: string, viewersAllowed: boolean): Promise<void> {
+    return this.apiClient.put<void>(`encounter/${encodeURIComponent(encounterId)}/viewersAllowed`, { viewersAllowed });
   }
 
   // DELETE /api/encounter/{encounterId}

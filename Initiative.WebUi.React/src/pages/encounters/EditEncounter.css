@@ -16,12 +16,8 @@
   margin: 0 auto;
 }
 
-/* Two-column layout when encounter is running */
+/* Two-column layout: initiative order left, stat block right */
 .encounter-body {
-  display: block;
-}
-
-.encounter-body--running {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 380px;
   gap: 1.5rem;
@@ -29,7 +25,7 @@
 }
 
 @media (max-width: 900px) {
-  .encounter-body--running {
+  .encounter-body {
     grid-template-columns: 1fr;
   }
 
@@ -284,11 +280,11 @@
 
 .encounter-status {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  margin-top: 2rem;
-  padding: 1rem;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
   background: #f8f9fa;
   border-radius: 4px;
 }
@@ -297,6 +293,7 @@
   font-size: 1rem;
   color: #666;
   min-width: 60px;
+  text-align: center;
 }
 
 .encounter-turn-nav {
@@ -308,7 +305,7 @@
 .encounter-active-creature {
   font-size: 1.1rem;
   font-weight: 600;
-  min-width: 160px;
+  min-height: 1.5em;
   text-align: center;
 }
 

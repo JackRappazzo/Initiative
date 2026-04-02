@@ -53,6 +53,9 @@ namespace Initiative.Api.Controllers
                 DisplayName = encounter.DisplayName,
                 EncounterId = encounter.Id,
                 CreatedAt = encounter.CreatedAt,
+                TurnIndex = encounter.TurnIndex,
+                TurnCount = encounter.TurnCount,
+                ViewersAllowed = encounter.ViewersAllowed,
                 Creatures = encounter.Creatures.Select(c => new EncounterCreatureJsonModel()
                 {
                     IsPlayer = c.IsPlayer,
@@ -116,6 +119,20 @@ namespace Initiative.Api.Controllers
             {
                 return NotFound();
             }
+        }
+
+        [HttpPut("{encounterId}/turnState"), Authorize]
+        public async Task<IActionResult> SetTurnState(string encounterId, [FromBody] SetEncounterTurnStateRequest request, CancellationToken cancellationToken)
+        {
+            await encounterService.SetEncounterTurnState(encounterId, User.GetUserId(), request.TurnIndex, request.TurnCount, cancellationToken);
+            return NoContent();
+        }
+
+        [HttpPut("{encounterId}/viewersAllowed"), Authorize]
+        public async Task<IActionResult> SetViewersAllowed(string encounterId, [FromBody] SetViewersAllowedRequest request, CancellationToken cancellationToken)
+        {
+            await encounterService.SetViewersAllowed(encounterId, User.GetUserId(), request.ViewersAllowed, cancellationToken);
+            return NoContent();
         }
     }
 }

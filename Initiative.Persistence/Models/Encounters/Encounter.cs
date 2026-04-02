@@ -22,5 +22,11 @@ namespace Initiative.Persistence.Models.Encounters
 
         public IEnumerable<EncounterCreature> Creatures { get; set; }
 
+        public int TurnIndex { get; set; }
+
+        public int TurnCount { get; set; }
+
+        public bool ViewersAllowed { get; set; }
+
     }
 }

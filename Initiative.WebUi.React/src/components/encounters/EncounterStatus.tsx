@@ -4,7 +4,7 @@ import { EncounterState, EditableCreature } from '../../types';
 interface EncounterStatusProps {
   encounterState: EncounterState;
   creatures: EditableCreature[];
-  onToggleEncounter: () => void;
+  onToggleViewersAllowed: () => void;
   onNextTurn: () => void;
   onPrevTurn: () => void;
 }
@@ -12,31 +12,31 @@ interface EncounterStatusProps {
 export const EncounterStatus: React.FC<EncounterStatusProps> = ({
   encounterState,
   creatures,
-  onToggleEncounter,
+  onToggleViewersAllowed,
   onNextTurn,
   onPrevTurn
 }) => {
-  const { isRunning, currentTurn, turnNumber } = encounterState;
+  const { viewersAllowed, currentTurn, turnNumber } = encounterState;
 
   return (
     <>
       <button 
-        className={`control-button ${isRunning ? 'danger' : 'primary'}`}
-        onClick={onToggleEncounter}
+        className={`control-button ${viewersAllowed ? 'danger' : 'primary'}`}
+        onClick={onToggleViewersAllowed}
       >
-        {isRunning ? 'End Encounter' : 'Start Encounter'}
+        {viewersAllowed ? 'Disallow Viewers' : 'Allow Viewers'}
       </button>
 
-      {isRunning && (
-        <div className="encounter-status">
-          <span className="encounter-turn-number">Turn {turnNumber}</span>
-          <div className="encounter-turn-nav">
-            <button className="control-button secondary" onClick={onPrevTurn} title="Previous turn">◀</button>
-            <span className="encounter-active-creature">{creatures[currentTurn]?.displayName || 'None'}</span>
-            <button className="control-button primary" onClick={onNextTurn} title="Next turn">▶</button>
-          </div>
+      <div className="encounter-status">
+        <div className="encounter-active-creature">
+          {creatures[currentTurn]?.displayName || '\u00A0'}
         </div>
-      )}
+        <div className="encounter-turn-nav">
+          <button className="control-button secondary" onClick={onPrevTurn} title="Previous turn">◀</button>
+          <span className="encounter-turn-number">Turn {turnNumber}</span>
+          <button className="control-button primary" onClick={onNextTurn} title="Next turn">▶</button>
+        </div>
+      </div>
     </>
   );
 };

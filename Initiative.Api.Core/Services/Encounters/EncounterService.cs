@@ -73,5 +73,23 @@ namespace Initiative.Api.Core.Services.Encounters
         {
             return await encounterRepository.DeleteEncounter(encounterId, cancellationToken);
         }
+
+        public async Task SetEncounterTurnState(string encounterId, string ownerId, int turnIndex, int turnCount, CancellationToken cancellationToken)
+        {
+            if (await encounterRepository.FetchEncounterById(encounterId, ownerId, cancellationToken) == null)
+            {
+                throw new ArgumentException("Encounter not found.", nameof(encounterId));
+            }
+            await encounterRepository.SetEncounterTurnState(encounterId, turnIndex, turnCount, cancellationToken);
+        }
+
+        public async Task SetViewersAllowed(string encounterId, string ownerId, bool viewersAllowed, CancellationToken cancellationToken)
+        {
+            if (await encounterRepository.FetchEncounterById(encounterId, ownerId, cancellationToken) == null)
+            {
+                throw new ArgumentException("Encounter not found.", nameof(encounterId));
+            }
+            await encounterRepository.SetEncounterViewersAllowed(encounterId, viewersAllowed, cancellationToken);
+        }
     }
 }
