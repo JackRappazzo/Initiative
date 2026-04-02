@@ -10,7 +10,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.BestiaryRepositor
         [When]
         public async Task GetAllBestiariesIsCalled()
         {
-            Result = await BestiaryRepository.GetAllBestiaries(CancellationToken);
+            Result = await BestiaryRepository.GetBestariesByOwners(new string?[] { null }, CancellationToken);
         }
     }
 }

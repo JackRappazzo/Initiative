@@ -13,12 +13,8 @@ namespace Initiative.Api.Core.Services.Bestiary
             _repository = repository;
         }
 
-        public async Task<IEnumerable<BestiaryDocument>> GetAvailableBestiaries(string userId, CancellationToken cancellationToken)
-        {
-            var system = await _repository.GetAllBestiaries(cancellationToken);
-            var custom = await _repository.GetBestariesByOwner(userId, cancellationToken);
-            return system.Concat(custom).OrderBy(b => b.Name);
-        }
+        public Task<IEnumerable<BestiaryDocument>> GetAvailableBestiaries(string userId, CancellationToken cancellationToken)
+            => _repository.GetBestariesByOwners(new string?[] { null, userId }, cancellationToken);
 
         public async Task<SearchCreaturesResult> SearchCreatures(BestiarySearchQuery query, CancellationToken cancellationToken)
         {

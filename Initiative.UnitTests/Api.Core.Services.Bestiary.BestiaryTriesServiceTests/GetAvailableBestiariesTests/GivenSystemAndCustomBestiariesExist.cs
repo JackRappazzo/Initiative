@@ -14,7 +14,6 @@ namespace Initiative.UnitTests.Api.Core.Services.Bestiary.BestiaryTriesServiceTe
         protected override ComposedTest ComposeTest() => TestComposer
             .Given(UserIdIsSet)
             .And(RepositoryReturnsSystemBestiaries)
-            .And(RepositoryReturnsCustomBestiaries)
             .When(GetAvailableBestiariesIsCalled)
             .Then(ShouldReturnBothBestiaries)
             .And(ShouldReturnBestiariesOrderedByName);
@@ -30,19 +29,10 @@ namespace Initiative.UnitTests.Api.Core.Services.Bestiary.BestiaryTriesServiceTe
         [Given]
         public void RepositoryReturnsSystemBestiaries()
         {
-            BestiaryRepository.GetAllBestiaries(CancellationToken)
+            BestiaryRepository.GetBestariesByOwners(Arg.Any<IEnumerable<string?>>(), CancellationToken)
                 .Returns(new List<BestiaryDocument>
                 {
-                    new BestiaryDocument { Id = _systemBestiaryId, Name = "Monster Manual", Source = "XMM" }
-                });
-        }
-
-        [Given]
-        public void RepositoryReturnsCustomBestiaries()
-        {
-            BestiaryRepository.GetBestariesByOwner(UserId, CancellationToken)
-                .Returns(new List<BestiaryDocument>
-                {
+                    new BestiaryDocument { Id = _systemBestiaryId, Name = "Monster Manual", Source = "XMM" },
                     new BestiaryDocument { Id = _customBestiaryId, Name = "My Homebrew", Source = null, OwnerId = UserId }
                 });
         }

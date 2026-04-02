@@ -23,9 +23,7 @@ namespace Initiative.UnitTests.Api.Core.Services.Bestiary.BestiaryTriesServiceTe
         [Given]
         public void RepositoryReturnsEmpty()
         {
-            BestiaryRepository.GetAllBestiaries(CancellationToken)
-                .Returns(Enumerable.Empty<BestiaryDocument>());
-            BestiaryRepository.GetBestariesByOwner(UserId, CancellationToken)
+            BestiaryRepository.GetBestariesByOwners(Arg.Any<IEnumerable<string?>>(), CancellationToken)
                 .Returns(Enumerable.Empty<BestiaryDocument>());
         }
 

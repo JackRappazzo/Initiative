@@ -15,14 +15,11 @@ namespace Initiative.Persistence.Repositories
         Task<BestiaryDocument?> GetBestiaryBySource(string source, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Returns all bestiaries, ordered by name.
+        /// Returns all bestiaries whose OwnerId is in <paramref name="ownerIds"/>.
+        /// Pass null entries to include system bestiaries (OwnerId == null).
+        /// e.g. new[] { null, userId } returns system + that user's custom bestiaries.
         /// </summary>
-        Task<IEnumerable<BestiaryDocument>> GetAllBestiaries(CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Returns all bestiaries owned by the given user, ordered by name.
-        /// </summary>
-        Task<IEnumerable<BestiaryDocument>> GetBestariesByOwner(string ownerId, CancellationToken cancellationToken);
+        Task<IEnumerable<BestiaryDocument>> GetBestariesByOwners(IEnumerable<string?> ownerIds, CancellationToken cancellationToken);
 
         /// <summary>
         /// Inserts or replaces creatures belonging to the given bestiary.

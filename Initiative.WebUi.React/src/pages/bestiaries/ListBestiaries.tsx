@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BestiaryClient, CreatureListItem } from '../../api/bestiaryClient';
 import Pagination from '../../components/Pagination';
@@ -22,6 +22,7 @@ const ListBestiaries: React.FC = () => {
   const [creatingBestiary, setCreatingBestiary] = useState(false);
   const [showNewInput, setShowNewInput] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const creatingRef = useRef(false);
 
   const handleCreatureClick = (creature: CreatureListItem) => {
     navigate(`/bestiaries/creatures/${creature.id}`);
@@ -34,7 +35,8 @@ const ListBestiaries: React.FC = () => {
 
   const handleCreateBestiary = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newBestiaryName.trim()) return;
+    if (!newBestiaryName.trim() || creatingRef.current) return;
+    creatingRef.current = true;
     setCreatingBestiary(true);
     setCreateError(null);
     try {
@@ -45,6 +47,7 @@ const ListBestiaries: React.FC = () => {
     } catch {
       setCreateError('Failed to create bestiary.');
     } finally {
+      creatingRef.current = false;
       setCreatingBestiary(false);
     }
   };

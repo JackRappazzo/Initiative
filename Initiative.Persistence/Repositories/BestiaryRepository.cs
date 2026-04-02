@@ -32,18 +32,12 @@ namespace Initiative.Persistence.Repositories
             return await result.FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<BestiaryDocument>> GetAllBestiaries(CancellationToken cancellationToken)
+        public async Task<IEnumerable<BestiaryDocument>> GetBestariesByOwners(IEnumerable<string?> ownerIds, CancellationToken cancellationToken)
         {
             var collection = GetMongoDatabase().GetCollection<BestiaryDocument>(BestiariesCollection);
-            return await collection.Find(FilterDefinition<BestiaryDocument>.Empty)
-                .SortBy(b => b.Name)
-                .ToListAsync(cancellationToken);
-        }
-
-        public async Task<IEnumerable<BestiaryDocument>> GetBestariesByOwner(string ownerId, CancellationToken cancellationToken)
-        {
-            var collection = GetMongoDatabase().GetCollection<BestiaryDocument>(BestiariesCollection);
-            return await collection.Find(b => b.OwnerId == ownerId)
+            var ownerList = ownerIds.ToList();
+            var filter = Builders<BestiaryDocument>.Filter.In(b => b.OwnerId, ownerList);
+            return await collection.Find(filter)
                 .SortBy(b => b.Name)
                 .ToListAsync(cancellationToken);
         }
