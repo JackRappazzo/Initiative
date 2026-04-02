@@ -239,6 +239,29 @@
   font-weight: 500;
 }
 
+.creature-th-link,
+.creature-td-link {
+  width: 2rem;
+  padding-right: 0 !important;
+  text-align: center;
+}
+
+.creature-page-btn {
+  background: none;
+  border: 1px solid var(--card-border, #313244);
+  border-radius: 4px;
+  color: var(--text-muted, #6c7086);
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 0.2rem 0.35rem;
+}
+
+.creature-page-btn:hover {
+  border-color: var(--accent, #89b4fa);
+  color: var(--accent, #89b4fa);
+}
+
 .creature-type {
   color: var(--text-muted, #6c7086);
   text-transform: capitalize;

@@ -1,7 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BestiaryClient, CreatureListItem } from '../../api/bestiaryClient';
+import { BestiaryClient, CreatureDetail, CreatureListItem } from '../../api/bestiaryClient';
 import Pagination from '../../components/Pagination';
+import CreatureStatBlock from '../../components/bestiaries/CreatureStatBlock';
 import { useBestiarySearch } from '../../hooks';
 import './ListBestiaries.css';
 
@@ -13,7 +14,7 @@ const ListBestiaries: React.FC = () => {
   const {
     bestiaries, selectedIds, bestiariesLoading, bestiariesError,
     toggleBestiary, selectAll, clearAll, refreshBestiaries,
-    nameInput, sort, handleNameInputChange, handleSortClick, sortIndicator,
+    nameInput, creatureTypeFilter, sort, handleNameInputChange, handleCreatureTypeChange, handleSortClick, sortIndicator,
     creatures, totalCount, totalPages, currentPage,
     creaturesLoading, creaturesError, handlePageChange,
   } = useBestiarySearch();
@@ -24,8 +25,17 @@ const ListBestiaries: React.FC = () => {
   const [createError, setCreateError] = useState<string | null>(null);
   const creatingRef = useRef(false);
 
-  const handleCreatureClick = (creature: CreatureListItem) => {
-    navigate(`/bestiaries/creatures/${creature.id}`);
+  const [statBlockCreature, setStatBlockCreature] = useState<CreatureDetail | null>(null);
+  const [statBlockLoading, setStatBlockLoading] = useState(false);
+
+  const handleCreatureClick = async (creature: CreatureListItem) => {
+    setStatBlockLoading(true);
+    try {
+      const detail = await bestiaryClient.getCreatureById(creature.id);
+      setStatBlockCreature(detail);
+    } finally {
+      setStatBlockLoading(false);
+    }
   };
 
   const onPageChange = (page: number) => {
@@ -54,6 +64,7 @@ const ListBestiaries: React.FC = () => {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
+    <>
     <div className="bestiaries-layout">
       {/* Sidebar */}
       <aside className="bestiaries-sidebar">
@@ -130,6 +141,28 @@ const ListBestiaries: React.FC = () => {
             onChange={handleNameInputChange}
             aria-label="Search creatures by name"
           />
+          <select
+            className="bestiary-type-filter"
+            value={creatureTypeFilter}
+            onChange={handleCreatureTypeChange}
+            aria-label="Filter by creature type"
+          >
+            <option value="">All types</option>
+            <option value="aberration">Aberration</option>
+            <option value="beast">Beast</option>
+            <option value="celestial">Celestial</option>
+            <option value="construct">Construct</option>
+            <option value="dragon">Dragon</option>
+            <option value="elemental">Elemental</option>
+            <option value="fey">Fey</option>
+            <option value="fiend">Fiend</option>
+            <option value="giant">Giant</option>
+            <option value="humanoid">Humanoid</option>
+            <option value="monstrosity">Monstrosity</option>
+            <option value="ooze">Ooze</option>
+            <option value="plant">Plant</option>
+            <option value="undead">Undead</option>
+          </select>
           {!creaturesLoading && (
             <span className="bestiary-count">{totalCount.toLocaleString()} creatures</span>
           )}
@@ -144,6 +177,7 @@ const ListBestiaries: React.FC = () => {
             <table className="creature-table">
               <thead>
                 <tr>
+                  <th className="creature-th-link"></th>
                   <th
                     className={`sortable-th${sort.col === 'Name' ? ' sortable-th--active' : ''}`}
                     onClick={() => handleSortClick('Name')}
@@ -172,11 +206,11 @@ const ListBestiaries: React.FC = () => {
               <tbody>
                 {creaturesLoading ? (
                   <tr>
-                    <td colSpan={5} className="table-loading">Loading...</td>
+                    <td colSpan={6} className="table-loading">Loading...</td>
                   </tr>
                 ) : creatures.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="table-empty">No creatures match your filters.</td>
+                    <td colSpan={6} className="table-empty">No creatures match your filters.</td>
                   </tr>
                 ) : (
                   creatures.map((creature) => (
@@ -187,6 +221,14 @@ const ListBestiaries: React.FC = () => {
                       tabIndex={0}
                       onKeyDown={(e) => e.key === 'Enter' && handleCreatureClick(creature)}
                     >
+                      <td className="creature-td-link">
+                        <button
+                          className="creature-page-btn"
+                          onClick={(e) => { e.stopPropagation(); navigate(`/bestiaries/creatures/${creature.id}`); }}
+                          title={`Open ${creature.name} page`}
+                          aria-label={`Open ${creature.name} full page`}
+                        >↗</button>
+                      </td>
                       <td className="creature-name">{creature.name}</td>
                       <td className="creature-type">{creature.creatureType ?? '—'}</td>
                       <td className="creature-cr">{creature.challengeRating ?? '—'}</td>
@@ -207,6 +249,22 @@ const ListBestiaries: React.FC = () => {
         )}
       </main>
     </div>
+
+    {statBlockLoading && (
+      <div className="stat-block-overlay">
+        <div className="stat-block-modal stat-block-modal--loading">Loading…</div>
+      </div>
+    )}
+
+    {statBlockCreature && (
+      <div className="stat-block-overlay" onClick={() => setStatBlockCreature(null)}>
+        <div className="stat-block-modal" onClick={(e) => e.stopPropagation()}>
+          <button className="stat-block-close" onClick={() => setStatBlockCreature(null)} aria-label="Close">✕</button>
+          <CreatureStatBlock data={statBlockCreature!.rawData} />
+        </div>
+      </div>
+    )}
+  </>
   );
 };
 

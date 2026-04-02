@@ -19,8 +19,10 @@ export interface UseBestiarySearchResult {
 
   // Search / sort state
   nameInput: string;
+  creatureTypeFilter: string;
   sort: SortState;
   handleNameInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleCreatureTypeChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   handleSortClick: (col: CreatureSortBy) => void;
   sortIndicator: (col: CreatureSortBy) => string;
 
@@ -47,6 +49,7 @@ export const useBestiarySearch = (): UseBestiarySearchResult => {
   // Search / creature state
   const [nameInput, setNameInput] = useState('');
   const [nameFilter, setNameFilter] = useState('');
+  const [creatureTypeFilter, setCreatureTypeFilter] = useState('');
   const [sort, setSort] = useState<SortState>({ col: 'Name', desc: false });
   const [creatures, setCreatures] = useState<CreatureListItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -83,6 +86,7 @@ export const useBestiarySearch = (): UseBestiarySearchResult => {
         const params = {
           bestiaryIds: idArray,
           name: nameFilter || undefined,
+          creatureType: creatureTypeFilter || undefined,
           sortBy: sort.col,
           sortDescending: sort.desc ? true : undefined,
           pageSize: PAGE_SIZE,
@@ -98,7 +102,7 @@ export const useBestiarySearch = (): UseBestiarySearchResult => {
     };
     run();
     return () => { cancelled = true; };
-  }, [bestiariesLoading, selectedIds, nameFilter, sort, currentPage, bestiaryClient]);
+  }, [bestiariesLoading, selectedIds, nameFilter, creatureTypeFilter, sort, currentPage, bestiaryClient]);
 
   // Debounce name input → nameFilter
   const handleNameInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,6 +113,11 @@ export const useBestiarySearch = (): UseBestiarySearchResult => {
       setNameFilter(value);
       setCurrentPage(1);
     }, DEBOUNCE_MS);
+  };
+
+  const handleCreatureTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCreatureTypeFilter(e.target.value);
+    setCurrentPage(1);
   };
 
   // Sort handler
@@ -160,8 +169,10 @@ export const useBestiarySearch = (): UseBestiarySearchResult => {
     clearAll,
     refreshBestiaries,
     nameInput,
+    creatureTypeFilter,
     sort,
     handleNameInputChange,
+    handleCreatureTypeChange,
     handleSortClick,
     sortIndicator,
     creatures,

@@ -22,6 +22,7 @@ export type CreatureSortBy = 'Name' | 'ChallengeRating' | 'Type';
 export interface SearchCreaturesParams {
   bestiaryIds?: string[];
   name?: string;
+  creatureType?: string;
   sortBy?: CreatureSortBy;
   sortDescending?: boolean;
   pageSize?: number;
@@ -195,6 +196,7 @@ export class BestiaryClient {
     const result: Record<string, unknown> = {};
     if (params.bestiaryIds !== undefined) result["bestiaryIds"] = params.bestiaryIds;
     if (params.name) result["name"] = params.name;
+    if (params.creatureType) result["creatureType"] = params.creatureType;
     if (params.sortBy) result["sortBy"] = params.sortBy;
     if (params.sortDescending) result["sortDescending"] = params.sortDescending;
     if (params.pageSize !== undefined) result["pageSize"] = params.pageSize;
