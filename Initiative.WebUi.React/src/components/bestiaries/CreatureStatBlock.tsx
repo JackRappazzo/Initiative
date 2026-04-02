@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { FiveEToolsRawData, FiveEToolsEntry } from '../../api/bestiaryClient';
+import { spellClient, SpellDetail } from '../../api/spellClient';
 import { isTaleSpire, rollInTray } from '../../utils/talespire';
 import './CreatureStatBlock.css';
 
@@ -242,10 +243,130 @@ function PropertyLine({ label, value }: { label: string; value: React.ReactNode 
   );
 }
 
-/** Extract the display name from a {@spell Name|Source} tag, or return as-is. */
-function spellName(raw: string): string {
-  const m = raw.match(/\{@spell ([^|}\s]+(?:\s[^|}\s]+)*)[^}]*\}/);
-  return m ? m[1] : cleanTags(raw);
+/** Extract the display name and optional source from a {@spell Name|Source} tag. */
+function parseSpellTag(raw: string): { name: string; source?: string } {
+  const m = raw.match(/\{@spell ([^|}\s]+(?:\s[^|}\s]+)*)(?:\|([^}]*))?\}/);
+  if (m) return { name: m[1], source: m[2] || undefined };
+  return { name: cleanTags(raw) };
+}
+
+// ── Spell school lookup ───────────────────────────────────────────────────────
+
+const SCHOOL_MAP: Record<string, string> = {
+  A: 'Abjuration', C: 'Conjuration', D: 'Divination', E: 'Enchantment',
+  V: 'Evocation', I: 'Illusion', N: 'Necromancy', T: 'Transmutation',
+};
+
+function formatSpellLevel(level: number): string {
+  if (level === 0) return 'Cantrip';
+  const suffixes: Record<number, string> = { 1: 'st', 2: 'nd', 3: 'rd' };
+  return `${level}${suffixes[level] ?? 'th'}-level`;
+}
+
+function formatComponents(c?: SpellDetail['rawData']['components']): string {
+  if (!c) return '';
+  const parts: string[] = [];
+  if (c.v) parts.push('V');
+  if (c.s) parts.push('S');
+  if (c.m) parts.push(`M (${typeof c.m === 'string' ? c.m : c.m.text})`);
+  return parts.join(', ');
+}
+
+function SpellPopover({ spell, onClose }: { spell: SpellDetail; onClose: () => void }) {
+  const raw = spell.rawData;
+  const school = SCHOOL_MAP[raw.school] ?? raw.school;
+  const levelLine = raw.level === 0
+    ? `${school} cantrip`
+    : `${formatSpellLevel(raw.level)} ${school}`;
+
+  const castingTime = raw.time?.map(t => `${t.number} ${t.unit}`).join(' or ') ?? '—';
+  const range = raw.range
+    ? (raw.range.type === 'point' && raw.range.distance
+        ? `${raw.range.distance.amount} ${raw.range.distance.type}`
+        : raw.range.type)
+    : '—';
+  const components = formatComponents(raw.components) || '—';
+  const duration = raw.duration?.map(d => {
+    if (d.type === 'instant') return 'Instantaneous';
+    if (d.type === 'permanent') return 'Until dispelled';
+    const dur = d.duration ? `${d.duration.amount} ${d.duration.type}` : d.type;
+    return d.concentration ? `Concentration, up to ${dur}` : dur;
+  }).join(' or ') ?? '—';
+
+  const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
+  const onRoll = useCallback((result: RollResult) => {
+    if (isTaleSpire()) {
+      rollInTray(result.expression, result.expression);
+    } else {
+      setLastRoll(result);
+    }
+  }, []);
+  const rollDetail = lastRoll && lastRoll.rolls.length > 1 ? ` [${lastRoll.rolls.join(', ')}]` : '';
+
+  return (
+    <div className="spell-popover__overlay" onClick={onClose}>
+      <div className="spell-popover__modal" onClick={e => e.stopPropagation()}>
+        <button className="spell-popover__close" aria-label="Close spell" onClick={onClose}>✕</button>
+        {lastRoll && (
+          <div className="stat-block__roll-banner">
+            <span className="stat-block__roll-expression">{lastRoll.expression}</span>
+            <span className="stat-block__roll-total">{lastRoll.total}</span>
+            {rollDetail && <span className="stat-block__roll-detail">{rollDetail}</span>}
+            <button className="stat-block__roll-dismiss" aria-label="Dismiss" onClick={() => setLastRoll(null)}>×</button>
+          </div>
+        )}
+        <div className="stat-block__header">
+          <h2 className="stat-block__name">{raw.name}</h2>
+          <p className="stat-block__meta">{levelLine}</p>
+        </div>
+        <div className="stat-block__divider stat-block__divider--thick" />
+        <p className="stat-block__property"><strong>Casting Time </strong>{castingTime}</p>
+        <p className="stat-block__property"><strong>Range </strong>{capitalize(range)}</p>
+        <p className="stat-block__property"><strong>Components </strong>{components}</p>
+        <p className="stat-block__property"><strong>Duration </strong>{capitalize(duration)}</p>
+        <div className="stat-block__divider stat-block__divider--thick" />
+        <div className="spell-popover__entries">
+          {raw.entries?.map((e, i) => (
+            <p key={i} className="spell-popover__entry">{renderDiceNodes(e, onRoll, `spell-entry-${i}`)}</p>
+          ))}
+          {raw.entriesHigherLevel?.map((hl, i) => (
+            <p key={`hl-${i}`} className="spell-popover__entry">
+              <em><strong>{hl.name}. </strong></em>
+              {hl.entries.map((e, j) => renderDiceNodes(e, onRoll, `spell-hl-${i}-${j}`))}
+            </p>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SpellLink({ raw }: { raw: string }) {
+  const [spell, setSpell] = useState<SpellDetail | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { name, source } = parseSpellTag(raw);
+
+  const open = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLoading(true);
+    const result = await spellClient.resolveSpell(name, source);
+    setLoading(false);
+    if (result) setSpell(result);
+  }, [name, source]);
+
+  return (
+    <>
+      <button
+        className="stat-block__spell-link"
+        onClick={open}
+        disabled={loading}
+        title={`View ${name}`}
+      >
+        {loading ? `${name}…` : name}
+      </button>
+      {spell && <SpellPopover spell={spell} onClose={() => setSpell(null)} />}
+    </>
+  );
 }
 
 type SpellcastingEntry = NonNullable<FiveEToolsRawData['spellcasting']>[number];
@@ -262,7 +383,12 @@ function SpellcastingBlock({ entry }: { entry: SpellcastingEntry }) {
       {entry.will && entry.will.length > 0 && (
         <span>
           <em>At will: </em>
-          {entry.will.map(spellName).join(', ')}.{' '}
+          {entry.will.map((raw, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && ', '}
+              <SpellLink raw={raw} />
+            </React.Fragment>
+          ))}.{' '}
         </span>
       )}
       {!hideDaily && entry.daily && Object.entries(entry.daily).map(([key, spells]) => {
@@ -271,7 +397,12 @@ function SpellcastingBlock({ entry }: { entry: SpellcastingEntry }) {
         return (
           <span key={key}>
             <em>{capitalize(label)}: </em>
-            {spells.map(spellName).join(', ')}.{' '}
+            {spells.map((raw, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && ', '}
+                <SpellLink raw={raw} />
+              </React.Fragment>
+            ))}.{' '}
           </span>
         );
       })}

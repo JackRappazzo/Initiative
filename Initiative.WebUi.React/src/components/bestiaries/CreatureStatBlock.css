@@ -12,6 +12,83 @@
   line-height: 1.4;
 }
 
+/* ── Spell links ──────────────────────────────────────────────────────────── */
+
+.stat-block__spell-link {
+  display: inline;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--stat-block-heading, #7a1e1e);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  cursor: pointer;
+  line-height: inherit;
+}
+
+.stat-block__spell-link:hover,
+.stat-block__spell-link:focus-visible {
+  text-decoration-style: solid;
+  outline: none;
+}
+
+.stat-block__spell-link:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ── Spell popover ────────────────────────────────────────────────────────── */
+
+.spell-popover__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 1100;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+}
+
+.spell-popover__modal {
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  padding: 0.75rem 1rem 1rem;
+}
+
+.spell-popover__close {
+  position: sticky;
+  top: 0.5rem;
+  float: right;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  z-index: 1;
+}
+
+.spell-popover__entries {
+  margin-top: 0.5rem;
+}
+
+.spell-popover__entry {
+  margin: 0.4rem 0;
+  line-height: 1.5;
+}
+
 /* Header */
 .stat-block__header {
   margin-bottom: 0.25rem;
