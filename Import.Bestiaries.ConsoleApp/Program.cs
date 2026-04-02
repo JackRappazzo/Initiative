@@ -20,9 +20,11 @@ var importer = scope.ServiceProvider.GetRequiredService<IBestiaryImportService>(
 
 var sources = new[]
 {
-    (Source: "XMM",  Name: "Monster Manual 2025",          File: "MonsterManual25.json"),
-    (Source: "XDMG", Name: "Dungeon Masters Guide (2024)", File: "DMG2024.json"),
-    (Source: "XPHB", Name: "Player's Handbook (2024)",     File: "PHB2024.json"),
+    (Source: "XMM",     Name: "Monster Manual 2025",                File: "MonsterManual25.json"),
+    (Source: "XDMG",    Name: "Dungeon Masters Guide (2024)",       File: "DMG2024.json"),
+    (Source: "XPHB",    Name: "Player's Handbook (2024)",           File: "PHB2024.json"),
+    (Source: "FM!",     Name: "Flee, Mortals!",                     File: "FleeMortals.json"),
+    (Source: "MPMM",    Name: "Monsters of the Multiverse (2024)",  File: "MonstersOfTheMultiverse2024.json"),
 };
 
 foreach (var (source, name, file) in sources)
