@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 
 interface NumericInputProps {
   /** The current value */
@@ -37,6 +37,7 @@ export const NumericInput: React.FC<NumericInputProps> = ({
   const [inputValue, setInputValue] = useState(() => 
     value !== undefined ? value.toString() : '0'
   );
+  const escapingRef = useRef(false);
 
   const calculateNewValue = useCallback((input: string): number => {
     // Step 1: Clean and validate input
@@ -87,6 +88,11 @@ export const NumericInput: React.FC<NumericInputProps> = ({
   }, [calculateNewValue, clampValue, inputValue, onChange, value]);
 
   const handleBlur = () => {
+    if (escapingRef.current) {
+      escapingRef.current = false;
+      onBlur?.();
+      return;
+    }
     evaluateAndUpdate();
     onBlur?.();
   };
@@ -95,6 +101,10 @@ export const NumericInput: React.FC<NumericInputProps> = ({
     if (e.key === 'Enter') {
       e.preventDefault();
       evaluateAndUpdate();
+      e.currentTarget.blur();
+    } else if (e.key === 'Escape') {
+      escapingRef.current = true;
+      setInputValue((value ?? 0).toString());
       e.currentTarget.blur();
     }
   };

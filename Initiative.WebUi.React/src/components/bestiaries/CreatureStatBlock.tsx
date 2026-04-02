@@ -174,6 +174,21 @@ function renderEntriesAsNodes(
 ): React.ReactNode {
   return entries.map((e, i) => {
     if (typeof e === 'string') return renderDiceNodes(e, onRoll, `${keyPrefix}-${i}`);
+    if (e.type === 'list' && e.items) {
+      return (
+        <ul key={`${keyPrefix}-${i}`} className="stat-block__feature-list">
+          {e.items.map((item, j) => {
+            if (typeof item === 'string') return <li key={j}>{renderDiceNodes(item, onRoll, `${keyPrefix}-${i}-${j}`)}</li>;
+            return (
+              <li key={j}>
+                {item.name && <strong>{item.name}. </strong>}
+                {item.entries && renderEntriesAsNodes(item.entries, onRoll, `${keyPrefix}-${i}-${j}`)}
+              </li>
+            );
+          })}
+        </ul>
+      );
+    }
     if (e.entries) return renderEntriesAsNodes(e.entries, onRoll, `${keyPrefix}-${i}`);
     return null;
   });
@@ -286,7 +301,14 @@ function formatSpeed(speed?: FiveEToolsRawData['speed']): string {
   if (!speed) return '—';
   const parts: string[] = [];
   if (speed.walk !== undefined) parts.push(`${speed.walk} ft.`);
-  if (speed.fly !== undefined) parts.push(`fly ${speed.fly} ft.${speed.canHover ? ' (hover)' : ''}`);
+  if (speed.fly !== undefined) {
+    if (typeof speed.fly === 'object') {
+      const cond = speed.fly.condition ? ` ${speed.fly.condition}` : (speed.canHover ? ' (hover)' : '');
+      parts.push(`fly ${speed.fly.number} ft.${cond}`);
+    } else {
+      parts.push(`fly ${speed.fly} ft.${speed.canHover ? ' (hover)' : ''}`);
+    }
+  }
   if (speed.swim !== undefined) parts.push(`swim ${speed.swim} ft.`);
   if (speed.burrow !== undefined) parts.push(`burrow ${speed.burrow} ft.`);
   if (speed.climb !== undefined) parts.push(`climb ${speed.climb} ft.`);

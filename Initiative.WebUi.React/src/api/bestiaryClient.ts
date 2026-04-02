@@ -31,13 +31,21 @@ export interface SearchCreaturesParams {
 // ── 5etools raw data shape ────────────────────────────────────────────────────
 
 export interface FiveEToolsEntry {
+  type?: string;
   name?: string;
   entries?: (string | FiveEToolsEntry)[];
+  items?: (string | FiveEToolsEntry)[];
+  style?: string;
+}
+
+export interface FiveEToolsSpeedValue {
+  number: number;
+  condition?: string;
 }
 
 export interface FiveEToolsSpeedEntry {
   walk?: number;
-  fly?: number;
+  fly?: number | FiveEToolsSpeedValue;
   swim?: number;
   burrow?: number;
   climb?: number;
