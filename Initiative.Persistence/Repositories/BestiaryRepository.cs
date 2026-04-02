@@ -220,6 +220,48 @@ namespace Initiative.Persistence.Repositories
             return await result.FirstOrDefaultAsync(cancellationToken);
         }
 
+        public async Task<BestiaryDocument?> GetBestiaryById(string bestiaryId, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<BestiaryDocument>(BestiariesCollection);
+            var result = await collection.FindAsync(b => b.Id == bestiaryId, cancellationToken: cancellationToken);
+            return await result.FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task RenameBestiary(string bestiaryId, string ownerId, string name, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<BestiaryDocument>(BestiariesCollection);
+            var update = Builders<BestiaryDocument>.Update.Set(b => b.Name, name);
+            await collection.UpdateOneAsync(b => b.Id == bestiaryId && b.OwnerId == ownerId, update, cancellationToken: cancellationToken);
+        }
+
+        public async Task DeleteBestiary(string bestiaryId, string ownerId, CancellationToken cancellationToken)
+        {
+            var creaturesCollection = GetMongoDatabase().GetCollection<BestiaryCreatureDocument>(CreaturesCollection);
+            await creaturesCollection.DeleteManyAsync(c => c.BestiaryId == bestiaryId, cancellationToken: cancellationToken);
+
+            var bestiaryCollection = GetMongoDatabase().GetCollection<BestiaryDocument>(BestiariesCollection);
+            await bestiaryCollection.DeleteOneAsync(b => b.Id == bestiaryId && b.OwnerId == ownerId, cancellationToken: cancellationToken);
+        }
+
+        public async Task<string> InsertCreature(BestiaryCreatureDocument creature, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<BestiaryCreatureDocument>(CreaturesCollection);
+            await collection.InsertOneAsync(creature, cancellationToken: cancellationToken);
+            return creature.Id;
+        }
+
+        public async Task UpdateCreature(BestiaryCreatureDocument creature, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<BestiaryCreatureDocument>(CreaturesCollection);
+            await collection.ReplaceOneAsync(c => c.Id == creature.Id, creature, cancellationToken: cancellationToken);
+        }
+
+        public async Task DeleteCreature(string creatureId, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<BestiaryCreatureDocument>(CreaturesCollection);
+            await collection.DeleteOneAsync(c => c.Id == creatureId, cancellationToken: cancellationToken);
+        }
+
         private void EnsureIndexes()
         {
             var db = GetMongoDatabase();

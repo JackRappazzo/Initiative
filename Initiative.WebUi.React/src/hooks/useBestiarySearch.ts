@@ -15,6 +15,7 @@ export interface UseBestiarySearchResult {
   toggleBestiary: (id: string) => void;
   selectAll: () => void;
   clearAll: () => void;
+  refreshBestiaries: () => void;
 
   // Search / sort state
   nameInput: string;
@@ -41,6 +42,7 @@ export const useBestiarySearch = (): UseBestiarySearchResult => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bestiariesLoading, setBestiariesLoading] = useState(true);
   const [bestiariesError, setBestiariesError] = useState<string | null>(null);
+  const [bestiaryRefreshToken, setBestiaryRefreshToken] = useState(0);
 
   // Search / creature state
   const [nameInput, setNameInput] = useState('');
@@ -54,8 +56,9 @@ export const useBestiarySearch = (): UseBestiarySearchResult => {
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load bestiaries on mount; default-select all
+  // Load bestiaries on mount and on refresh
   useEffect(() => {
+    setBestiariesLoading(true);
     bestiaryClient.getAvailableBestiaries()
       .then((data) => {
         setBestiaries(data);
@@ -63,7 +66,7 @@ export const useBestiarySearch = (): UseBestiarySearchResult => {
       })
       .catch(() => setBestiariesError('Failed to load bestiaries'))
       .finally(() => setBestiariesLoading(false));
-  }, [bestiaryClient]);
+  }, [bestiaryClient, bestiaryRefreshToken]);
 
   // Load creatures whenever filters or page changes
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -139,6 +142,10 @@ export const useBestiarySearch = (): UseBestiarySearchResult => {
     setCurrentPage(1);
   };
 
+  const refreshBestiaries = () => {
+    setBestiaryRefreshToken(t => t + 1);
+  };
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -151,6 +158,7 @@ export const useBestiarySearch = (): UseBestiarySearchResult => {
     toggleBestiary,
     selectAll,
     clearAll,
+    refreshBestiaries,
     nameInput,
     sort,
     handleNameInputChange,

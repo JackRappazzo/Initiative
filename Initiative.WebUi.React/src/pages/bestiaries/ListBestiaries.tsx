@@ -1,20 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreatureListItem } from '../../api/bestiaryClient';
+import { BestiaryClient, CreatureListItem } from '../../api/bestiaryClient';
 import Pagination from '../../components/Pagination';
 import { useBestiarySearch } from '../../hooks';
 import './ListBestiaries.css';
+
+const bestiaryClient = new BestiaryClient();
 
 const ListBestiaries: React.FC = () => {
   const navigate = useNavigate();
 
   const {
     bestiaries, selectedIds, bestiariesLoading, bestiariesError,
-    toggleBestiary, selectAll, clearAll,
+    toggleBestiary, selectAll, clearAll, refreshBestiaries,
     nameInput, sort, handleNameInputChange, handleSortClick, sortIndicator,
     creatures, totalCount, totalPages, currentPage,
     creaturesLoading, creaturesError, handlePageChange,
   } = useBestiarySearch();
+
+  const [newBestiaryName, setNewBestiaryName] = useState('');
+  const [creatingBestiary, setCreatingBestiary] = useState(false);
+  const [showNewInput, setShowNewInput] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const handleCreatureClick = (creature: CreatureListItem) => {
     navigate(`/bestiaries/creatures/${creature.id}`);
@@ -23,6 +30,23 @@ const ListBestiaries: React.FC = () => {
   const onPageChange = (page: number) => {
     handlePageChange(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCreateBestiary = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBestiaryName.trim()) return;
+    setCreatingBestiary(true);
+    setCreateError(null);
+    try {
+      await bestiaryClient.createBestiary(newBestiaryName.trim());
+      setNewBestiaryName('');
+      setShowNewInput(false);
+      refreshBestiaries();
+    } catch {
+      setCreateError('Failed to create bestiary.');
+    } finally {
+      setCreatingBestiary(false);
+    }
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -40,6 +64,25 @@ const ListBestiaries: React.FC = () => {
         </div>
 
         {bestiariesError && <p className="sidebar-error">{bestiariesError}</p>}
+
+        {showNewInput ? (
+          <form className="new-bestiary-form" onSubmit={handleCreateBestiary}>
+            <input
+              value={newBestiaryName}
+              onChange={e => setNewBestiaryName(e.target.value)}
+              placeholder="Bestiary name…"
+              disabled={creatingBestiary}
+              autoFocus
+            />
+            <button type="submit" disabled={creatingBestiary || !newBestiaryName.trim()}>
+              {creatingBestiary ? '…' : 'Create'}
+            </button>
+            <button type="button" onClick={() => setShowNewInput(false)} disabled={creatingBestiary}>Cancel</button>
+            {createError && <p className="sidebar-error">{createError}</p>}
+          </form>
+        ) : (
+          <button className="new-bestiary-btn" onClick={() => setShowNewInput(true)}>+ New Bestiary</button>
+        )}
 
         {bestiariesLoading ? (
           <p className="sidebar-loading">Loading...</p>
@@ -59,6 +102,12 @@ const ListBestiaries: React.FC = () => {
                   <span className={`sidebar-badge ${b.ownerId ? 'badge-custom' : 'badge-system'}`}>
                     {b.ownerId ? 'Custom' : 'System'}
                   </span>
+                  {b.ownerId && (
+                    <button
+                      className="sidebar-edit-btn"
+                      onClick={e => { e.preventDefault(); navigate(`/bestiaries/${b.id}/edit`); }}
+                    >Edit</button>
+                  )}
                 </label>
               </li>
             ))}

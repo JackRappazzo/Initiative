@@ -86,5 +86,86 @@ namespace Initiative.Api.Controllers
                 "application/json"
             );
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateBestiary([FromBody] CreateBestiaryRequest request, CancellationToken cancellationToken)
+        {
+            var bestiary = await _bestiaryService.CreateCustomBestiary(User.GetUserId()!, request.Name, cancellationToken);
+            return Ok(new { id = bestiary.Id, name = bestiary.Name });
+        }
+
+        [HttpPut("{bestiaryId}")]
+        public async Task<IActionResult> RenameBestiary(string bestiaryId, [FromBody] RenameBestiaryRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _bestiaryService.RenameBestiary(bestiaryId, User.GetUserId()!, request.Name, cancellationToken);
+                return NoContent();
+            }
+            catch (ArgumentException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpDelete("{bestiaryId}")]
+        public async Task<IActionResult> DeleteBestiary(string bestiaryId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _bestiaryService.DeleteBestiary(bestiaryId, User.GetUserId()!, cancellationToken);
+                return NoContent();
+            }
+            catch (ArgumentException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPost("{bestiaryId}/creatures")]
+        public async Task<IActionResult> CreateCustomCreature(string bestiaryId, [FromBody] SaveCustomCreatureRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var creature = await _bestiaryService.CreateCustomCreature(bestiaryId, User.GetUserId()!, MapToCustomCreatureData(request), cancellationToken);
+                return Ok(new { id = creature.Id, name = creature.Name });
+            }
+            catch (ArgumentException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPut("{bestiaryId}/creatures/{creatureId}")]
+        public async Task<IActionResult> UpdateCustomCreature(string bestiaryId, string creatureId, [FromBody] SaveCustomCreatureRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _bestiaryService.UpdateCustomCreature(creatureId, bestiaryId, User.GetUserId()!, MapToCustomCreatureData(request), cancellationToken);
+                return NoContent();
+            }
+            catch (ArgumentException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpDelete("{bestiaryId}/creatures/{creatureId}")]
+        public async Task<IActionResult> DeleteCustomCreature(string bestiaryId, string creatureId, CancellationToken cancellationToken)
+        {
+            await _bestiaryService.DeleteCustomCreature(creatureId, cancellationToken);
+            return NoContent();
+        }
+
+        private static CustomCreatureData MapToCustomCreatureData(SaveCustomCreatureRequest request) => new()
+        {
+            Name = request.Name,
+            CreatureType = request.CreatureType,
+            ChallengeRating = request.ChallengeRating,
+            IsLegendary = request.IsLegendary,
+            HP = request.HP,
+            AC = request.AC,
+            Traits = request.Traits
+        };
     }
 }

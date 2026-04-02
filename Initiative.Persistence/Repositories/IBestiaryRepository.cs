@@ -48,5 +48,12 @@ namespace Initiative.Persistence.Repositories
         /// Returns the full creature document by its ID, or null if not found.
         /// </summary>
         Task<BestiaryCreatureDocument?> GetCreatureById(string creatureId, CancellationToken cancellationToken);
+
+        Task<BestiaryDocument?> GetBestiaryById(string bestiaryId, CancellationToken cancellationToken);
+        Task RenameBestiary(string bestiaryId, string ownerId, string name, CancellationToken cancellationToken);
+        Task DeleteBestiary(string bestiaryId, string ownerId, CancellationToken cancellationToken);
+        Task<string> InsertCreature(BestiaryCreatureDocument creature, CancellationToken cancellationToken);
+        Task UpdateCreature(BestiaryCreatureDocument creature, CancellationToken cancellationToken);
+        Task DeleteCreature(string creatureId, CancellationToken cancellationToken);
     }
 }

@@ -119,6 +119,16 @@ export interface CreatureDetail {
   rawData: FiveEToolsRawData;
 }
 
+export interface CustomCreaturePayload {
+  name: string;
+  creatureType?: string;
+  challengeRating?: string;
+  isLegendary: boolean;
+  hp?: number;
+  ac?: number;
+  traits?: string;
+}
+
 // ── Client ────────────────────────────────────────────────────────────────────
 
 export class BestiaryClient {
@@ -145,6 +155,40 @@ export class BestiaryClient {
       `bestiary/creatures/${encodeURIComponent(creatureId)}`
     );
     return response.data;
+  }
+
+  public async createBestiary(name: string): Promise<{ id: string; name: string }> {
+    const response = await this.apiClient.instance.post<{ id: string; name: string }>("bestiary", { name });
+    return response.data;
+  }
+
+  public async renameBestiary(bestiaryId: string, name: string): Promise<void> {
+    await this.apiClient.instance.put(`bestiary/${encodeURIComponent(bestiaryId)}`, { name });
+  }
+
+  public async deleteBestiary(bestiaryId: string): Promise<void> {
+    await this.apiClient.instance.delete(`bestiary/${encodeURIComponent(bestiaryId)}`);
+  }
+
+  public async createCustomCreature(bestiaryId: string, payload: CustomCreaturePayload): Promise<{ id: string; name: string }> {
+    const response = await this.apiClient.instance.post<{ id: string; name: string }>(
+      `bestiary/${encodeURIComponent(bestiaryId)}/creatures`,
+      payload
+    );
+    return response.data;
+  }
+
+  public async updateCustomCreature(bestiaryId: string, creatureId: string, payload: CustomCreaturePayload): Promise<void> {
+    await this.apiClient.instance.put(
+      `bestiary/${encodeURIComponent(bestiaryId)}/creatures/${encodeURIComponent(creatureId)}`,
+      payload
+    );
+  }
+
+  public async deleteCustomCreature(bestiaryId: string, creatureId: string): Promise<void> {
+    await this.apiClient.instance.delete(
+      `bestiary/${encodeURIComponent(bestiaryId)}/creatures/${encodeURIComponent(creatureId)}`
+    );
   }
 
   private buildParams(params: SearchCreaturesParams): Record<string, unknown> {

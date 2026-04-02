@@ -2,22 +2,28 @@ using Initiative.Persistence.Models.Bestiary;
 
 namespace Initiative.Api.Core.Services.Bestiary
 {
+    public class CustomCreatureData
+    {
+        public required string Name { get; set; }
+        public string? CreatureType { get; set; }
+        public string? ChallengeRating { get; set; }
+        public bool IsLegendary { get; set; }
+        public int? HP { get; set; }
+        public int? AC { get; set; }
+        public string? Traits { get; set; }
+    }
+
     public interface IBestiaryService
     {
-        /// <summary>
-        /// Returns all system bestiaries plus any custom bestiaries owned by the given user.
-        /// </summary>
         Task<IEnumerable<BestiaryDocument>> GetAvailableBestiaries(string userId, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Searches creatures using the supplied filters and returns the matching page together
-        /// with the total count of all matching creatures (for pagination).
-        /// </summary>
         Task<SearchCreaturesResult> SearchCreatures(BestiarySearchQuery query, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Returns a single creature by its ID, or null if not found.
-        /// </summary>
         Task<BestiaryCreatureDocument?> GetCreatureById(string creatureId, CancellationToken cancellationToken);
+
+        Task<BestiaryDocument> CreateCustomBestiary(string userId, string name, CancellationToken cancellationToken);
+        Task RenameBestiary(string bestiaryId, string userId, string name, CancellationToken cancellationToken);
+        Task DeleteBestiary(string bestiaryId, string userId, CancellationToken cancellationToken);
+        Task<BestiaryCreatureDocument> CreateCustomCreature(string bestiaryId, string userId, CustomCreatureData data, CancellationToken cancellationToken);
+        Task UpdateCustomCreature(string creatureId, string bestiaryId, string userId, CustomCreatureData data, CancellationToken cancellationToken);
+        Task DeleteCustomCreature(string creatureId, CancellationToken cancellationToken);
     }
 }
