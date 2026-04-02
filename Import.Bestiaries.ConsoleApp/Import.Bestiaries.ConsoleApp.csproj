@@ -22,6 +22,9 @@
     <EmbeddedResource Include="Sources\DMG2024.json" />
     <EmbeddedResource Include="Sources\MonstersOfTheMultiverse2024.json" />
     <EmbeddedResource Include="Sources\PHB2024.json" />
+    <EmbeddedResource Include="Sources\Spells\spells-xphb.json" />
+    <EmbeddedResource Include="Sources\Spells\spells-xge.json" />
+    <EmbeddedResource Include="Sources\Spells\spells-tce.json" />
   </ItemGroup>
 
   <ItemGroup>

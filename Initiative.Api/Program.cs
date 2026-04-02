@@ -5,6 +5,7 @@ using Initiative.Api.Core.Identity;
 using Initiative.Api.Core.Identity.Roles;
 using Initiative.Api.Core.Services.Authentication;
 using Initiative.Api.Core.Services.Bestiary;
+using Initiative.Api.Core.Services.Spell;
 using Initiative.Api.Core.Services.Encounters;
 using Initiative.Api.Core.Services.Parties;
 using Initiative.Api.Core.Services.Users;
@@ -59,6 +60,7 @@ builder.Services.AddScoped<IDatabaseConnectionFactory, DatabaseConnectionFactory
 builder.Services.AddScoped<IJwtRefreshTokenRepository, JwtRefreshTokenRepository>();
 builder.Services.AddScoped<IEncounterRepository, EncounterRepository>();
 builder.Services.AddScoped<IBestiaryRepository, BestiaryRepository>();
+builder.Services.AddScoped<ISpellRepository, SpellRepository>();
 builder.Services.AddScoped<IPartyRepository, PartyRepository>();
 builder.Services.AddScoped<ILobbyStateRepository, LobbyStateRepository>();
 
@@ -71,6 +73,7 @@ builder.Services.AddScoped<ICredentialsFactory, CredentialsFactory>();
 builder.Services.AddScoped<IJwtRefreshService, JwtRefreshService>();
 builder.Services.AddScoped<IEncounterService, EncounterService>();
 builder.Services.AddScoped<IBestiaryService, BestiaryService>();
+builder.Services.AddScoped<ISpellService, SpellService>();
 builder.Services.AddScoped<IPartyService, PartyService>();
 builder.Services.AddScoped<IBase62CodeGenerator, Base62CodeGenerator>();
 

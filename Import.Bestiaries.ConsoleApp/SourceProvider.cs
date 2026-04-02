@@ -8,7 +8,8 @@ namespace Import.Bestiaries.ConsoleApp
 
         public Stream OpenSource(string resourceFileName)
         {
-            var resourceName = $"{ResourceNamespace}.{resourceFileName}";
+            var normalised = resourceFileName.Replace('/', '.').Replace('\\', '.');
+            var resourceName = $"{ResourceNamespace}.{normalised}";
             var stream = typeof(SourceProvider).Assembly.GetManifestResourceStream(resourceName);
             if (stream is null)
                 throw new InvalidOperationException(

@@ -12,6 +12,9 @@ services.AddScoped<IBestiaryRepository, BestiaryRepository>();
 services.AddScoped<IFivEToolsParser, FivEToolsParser>();
 services.AddScoped<ISourceProvider, SourceProvider>();
 services.AddScoped<IBestiaryImportService, BestiaryImportService>();
+services.AddScoped<ISpellRepository, SpellRepository>();
+services.AddScoped<ISpellParser, SpellParser>();
+services.AddScoped<ISpellImportService, SpellImportService>();
 
 await using var provider = services.BuildServiceProvider();
 using var scope = provider.CreateScope();
@@ -36,6 +39,28 @@ foreach (var (source, name, file) in sources)
     catch (Exception ex)
     {
         Console.Error.WriteLine($"Import of '{name}' failed: {ex.Message}");
+        Environment.Exit(1);
+    }
+}
+
+var spellImporter = scope.ServiceProvider.GetRequiredService<ISpellImportService>();
+
+var spellSources = new[]
+{
+    (Source: "XPHB",    Name: "Player's Handbook (2024)",           File: "Spells/spells-xphb.json"),
+    (Source: "XGE",     Name: "Xanathar's Guide to Everything",     File: "Spells/spells-xge.json"),
+    (Source: "TCE",     Name: "Tasha's Cauldron of Everything",     File: "Spells/spells-tce.json"),
+};
+
+foreach (var (source, name, file) in spellSources)
+{
+    try
+    {
+        await spellImporter.ImportAsync(source, name, file, CancellationToken.None);
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Spell import of '{name}' failed: {ex.Message}");
         Environment.Exit(1);
     }
 }
