@@ -249,6 +249,12 @@
   white-space: nowrap;
 }
 
+.creature-source {
+  color: var(--text-muted, #a6adc8);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
 .creature-flags {
   text-align: right;
 }

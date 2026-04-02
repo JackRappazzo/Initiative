@@ -11,7 +11,7 @@
   border: 1px solid var(--card-border, #313244);
   border-radius: 4px;
   background: var(--card-bg, #1e1e2e);
-  color: inherit;
+  color: var(--text, #cdd6f4);
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.15s, border-color 0.15s;

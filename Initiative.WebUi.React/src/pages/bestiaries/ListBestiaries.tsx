@@ -113,17 +113,18 @@ const ListBestiaries: React.FC = () => {
                   >
                     CR{sortIndicator('ChallengeRating')}
                   </th>
+                  <th>Source</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {creaturesLoading ? (
                   <tr>
-                    <td colSpan={4} className="table-loading">Loading...</td>
+                    <td colSpan={5} className="table-loading">Loading...</td>
                   </tr>
                 ) : creatures.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="table-empty">No creatures match your filters.</td>
+                    <td colSpan={5} className="table-empty">No creatures match your filters.</td>
                   </tr>
                 ) : (
                   creatures.map((creature) => (
@@ -137,6 +138,7 @@ const ListBestiaries: React.FC = () => {
                       <td className="creature-name">{creature.name}</td>
                       <td className="creature-type">{creature.creatureType ?? '—'}</td>
                       <td className="creature-cr">{creature.challengeRating ?? '—'}</td>
+                      <td className="creature-source">{creature.source ?? '—'}</td>
                       <td className="creature-flags">
                         {creature.isLegendary && (
                           <span className="legendary-badge">Legendary</span>
