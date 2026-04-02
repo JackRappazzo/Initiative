@@ -101,11 +101,13 @@ export interface FiveEToolsRawData {
   legendaryActionsLair?: number;
   spellcasting?: {
     name: string;
+    type?: string;
     headerEntries?: string[];
     will?: string[];
     daily?: Record<string, string[]>;
     ability?: string;
     displayAs?: string;
+    hidden?: string[];
   }[];
 }
 

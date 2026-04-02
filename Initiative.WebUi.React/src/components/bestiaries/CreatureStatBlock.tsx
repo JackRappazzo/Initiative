@@ -242,12 +242,62 @@ function PropertyLine({ label, value }: { label: string; value: React.ReactNode 
   );
 }
 
-function Section({ title, entries, onRoll }: { title: string; entries: FiveEToolsEntry[]; onRoll: OnRoll }) {
-  if (!entries.length) return null;
+/** Extract the display name from a {@spell Name|Source} tag, or return as-is. */
+function spellName(raw: string): string {
+  const m = raw.match(/\{@spell ([^|}\s]+(?:\s[^|}\s]+)*)[^}]*\}/);
+  return m ? m[1] : cleanTags(raw);
+}
+
+type SpellcastingEntry = NonNullable<FiveEToolsRawData['spellcasting']>[number];
+
+function SpellcastingBlock({ entry }: { entry: SpellcastingEntry }) {
+  const hideDaily = entry.hidden?.includes('daily');
+
+  return (
+    <div className="stat-block__feature">
+      <strong className="stat-block__feature-name">{entry.name}. </strong>
+      {entry.headerEntries?.map((h, i) => (
+        <span key={i}>{cleanTags(h)} </span>
+      ))}
+      {entry.will && entry.will.length > 0 && (
+        <span>
+          <em>At will: </em>
+          {entry.will.map(spellName).join(', ')}.{' '}
+        </span>
+      )}
+      {!hideDaily && entry.daily && Object.entries(entry.daily).map(([key, spells]) => {
+        const count = key.replace('e', '');
+        const label = key.endsWith('e') ? `${count}/day each` : `${count}/day`;
+        return (
+          <span key={key}>
+            <em>{capitalize(label)}: </em>
+            {spells.map(spellName).join(', ')}.{' '}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function Section({
+  title,
+  entries,
+  onRoll,
+  spellcastingEntries,
+}: {
+  title: string;
+  entries: FiveEToolsEntry[];
+  onRoll: OnRoll;
+  spellcastingEntries?: SpellcastingEntry[];
+}) {
+  if (!entries.length && !spellcastingEntries?.length) return null;
   return (
     <>
       <div className="stat-block__divider" />
       <h4 className="stat-block__section-title">{title}</h4>
+      {spellcastingEntries?.map((sc, i) => (
+        <SpellcastingBlock key={`sc-${i}`} entry={sc} />
+      ))}
       {entries.map((entry, i) => (
         <div key={i} className="stat-block__feature">
           {entry.name && <strong className="stat-block__feature-name">{entry.name}. </strong>}
@@ -420,9 +470,24 @@ const CreatureStatBlock: React.FC<Props> = ({ data }) => {
 
       {/* Feature sections */}
       {data.trait?.length ? <Section title="Traits" entries={data.trait} onRoll={onRoll} /> : null}
-      {data.action?.length ? <Section title="Actions" entries={data.action} onRoll={onRoll} /> : null}
-      {data.bonus?.length ? <Section title="Bonus Actions" entries={data.bonus} onRoll={onRoll} /> : null}
-      {data.reaction?.length ? <Section title="Reactions" entries={data.reaction} onRoll={onRoll} /> : null}
+      <Section
+        title="Actions"
+        entries={data.action ?? []}
+        onRoll={onRoll}
+        spellcastingEntries={data.spellcasting?.filter(sc => !sc.displayAs || sc.displayAs === 'action')}
+      />
+      <Section
+        title="Bonus Actions"
+        entries={data.bonus ?? []}
+        onRoll={onRoll}
+        spellcastingEntries={data.spellcasting?.filter(sc => sc.displayAs === 'bonus')}
+      />
+      <Section
+        title="Reactions"
+        entries={data.reaction ?? []}
+        onRoll={onRoll}
+        spellcastingEntries={data.spellcasting?.filter(sc => sc.displayAs === 'reaction')}
+      />
       {data.legendary?.length ? (
         <Section
           title={`Legendary Actions${crStr ? ` (CR ${crStr})` : ''}`}
