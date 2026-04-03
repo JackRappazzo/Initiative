@@ -13,6 +13,7 @@ export interface UseBestiarySearchResult {
   bestiariesLoading: boolean;
   bestiariesError: string | null;
   toggleBestiary: (id: string) => void;
+  selectOnly: (id: string) => void;
   selectAll: () => void;
   clearAll: () => void;
   refreshBestiaries: () => void;
@@ -141,6 +142,11 @@ export const useBestiarySearch = (): UseBestiarySearchResult => {
     setCurrentPage(1);
   };
 
+  const selectOnly = (id: string) => {
+    setSelectedIds(new Set([id]));
+    setCurrentPage(1);
+  };
+
   const selectAll = () => {
     setSelectedIds(new Set(bestiaries.map((b) => b.id)));
     setCurrentPage(1);
@@ -165,6 +171,7 @@ export const useBestiarySearch = (): UseBestiarySearchResult => {
     bestiariesLoading,
     bestiariesError,
     toggleBestiary,
+    selectOnly,
     selectAll,
     clearAll,
     refreshBestiaries,
