@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Sources\Conditions\conditionsdiseases.json" />
     <None Remove="Sources\FleeMortals.json" />
     <None Remove="Sources\MonstersOfTheMultiverse2024.json" />
   </ItemGroup>
@@ -17,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Sources\Conditions\conditionsdiseases.json" />
     <EmbeddedResource Include="Sources\FleeMortals.json" />
     <EmbeddedResource Include="Sources\MonsterManual25.json" />
     <EmbeddedResource Include="Sources\DMG2024.json" />

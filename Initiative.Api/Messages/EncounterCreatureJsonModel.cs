@@ -13,6 +13,10 @@ namespace Initiative.Api.Messages
 
         public string? CreatureId { get; set; }
 
+        public List<string> Statuses { get; set; } = new();
+
+        public bool IsHidden { get; set; } = false;
+
         public int Initiative { get; set; }
 
         public int MaxHP { get; set; }

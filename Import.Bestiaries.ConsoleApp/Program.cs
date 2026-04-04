@@ -15,6 +15,9 @@ services.AddScoped<IBestiaryImportService, BestiaryImportService>();
 services.AddScoped<ISpellRepository, SpellRepository>();
 services.AddScoped<ISpellParser, SpellParser>();
 services.AddScoped<ISpellImportService, SpellImportService>();
+services.AddScoped<IConditionRepository, ConditionRepository>();
+services.AddScoped<IConditionParser, ConditionParser>();
+services.AddScoped<IConditionImportService, ConditionImportService>();
 
 await using var provider = services.BuildServiceProvider();
 using var scope = provider.CreateScope();
@@ -64,4 +67,17 @@ foreach (var (source, name, file) in spellSources)
         Environment.Exit(1);
     }
 }
+
+var conditionImporter = scope.ServiceProvider.GetRequiredService<IConditionImportService>();
+
+try
+{
+    await conditionImporter.ImportAsync("5etools", "Conditions/conditionsdiseases.json", CancellationToken.None);
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"Condition import failed: {ex.Message}");
+    Environment.Exit(1);
+}
+
 
