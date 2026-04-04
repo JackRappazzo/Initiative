@@ -13,5 +13,6 @@ namespace Initiative.Persistence.Repositories
         Task SetEncounterName(string encounterId, string newName, CancellationToken cancellationToken);
         Task SetEncounterTurnState(string encounterId, int turnIndex, int turnCount, CancellationToken cancellationToken);
         Task SetEncounterViewersAllowed(string encounterId, bool viewersAllowed, CancellationToken cancellationToken);
+        Task SetEncounterPartyLevels(string encounterId, IEnumerable<int> partyLevels, CancellationToken cancellationToken);
     }
 }

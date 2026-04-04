@@ -28,5 +28,7 @@ namespace Initiative.Persistence.Models.Encounters
 
         public bool ViewersAllowed { get; set; }
 
+        public IEnumerable<int> PartyLevels { get; set; } = [];
+
     }
 }

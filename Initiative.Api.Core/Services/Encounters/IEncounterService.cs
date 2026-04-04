@@ -13,5 +13,6 @@ namespace Initiative.Api.Core.Services.Encounters
         Task<bool> DeleteEncounter(string encounterId, CancellationToken cancellationToken);
         Task SetEncounterTurnState(string encounterId, string ownerId, int turnIndex, int turnCount, CancellationToken cancellationToken);
         Task SetViewersAllowed(string encounterId, string ownerId, bool viewersAllowed, CancellationToken cancellationToken);
+        Task SetEncounterPartyLevels(string encounterId, string ownerId, IEnumerable<int> partyLevels, CancellationToken cancellationToken);
     }
 }

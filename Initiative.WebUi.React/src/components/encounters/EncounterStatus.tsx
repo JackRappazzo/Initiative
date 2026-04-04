@@ -31,9 +31,17 @@ export const EncounterStatus: React.FC<EncounterStatusProps> = ({
 
   const formatNumber = (value: number): string => value.toLocaleString();
 
-  const difficultyClass = encounterDifficulty
-    ? `encounter-difficulty-${encounterDifficulty.difficulty.toLowerCase()}`
-    : 'encounter-difficulty-none';
+  const meterColorClass = encounterDifficulty
+    ? `encounter-difficulty-meter-${encounterDifficulty.difficulty.toLowerCase()}`
+    : 'encounter-difficulty-meter-none';
+
+  const progressPercent = encounterDifficulty && encounterDifficulty.thresholds.extreme > 0
+    ? Math.min(100, Math.round((encounterDifficulty.totalMonsterXp / encounterDifficulty.thresholds.extreme) * 100))
+    : 0;
+
+  const overExtremeBy = encounterDifficulty
+    ? Math.max(0, encounterDifficulty.totalMonsterXp - encounterDifficulty.thresholds.extreme)
+    : 0;
 
   return (
     <>
@@ -45,13 +53,13 @@ export const EncounterStatus: React.FC<EncounterStatusProps> = ({
       </button>
 
       <div className="encounter-status">
-        <div className={`encounter-difficulty ${difficultyClass}`}>
+        <div className="encounter-difficulty">
           <div className="encounter-difficulty-header">
             <strong>Encounter Difficulty</strong>
             <button
               className="control-button secondary encounter-difficulty-toggle"
               onClick={onToggleShowDifficulty}
-              title={showDifficulty ? 'Hide encounter difficulty details' : 'Show encounter difficulty details'}
+              title={showDifficulty ? 'Hide encounter difficulty meter' : 'Show encounter difficulty meter'}
             >
               {showDifficulty ? 'Hide' : 'Show'}
             </button>
@@ -62,21 +70,24 @@ export const EncounterStatus: React.FC<EncounterStatusProps> = ({
               <span>Difficulty unavailable: choose a party to evaluate.</span>
             ) : (
               <>
-                <div className="encounter-difficulty-row">
-                  <strong>Difficulty:</strong> {encounterDifficulty.difficulty}
+                <div className="encounter-difficulty-meter">
+                  <div
+                    className={`encounter-difficulty-meter-fill ${meterColorClass}`}
+                    style={{ width: `${progressPercent}%` }}
+                  />
                 </div>
-                <div className="encounter-difficulty-row">
-                  <strong>Monster XP:</strong> {formatNumber(encounterDifficulty.totalMonsterXp)}
+                <div className="encounter-difficulty-meta">
+                  <strong>{encounterDifficulty.difficulty}</strong>
+                  {' · '}
+                  {formatNumber(encounterDifficulty.totalMonsterXp)} / {formatNumber(encounterDifficulty.thresholds.extreme)} XP
+                  {' · '}
+                  {partyMemberCount} member{partyMemberCount === 1 ? '' : 's'}
                 </div>
-                <div className="encounter-difficulty-row">
-                  <strong>Party:</strong> {partyMemberCount} member{partyMemberCount === 1 ? '' : 's'}
-                </div>
-                <div className="encounter-difficulty-thresholds">
-                  L {formatNumber(encounterDifficulty.thresholds.low)}
-                  {' | '}M {formatNumber(encounterDifficulty.thresholds.moderate)}
-                  {' | '}H {formatNumber(encounterDifficulty.thresholds.high)}
-                  {' | '}X {formatNumber(encounterDifficulty.thresholds.extreme)}
-                </div>
+                {overExtremeBy > 0 && (
+                  <div className="encounter-difficulty-note encounter-difficulty-note-danger">
+                    Over Extreme by {formatNumber(overExtremeBy)} XP.
+                  </div>
+                )}
                 {unknownMonsterCount > 0 && (
                   <div className="encounter-difficulty-note">
                     {unknownMonsterCount} monster{unknownMonsterCount === 1 ? '' : 's'} with unknown CR were treated as 0 XP.

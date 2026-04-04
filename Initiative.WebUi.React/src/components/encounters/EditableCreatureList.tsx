@@ -85,7 +85,6 @@ export const EditableCreatureList: React.FC<EditableCreatureListProps> = ({
       <div className="creature-item creature-header">
         <div></div>
         <div className="creature-header-init">
-          Init
           <button
             className="die-button die-button-header"
             onClick={onRollAllInitiative}
@@ -93,6 +92,7 @@ export const EditableCreatureList: React.FC<EditableCreatureListProps> = ({
           >
             🎲
           </button>
+          Init
         </div>
         <div>HP</div>
         <div>Name</div>

@@ -101,6 +101,13 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
 
       {/* Initiative */}
       <div className="creature-init-cell">
+        <button
+          className="die-button"
+          onClick={rollInitiative}
+          title={`Roll 1d20${(creature.initiativeModifier ?? 0) >= 0 ? '+' : ''}${creature.initiativeModifier ?? 0}`}
+        >
+          🎲
+        </button>
         {editingField === 'initiative' ? (
           <NumericInput
             value={creature.initiative}
@@ -119,13 +126,6 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
             {displayValue(creature.initiative, '–')}
           </span>
         )}
-        <button
-          className="die-button"
-          onClick={rollInitiative}
-          title={`Roll 1d20${(creature.initiativeModifier ?? 0) >= 0 ? '+' : ''}${creature.initiativeModifier ?? 0}`}
-        >
-          🎲
-        </button>
       </div>
 
       {/* HP: current / max */}

@@ -50,11 +50,10 @@ const EditEncounter: React.FC = () => {
   const [showStatBlock, setShowStatBlock] = useState(true);
   const [partyMembers, setPartyMembers] = useState<PartyMember[]>([]);
   const [creatureCrById, setCreatureCrById] = useState<Record<string, string | null>>({});
-  const encounterPrefsStorageKey = useMemo(
-    () => (encounterId ? `encounterDifficultyPrefs:${encounterId}` : null),
+  const encounterUiPrefsStorageKey = useMemo(
+    () => (encounterId ? `encounterUiPrefs:${encounterId}` : null),
     [encounterId]
   );
-  const prefsLoaded = useRef(false);
   const turnStateLoaded = useRef(false);
 
   const {
@@ -199,6 +198,13 @@ const EditEncounter: React.FC = () => {
   const handleChooseParty = useCallback((party: import('../../api/partyClient').Party) => {
     setShowPartyPicker(false);
     setPartyMembers(party.members);
+
+    if (encounterId) {
+      encounterClient
+        .setPartyLevels(encounterId, party.members.map((member) => member.level))
+        .catch(() => setError('Failed to save party levels'));
+    }
+
     // Remove existing player characters, keep non-player creatures
     const nonPlayers = creatures.filter((c) => !c.isPlayer);
     const partyCreatures = party.members.map((m) => ({
@@ -214,7 +220,7 @@ const EditEncounter: React.FC = () => {
       isEditing: false,
     }));
     handleCreaturesChange([...nonPlayers, ...partyCreatures]);
-  }, [creatures, handleCreaturesChange]);
+  }, [creatures, handleCreaturesChange, encounterId, encounterClient, setError]);
 
   const loadEncounter = useCallback(async () => {
     if (!encounterId) return;
@@ -224,6 +230,10 @@ const EditEncounter: React.FC = () => {
       setEncounter(data);
       setNewName(data.displayName);
       setCreatureList(data.creatures.map(c => ({ ...c, isEditing: false })));
+      setPartyMembers((data.partyLevels ?? []).map((level, index) => ({
+        name: `Party Member ${index + 1}`,
+        level: Math.max(1, Math.min(20, Math.floor(level))),
+      })));
       setEncounterState({
         currentTurn: data.turnIndex ?? 0,
         turnNumber: data.turnCount ?? 1,
@@ -244,52 +254,36 @@ const EditEncounter: React.FC = () => {
   }, [loadEncounter]);
 
   useEffect(() => {
-    prefsLoaded.current = false;
-
-    if (!encounterPrefsStorageKey || typeof window === 'undefined') {
-      prefsLoaded.current = true;
+    if (!encounterUiPrefsStorageKey || typeof window === 'undefined') {
       return;
     }
 
     try {
-      const raw = window.localStorage.getItem(encounterPrefsStorageKey);
+      const raw = window.localStorage.getItem(encounterUiPrefsStorageKey);
       if (!raw) {
         return;
       }
 
-      const parsed = JSON.parse(raw) as { partyLevels?: number[]; showDifficulty?: boolean };
-
-      if (Array.isArray(parsed.partyLevels)) {
-        setPartyMembers(
-          parsed.partyLevels.map((level, index) => ({
-            name: `Party Member ${index + 1}`,
-            level: Math.max(1, Math.min(20, Math.floor(level))),
-          }))
-        );
-      }
-
+      const parsed = JSON.parse(raw) as { showDifficulty?: boolean };
       if (typeof parsed.showDifficulty === 'boolean') {
         setShowDifficulty(parsed.showDifficulty);
       }
     } catch {
-      // Ignore malformed persisted encounter difficulty preferences.
-    } finally {
-      prefsLoaded.current = true;
+      // Ignore malformed persisted encounter UI preferences.
     }
-  }, [encounterPrefsStorageKey]);
+  }, [encounterUiPrefsStorageKey]);
 
   useEffect(() => {
-    if (!encounterPrefsStorageKey || !prefsLoaded.current || typeof window === 'undefined') {
+    if (!encounterUiPrefsStorageKey || typeof window === 'undefined') {
       return;
     }
 
     const payload = {
-      partyLevels: partyMembers.map((member) => member.level),
       showDifficulty,
     };
 
-    window.localStorage.setItem(encounterPrefsStorageKey, JSON.stringify(payload));
-  }, [encounterPrefsStorageKey, partyMembers, showDifficulty]);
+    window.localStorage.setItem(encounterUiPrefsStorageKey, JSON.stringify(payload));
+  }, [encounterUiPrefsStorageKey, showDifficulty]);
 
   // Fetch stat block for the current creature whenever the active turn changes
   useEffect(() => {
@@ -524,7 +518,16 @@ const EditEncounter: React.FC = () => {
         </div>
       )}
 
-      <div className="encounter-body">
+      <div className="statblock-toggle-row">
+        <button
+          className="control-button secondary"
+          onClick={() => setShowStatBlock(prev => !prev)}
+        >
+          {showStatBlock ? 'Hide Stat Block' : 'Show Stat Block'}
+        </button>
+      </div>
+
+      <div className={`encounter-body ${showStatBlock ? '' : 'encounter-body-full'}`}>
         <div className="encounter-left">
           <EncounterStatus
             encounterState={encounterState}
@@ -568,20 +571,13 @@ const EditEncounter: React.FC = () => {
           </button>
         </div>
 
-        <div className="encounter-statblock-panel">
-          <button
-            className="control-button secondary"
-            onClick={() => setShowStatBlock(prev => !prev)}
-            style={{ marginBottom: '0.5rem' }}
-          >
-            {showStatBlock ? 'Hide Stat Block' : 'Show Stat Block'}
-          </button>
-          {showStatBlock && (
-            activeStatBlock
+        {showStatBlock && (
+          <div className="encounter-statblock-panel">
+            {activeStatBlock
               ? <CreatureStatBlock data={activeStatBlock} />
-              : <div className="encounter-statblock-empty">No stat block available</div>
-          )}
-        </div>
+              : <div className="encounter-statblock-empty">No stat block available</div>}
+          </div>
+        )}
       </div>
 
       {showBestiaryPicker && (

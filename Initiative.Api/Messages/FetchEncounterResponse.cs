@@ -16,9 +16,12 @@
 
         public bool ViewersAllowed { get; set; }
 
+        public IEnumerable<int> PartyLevels { get; set; }
+
         public FetchEncounterResponse()
         {
             Creatures = new List<EncounterCreatureJsonModel>();
+            PartyLevels = new List<int>();
         }
     }
 }

@@ -91,5 +91,19 @@ namespace Initiative.Api.Core.Services.Encounters
             }
             await encounterRepository.SetEncounterViewersAllowed(encounterId, viewersAllowed, cancellationToken);
         }
+
+        public async Task SetEncounterPartyLevels(string encounterId, string ownerId, IEnumerable<int> partyLevels, CancellationToken cancellationToken)
+        {
+            if (await encounterRepository.FetchEncounterById(encounterId, ownerId, cancellationToken) == null)
+            {
+                throw new ArgumentException("Encounter not found.", nameof(encounterId));
+            }
+
+            var sanitizedLevels = (partyLevels ?? [])
+                .Select(level => Math.Clamp(level, 1, 20))
+                .ToList();
+
+            await encounterRepository.SetEncounterPartyLevels(encounterId, sanitizedLevels, cancellationToken);
+        }
     }
 }

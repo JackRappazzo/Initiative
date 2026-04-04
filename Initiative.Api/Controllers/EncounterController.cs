@@ -56,6 +56,7 @@ namespace Initiative.Api.Controllers
                 TurnIndex = encounter.TurnIndex,
                 TurnCount = encounter.TurnCount,
                 ViewersAllowed = encounter.ViewersAllowed,
+                PartyLevels = encounter.PartyLevels ?? [],
                 Creatures = encounter.Creatures.Select(c => new EncounterCreatureJsonModel()
                 {
                     IsPlayer = c.IsPlayer,
@@ -132,6 +133,13 @@ namespace Initiative.Api.Controllers
         public async Task<IActionResult> SetViewersAllowed(string encounterId, [FromBody] SetViewersAllowedRequest request, CancellationToken cancellationToken)
         {
             await encounterService.SetViewersAllowed(encounterId, User.GetUserId(), request.ViewersAllowed, cancellationToken);
+            return NoContent();
+        }
+
+        [HttpPut("{encounterId}/partyLevels"), Authorize]
+        public async Task<IActionResult> SetPartyLevels(string encounterId, [FromBody] SetEncounterPartyLevelsRequest request, CancellationToken cancellationToken)
+        {
+            await encounterService.SetEncounterPartyLevels(encounterId, User.GetUserId(), request.PartyLevels, cancellationToken);
             return NoContent();
         }
     }

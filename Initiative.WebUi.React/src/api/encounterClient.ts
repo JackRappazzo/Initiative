@@ -27,6 +27,7 @@ export interface FetchEncounterResponse {
   turnIndex: number;
   turnCount: number;
   viewersAllowed: boolean;
+  partyLevels: number[];
 }
 
 export class EncounterClient {
@@ -70,6 +71,11 @@ export class EncounterClient {
   // PUT /api/encounter/{encounterId}/viewersAllowed
   public async setViewersAllowed(encounterId: string, viewersAllowed: boolean): Promise<void> {
     return this.apiClient.put<void>(`encounter/${encodeURIComponent(encounterId)}/viewersAllowed`, { viewersAllowed });
+  }
+
+  // PUT /api/encounter/{encounterId}/partyLevels
+  public async setPartyLevels(encounterId: string, partyLevels: number[]): Promise<void> {
+    return this.apiClient.put<void>(`encounter/${encodeURIComponent(encounterId)}/partyLevels`, { partyLevels });
   }
 
   // DELETE /api/encounter/{encounterId}

@@ -33,6 +33,7 @@ namespace Initiative.Persistence.Repositories
             var encounter = new Encounter()
             {
                 Creatures = [],
+                PartyLevels = [],
                 DisplayName = name,
                 OwnerId = ownerId,
                 CreatedAt = DateTime.UtcNow
@@ -134,6 +135,13 @@ namespace Initiative.Persistence.Repositories
         {
             var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
             var update = Builders<Encounter>.Update.Set(e => e.ViewersAllowed, viewersAllowed);
+            await collection.UpdateOneAsync(e => e.Id == encounterId, update, cancellationToken: cancellationToken);
+        }
+
+        public async Task SetEncounterPartyLevels(string encounterId, IEnumerable<int> partyLevels, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<Encounter>(TableName);
+            var update = Builders<Encounter>.Update.Set(e => e.PartyLevels, partyLevels);
             await collection.UpdateOneAsync(e => e.Id == encounterId, update, cancellationToken: cancellationToken);
         }
 

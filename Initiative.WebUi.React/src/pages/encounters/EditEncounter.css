@@ -24,6 +24,16 @@
   align-items: start;
 }
 
+.encounter-body-full {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.statblock-toggle-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+
 @media (max-width: 900px) {
   .encounter-body {
     grid-template-columns: 1fr;
@@ -45,7 +55,7 @@
   }
 
   .creature-item {
-    grid-template-columns: 20px 72px 100px minmax(0, 1fr) 40px auto;
+    grid-template-columns: 20px 56px 88px minmax(0, 1fr) 40px auto;
     gap: 0.25rem;
     padding: 0.35rem 0.25rem;
   }
@@ -114,7 +124,7 @@
 
 .creature-item {
   display: grid;
-  grid-template-columns: 24px 90px 120px minmax(120px, 240px) 48px auto;
+  grid-template-columns: 24px 62px 96px minmax(120px, 1fr) 48px auto;
   gap: 0.5rem;
   align-items: center;
   padding: 0.35rem 0.5rem;
@@ -187,12 +197,12 @@
 }
 
 .creature-hp-part {
-  min-width: 36px;
+  min-width: 28px;
   text-align: center;
 }
 
 .creature-hp-input {
-  width: 46px !important;
+  width: 38px !important;
   min-width: 0;
   text-align: center;
 }
@@ -339,10 +349,6 @@
   background: #fff;
 }
 
-.encounter-difficulty-none {
-  color: #666;
-}
-
 .encounter-difficulty-header {
   display: flex;
   align-items: center;
@@ -356,13 +362,43 @@
   padding: 0.18rem 0.45rem;
 }
 
-.encounter-difficulty-row {
-  margin: 0.1rem 0;
+.encounter-difficulty-meter {
+  width: 100%;
+  height: 10px;
+  background: #e9edf2;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 0.2rem;
 }
 
-.encounter-difficulty-thresholds {
-  margin-top: 0.2rem;
-  color: #445;
+.encounter-difficulty-meter-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.encounter-difficulty-meter-none,
+.encounter-difficulty-meter-trivial,
+.encounter-difficulty-meter-low {
+  background: #5ca95b;
+}
+
+.encounter-difficulty-meter-moderate {
+  background: #d8b500;
+}
+
+.encounter-difficulty-meter-high {
+  background: #d07a24;
+}
+
+.encounter-difficulty-meter-extreme {
+  background: #c73a3a;
+}
+
+.encounter-difficulty-meta {
+  margin-top: 0.35rem;
+  color: #2f3842;
   font-size: 0.78rem;
 }
 
@@ -372,28 +408,8 @@
   font-size: 0.76rem;
 }
 
-.encounter-difficulty-trivial {
-  border-color: #cfd8dc;
-}
-
-.encounter-difficulty-low {
-  border-color: #9ccc65;
-  background: #f7fff0;
-}
-
-.encounter-difficulty-moderate {
-  border-color: #4fc3f7;
-  background: #f1f9ff;
-}
-
-.encounter-difficulty-high {
-  border-color: #ffb74d;
-  background: #fff7ef;
-}
-
-.encounter-difficulty-extreme {
-  border-color: #e57373;
-  background: #fff1f1;
+.encounter-difficulty-note-danger {
+  color: #9b1c1c;
 }
 
 .encounters-container {
@@ -548,7 +564,7 @@
 .creature-init-cell {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
 }
 
 .creature-init-value {
