@@ -5,6 +5,7 @@ import { NumericInput } from '../ui';
 import { EditableCreature } from '../../types';
 import { BestiaryClient, FiveEToolsRawData } from '../../api/bestiaryClient';
 import CreatureStatBlock from '../bestiaries/CreatureStatBlock';
+import { StatusTypeahead } from './StatusTypeahead';
 
 type EditingField = 'initiative' | 'currentHP' | 'maxHP' | 'displayName' | 'ac' | null;
 
@@ -29,6 +30,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
   const nameInputRef = useRef<HTMLInputElement>(null);
   const [statBlockData, setStatBlockData] = useState<FiveEToolsRawData | null>(null);
   const [statBlockLoading, setStatBlockLoading] = useState(false);
+  const [showStatusTypeahead, setShowStatusTypeahead] = useState(false);
 
   const {
     attributes,
@@ -52,7 +54,6 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
   const startEditing = useCallback((field: EditingField) => {
     setEditingField(field);
     if (field === 'displayName') {
-      // Focus the name input after render
       setTimeout(() => nameInputRef.current?.select(), 0);
     }
   }, []);
@@ -81,173 +82,237 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
   const displayValue = (val: number | undefined, placeholder: string) =>
     val !== undefined && val !== null ? val.toString() : placeholder;
 
+  const addStatus = useCallback(() => {
+    setShowStatusTypeahead(true);
+  }, []);
+
+  const handleStatusSelected = useCallback((status: string) => {
+    const trimmed = status.trim();
+    if (!trimmed) {
+      return;
+    }
+
+    const existingStatuses = creature.statuses ?? [];
+    if (existingStatuses.some((s) => s.toLowerCase() === trimmed.toLowerCase())) {
+      return;
+    }
+
+    handleFieldChange('statuses', [...existingStatuses, trimmed]);
+    setShowStatusTypeahead(false);
+  }, [creature.statuses, handleFieldChange]);
+
+  const removeStatus = useCallback((statusIndex: number) => {
+    const existingStatuses = creature.statuses ?? [];
+    handleFieldChange('statuses', existingStatuses.filter((_, idx) => idx !== statusIndex));
+  }, [creature.statuses, handleFieldChange]);
+
   return (
     <>
-    <div 
-      ref={setNodeRef}
-      style={{
-        ...style,
-        ...(isCurrentTurn ? { background: '#e9ecef' } : {})
-      }}
-      className={`creature-item ${isDragging ? 'dragging' : ''}`}
-      {...attributes}
-    >
       <div
-        className="drag-handle"
-        {...listeners}
+        ref={setNodeRef}
+        style={style}
+        className={`creature-row-wrap ${isDragging ? 'dragging' : ''}`}
+        {...attributes}
       >
-        ⋮⋮
-      </div>
-
-      {/* Initiative */}
-      <div className="creature-init-cell">
-        <button
-          className="die-button"
-          onClick={rollInitiative}
-          title={`Roll 1d20${(creature.initiativeModifier ?? 0) >= 0 ? '+' : ''}${creature.initiativeModifier ?? 0}`}
+        <div
+          style={isCurrentTurn ? { background: '#e9ecef' } : undefined}
+          className="creature-item"
         >
-          🎲
-        </button>
-        {editingField === 'initiative' ? (
-          <NumericInput
-            value={creature.initiative}
-            onChange={(value) => handleFieldChange('initiative', value)}
-            onBlur={stopEditing}
-            ariaLabel="Initiative"
-            placeholder="–"
-            className="creature-field-input creature-init-input"
-          />
-        ) : (
-          <span
-            className="creature-field-display creature-init-value"
-            onClick={() => startEditing('initiative')}
-            title="Click to edit initiative"
+          <div
+            className="drag-handle"
+            {...listeners}
           >
-            {displayValue(creature.initiative, '–')}
-          </span>
-        )}
-      </div>
+            ⋮⋮
+          </div>
 
-      {/* HP: current / max */}
-      <div className="creature-hp-cell">
-        {creature.isPlayer ? (
-          <span className="creature-field-display creature-player-dash">--</span>
-        ) : (
-          <>
-            {editingField === 'currentHP' ? (
+          <div className="creature-init-cell">
+            <button
+              className="die-button"
+              onClick={rollInitiative}
+              title={`Roll 1d20${(creature.initiativeModifier ?? 0) >= 0 ? '+' : ''}${creature.initiativeModifier ?? 0}`}
+            >
+              🎲
+            </button>
+            {editingField === 'initiative' ? (
               <NumericInput
-                value={creature.currentHP}
-                onChange={(value) => handleFieldChange('currentHP', value)}
+                value={creature.initiative}
+                onChange={(value) => handleFieldChange('initiative', value)}
                 onBlur={stopEditing}
-                ariaLabel="Hit Points"
+                ariaLabel="Initiative"
                 placeholder="–"
-                className="creature-field-input creature-hp-input"
+                className="creature-field-input creature-init-input"
               />
             ) : (
               <span
-                className="creature-field-display creature-hp-part"
-                onClick={() => startEditing('currentHP')}
-                title="Click to edit current HP"
+                className="creature-field-display creature-init-value"
+                onClick={() => startEditing('initiative')}
+                title="Click to edit initiative"
               >
-                {displayValue(creature.currentHP, '–')}
+                {displayValue(creature.initiative, '–')}
               </span>
             )}
-            <span className="creature-hp-sep">/</span>
-            {editingField === 'maxHP' ? (
-              <NumericInput
-                value={creature.maxHP}
-                onChange={(value) => handleFieldChange('maxHP', value)}
+          </div>
+
+          <div className="creature-hp-cell">
+            {creature.isPlayer ? (
+              <span className="creature-field-display creature-player-dash">--</span>
+            ) : (
+              <>
+                {editingField === 'currentHP' ? (
+                  <NumericInput
+                    value={creature.currentHP}
+                    onChange={(value) => handleFieldChange('currentHP', value)}
+                    onBlur={stopEditing}
+                    ariaLabel="Hit Points"
+                    placeholder="–"
+                    className="creature-field-input creature-hp-input"
+                  />
+                ) : (
+                  <span
+                    className="creature-field-display creature-hp-part"
+                    onClick={() => startEditing('currentHP')}
+                    title="Click to edit current HP"
+                  >
+                    {displayValue(creature.currentHP, '–')}
+                  </span>
+                )}
+                <span className="creature-hp-sep">/</span>
+                {editingField === 'maxHP' ? (
+                  <NumericInput
+                    value={creature.maxHP}
+                    onChange={(value) => handleFieldChange('maxHP', value)}
+                    onBlur={stopEditing}
+                    ariaLabel="Maximum Hit Points"
+                    placeholder="–"
+                    className="creature-field-input creature-hp-input"
+                  />
+                ) : (
+                  <span
+                    className="creature-field-display creature-hp-part"
+                    onClick={() => startEditing('maxHP')}
+                    title="Click to edit max HP"
+                  >
+                    {displayValue(creature.maxHP, '–')}
+                  </span>
+                )}
+              </>
+            )}
+          </div>
+
+          <div className="creature-name-cell">
+            {editingField === 'displayName' ? (
+              <input
+                ref={nameInputRef}
+                type="text"
+                value={creature.displayName}
+                onChange={(e) => handleFieldChange('displayName', e.target.value)}
                 onBlur={stopEditing}
-                ariaLabel="Maximum Hit Points"
-                placeholder="–"
-                className="creature-field-input creature-hp-input"
+                className="creature-field-input creature-name-input"
+                autoFocus
               />
             ) : (
               <span
-                className="creature-field-display creature-hp-part"
-                onClick={() => startEditing('maxHP')}
-                title="Click to edit max HP"
+                className={`creature-field-display creature-name-display${creature.isPlayer ? ' creature-name-player' : ''}`}
+                onClick={() => startEditing('displayName')}
+                title="Click to edit name"
               >
-                {displayValue(creature.maxHP, '–')}
+                {creature.displayName || '–'}
               </span>
             )}
-          </>
-        )}
-      </div>
+            <div className="creature-status-inline">
+              {(creature.statuses ?? []).map((status, statusIndex) => (
+                <span key={`${status}-${statusIndex}`} className="creature-status-pill creature-status-pill-inline">
+                  {status}
+                  <button
+                    type="button"
+                    className="creature-status-remove"
+                    onClick={() => removeStatus(statusIndex)}
+                    title={`Remove ${status}`}
+                  >
+                    X
+                  </button>
+                </span>
+              ))}
+              <button
+                type="button"
+                className="creature-status-add-inline"
+                onClick={addStatus}
+                title="Add status"
+              >
+                +
+              </button>
+            </div>
+          </div>
 
-      {/* Display Name */}
-      {editingField === 'displayName' ? (
-        <input
-          ref={nameInputRef}
-          type="text"
-          value={creature.displayName}
-          onChange={(e) => handleFieldChange('displayName', e.target.value)}
-          onBlur={stopEditing}
-          className="creature-field-input creature-name-input"
-          autoFocus
-        />
-      ) : (
-        <span
-          className={`creature-field-display creature-name-display${creature.isPlayer ? ' creature-name-player' : ''}`}
-          onClick={() => startEditing('displayName')}
-          title="Click to edit name"
-        >
-          {creature.displayName || '–'}
-        </span>
-      )}
+          {creature.isPlayer ? (
+            <span className="creature-field-display creature-player-dash">--</span>
+          ) : editingField === 'ac' ? (
+            <NumericInput
+              value={creature.ac}
+              min={0}
+              onChange={(value) => handleFieldChange('ac', value)}
+              onBlur={stopEditing}
+              ariaLabel="Armor Class"
+              placeholder="–"
+              className="creature-field-input"
+            />
+          ) : (
+            <span
+              className="creature-field-display"
+              onClick={() => startEditing('ac')}
+              title="Click to edit AC"
+            >
+              {displayValue(creature.ac, '–')}
+            </span>
+          )}
 
-      {/* AC */}
-      {creature.isPlayer ? (
-        <span className="creature-field-display creature-player-dash">--</span>
-      ) : editingField === 'ac' ? (
-        <NumericInput
-          value={creature.ac}
-          min={0}
-          onChange={(value) => handleFieldChange('ac', value)}
-          onBlur={stopEditing}
-          ariaLabel="Armor Class"
-          placeholder="–"
-          className="creature-field-input"
-        />
-      ) : (
-        <span
-          className="creature-field-display"
-          onClick={() => startEditing('ac')}
-          title="Click to edit AC"
-        >
-          {displayValue(creature.ac, '–')}
-        </span>
-      )}
-
-      <div className="creature-controls">
-        {!creature.isPlayer && creature.creatureId && (
-          <button
-            className="control-button secondary"
-            onClick={openStatBlock}
-            disabled={statBlockLoading}
-            title="View stat block"
-          >
-            {statBlockLoading ? '…' : '📋'}
-          </button>
-        )}
-        <button
-          className="control-button danger"
-          onClick={() => onCreatureRemove(index)}
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-
-    {/* Stat block modal */}
-    {statBlockData && (
-      <div className="stat-block-overlay" onClick={() => setStatBlockData(null)}>
-        <div className="stat-block-modal" onClick={(e) => e.stopPropagation()}>
-          <button className="stat-block-close" onClick={() => setStatBlockData(null)}>✕</button>
-          <CreatureStatBlock data={statBlockData} />
+          <div className="creature-controls">
+            {!creature.isPlayer && creature.creatureId && (
+              <button
+                className="control-button secondary"
+                onClick={openStatBlock}
+                disabled={statBlockLoading}
+                title="View stat block"
+              >
+                {statBlockLoading ? '…' : '📋'}
+              </button>
+            )}
+            {!creature.isPlayer && (
+              <button
+                className={`control-button secondary ${creature.isHidden ? 'hidden' : ''}`}
+                onClick={() => handleFieldChange('isHidden', !creature.isHidden)}
+                title={creature.isHidden ? 'Show in lobby' : 'Hide from lobby'}
+              >
+                {creature.isHidden ? '�' : '👁️'}
+              </button>
+            )}
+            <button
+              className="control-button danger"
+              onClick={() => onCreatureRemove(index)}
+            >
+              ✕
+            </button>
+          </div>
         </div>
+
       </div>
-    )}
-  </>
+
+      {statBlockData && (
+        <div className="stat-block-overlay" onClick={() => setStatBlockData(null)}>
+          <div className="stat-block-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="stat-block-close" onClick={() => setStatBlockData(null)}>✕</button>
+            <CreatureStatBlock data={statBlockData} />
+          </div>
+        </div>
+      )}
+
+      {showStatusTypeahead && (
+        <StatusTypeahead
+          existingStatuses={creature.statuses ?? []}
+          onStatusSelected={handleStatusSelected}
+          onDismiss={() => setShowStatusTypeahead(false)}
+        />
+      )}
+    </>
   );
 };

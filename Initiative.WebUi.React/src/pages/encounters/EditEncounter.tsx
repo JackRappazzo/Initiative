@@ -80,7 +80,9 @@ const EditEncounter: React.FC = () => {
     }
 
     try {
-      const creatureNames = creatureList.map(creature => creature.displayName || 'Unnamed Creature');
+      const creatureNames = creatureList
+        .filter(creature => !creature.isHidden) // Filter out hidden creatures
+        .map(creature => creature.displayName || 'Unnamed Creature');
       const lobbyMode = viewersAllowed ? 'InProgress' : 'Waiting';
       
       console.log('[EditEncounter] Sending lobby state:', {
@@ -107,9 +109,10 @@ const EditEncounter: React.FC = () => {
   const updateCreature = useCallback((index: number, creature: any) => {
     originalUpdateCreature(index, creature);
     
-    // Send lobby state if creature displayName changed (affects display) and viewers are allowed
+    // Send lobby state if creature displayName or isHidden changed (affects display) and viewers are allowed
     const oldCreature = creatures[index];
-    if (encounterState.viewersAllowed && oldCreature && oldCreature.displayName !== creature.displayName) {
+    if (encounterState.viewersAllowed && oldCreature && 
+        (oldCreature.displayName !== creature.displayName || oldCreature.isHidden !== creature.isHidden)) {
       const updatedCreatures = [...creatures];
       updatedCreatures[index] = creature;
       

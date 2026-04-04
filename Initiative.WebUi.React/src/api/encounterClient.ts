@@ -5,6 +5,8 @@ export interface EncounterCreatureJsonModel {
   displayName: string;
   creatureName?: string;
   creatureId?: string;
+  statuses?: string[];
+  isHidden?: boolean;
   initiative: number;
   initiativeModifier: number;
   maxHP: number;

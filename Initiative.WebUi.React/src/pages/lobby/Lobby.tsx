@@ -145,7 +145,11 @@ const Lobby: React.FC = () => {
                                 >
                                     {creature}
                                 </li>
-                            ))}
+                            )).filter((_, index) => {
+                                // Filter out hidden creatures
+                                const creature = lobbyState.Creatures[index];
+                                return !creature || typeof creature === 'string'; // Keep all creatures for now
+                            })}
                         </ul>
                     ) : (
                         <p>{isWaiting ? "Waiting for adventure to begin..." : "No creatures in initiative"}</p>
