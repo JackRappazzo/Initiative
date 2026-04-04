@@ -8,8 +8,10 @@ import { EditableCreatureList, EncounterHeader, EncounterStatus } from '../../co
 import BestiaryPicker from '../../components/bestiaries/BestiaryPicker';
 import PartyPicker from '../../components/encounters/PartyPicker';
 import CreatureStatBlock from '../../components/bestiaries/CreatureStatBlock';
+import { PartyMember } from '../../api/partyClient';
 import { useUser } from '../../contexts/UserContext';
 import { isTaleSpire } from '../../utils/talespire';
+import { calculateEncounterDifficulty, challengeRatingToXp } from '../../utils/encounterDifficulty';
 
 import './EditEncounter.css';
 
@@ -38,6 +40,7 @@ const EditEncounter: React.FC = () => {
   const [showBestiaryPicker, setShowBestiaryPicker] = useState(false);
   const [showPartyPicker, setShowPartyPicker] = useState(false);
   const [newName, setNewName] = useState('');
+  const [showDifficulty, setShowDifficulty] = useState(true);
   const [encounterState, setEncounterState] = useState<EncounterState>({
     currentTurn: 0,
     turnNumber: 1,
@@ -45,6 +48,13 @@ const EditEncounter: React.FC = () => {
   });
   const [activeStatBlock, setActiveStatBlock] = useState<FiveEToolsRawData | null>(null);
   const [showStatBlock, setShowStatBlock] = useState(true);
+  const [partyMembers, setPartyMembers] = useState<PartyMember[]>([]);
+  const [creatureCrById, setCreatureCrById] = useState<Record<string, string | null>>({});
+  const encounterPrefsStorageKey = useMemo(
+    () => (encounterId ? `encounterDifficultyPrefs:${encounterId}` : null),
+    [encounterId]
+  );
+  const prefsLoaded = useRef(false);
   const turnStateLoaded = useRef(false);
 
   const {
@@ -188,6 +198,7 @@ const EditEncounter: React.FC = () => {
 
   const handleChooseParty = useCallback((party: import('../../api/partyClient').Party) => {
     setShowPartyPicker(false);
+    setPartyMembers(party.members);
     // Remove existing player characters, keep non-player creatures
     const nonPlayers = creatures.filter((c) => !c.isPlayer);
     const partyCreatures = party.members.map((m) => ({
@@ -232,6 +243,54 @@ const EditEncounter: React.FC = () => {
     loadEncounter();
   }, [loadEncounter]);
 
+  useEffect(() => {
+    prefsLoaded.current = false;
+
+    if (!encounterPrefsStorageKey || typeof window === 'undefined') {
+      prefsLoaded.current = true;
+      return;
+    }
+
+    try {
+      const raw = window.localStorage.getItem(encounterPrefsStorageKey);
+      if (!raw) {
+        return;
+      }
+
+      const parsed = JSON.parse(raw) as { partyLevels?: number[]; showDifficulty?: boolean };
+
+      if (Array.isArray(parsed.partyLevels)) {
+        setPartyMembers(
+          parsed.partyLevels.map((level, index) => ({
+            name: `Party Member ${index + 1}`,
+            level: Math.max(1, Math.min(20, Math.floor(level))),
+          }))
+        );
+      }
+
+      if (typeof parsed.showDifficulty === 'boolean') {
+        setShowDifficulty(parsed.showDifficulty);
+      }
+    } catch {
+      // Ignore malformed persisted encounter difficulty preferences.
+    } finally {
+      prefsLoaded.current = true;
+    }
+  }, [encounterPrefsStorageKey]);
+
+  useEffect(() => {
+    if (!encounterPrefsStorageKey || !prefsLoaded.current || typeof window === 'undefined') {
+      return;
+    }
+
+    const payload = {
+      partyLevels: partyMembers.map((member) => member.level),
+      showDifficulty,
+    };
+
+    window.localStorage.setItem(encounterPrefsStorageKey, JSON.stringify(payload));
+  }, [encounterPrefsStorageKey, partyMembers, showDifficulty]);
+
   // Fetch stat block for the current creature whenever the active turn changes
   useEffect(() => {
     const current = creatures[encounterState.currentTurn];
@@ -245,6 +304,105 @@ const EditEncounter: React.FC = () => {
       .catch(() => { if (!cancelled) setActiveStatBlock(null); });
     return () => { cancelled = true; };
   }, [encounterState.currentTurn, creatures, bestiaryClient]);
+
+  useEffect(() => {
+    const monsterIds = Array.from(
+      new Set(
+        creatures
+          .filter((creature) => !creature.isPlayer && !!creature.creatureId)
+          .map((creature) => creature.creatureId as string)
+      )
+    );
+
+    const missingIds = monsterIds.filter((id) => creatureCrById[id] === undefined);
+    if (missingIds.length === 0) {
+      return;
+    }
+
+    let cancelled = false;
+
+    Promise.all(
+      missingIds.map(async (id) => {
+        try {
+          const detail = await bestiaryClient.getCreatureById(id);
+          const rawCr = detail.rawData.cr;
+
+          if (typeof rawCr === 'string') {
+            return [id, rawCr] as const;
+          }
+
+          if (rawCr && typeof rawCr.cr === 'string') {
+            return [id, rawCr.cr] as const;
+          }
+
+          return [id, null] as const;
+        } catch {
+          return [id, null] as const;
+        }
+      })
+    ).then((entries) => {
+      if (cancelled) {
+        return;
+      }
+
+      setCreatureCrById((previous) => {
+        const next = { ...previous };
+
+        for (const [id, cr] of entries) {
+          if (next[id] === undefined) {
+            next[id] = cr;
+          }
+        }
+
+        return next;
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [creatures, bestiaryClient, creatureCrById]);
+
+  const partyLevels = useMemo(() => partyMembers.map((member) => member.level), [partyMembers]);
+
+  const monsterXpValues = useMemo(
+    () =>
+      creatures
+        .filter((creature) => !creature.isPlayer)
+        .map((creature) => {
+          if (!creature.creatureId) {
+            return 0;
+          }
+
+          return challengeRatingToXp(creatureCrById[creature.creatureId]);
+        }),
+    [creatures, creatureCrById]
+  );
+
+  const unknownMonsterCount = useMemo(
+    () =>
+      creatures.filter((creature) => {
+        if (creature.isPlayer) {
+          return false;
+        }
+
+        if (!creature.creatureId) {
+          return true;
+        }
+
+        const cr = creatureCrById[creature.creatureId];
+        return !cr || challengeRatingToXp(cr) === 0;
+      }).length,
+    [creatures, creatureCrById]
+  );
+
+  const encounterDifficulty = useMemo(() => {
+    if (partyLevels.length === 0) {
+      return null;
+    }
+
+    return calculateEncounterDifficulty(partyLevels, monsterXpValues);
+  }, [partyLevels, monsterXpValues]);
 
   const handleNameEdit = async () => {
     if (!encounter || !encounterId || !newName.trim()) return;
@@ -374,6 +532,11 @@ const EditEncounter: React.FC = () => {
             onToggleViewersAllowed={toggleViewersAllowed}
             onNextTurn={nextTurn}
             onPrevTurn={prevTurn}
+            showDifficulty={showDifficulty}
+            onToggleShowDifficulty={() => setShowDifficulty((previous) => !previous)}
+            encounterDifficulty={encounterDifficulty}
+            partyMemberCount={partyMembers.length}
+            unknownMonsterCount={unknownMonsterCount}
           />
 
           <div className="creature-list">

@@ -68,6 +68,12 @@ main {
   padding: 1rem;
 }
 
+@media (max-width: 600px) {
+  main {
+    padding: 0;
+  }
+}
+
 /* Footer */
 .footer {
   background-color: #282c34;
