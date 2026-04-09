@@ -41,7 +41,7 @@ namespace Initiative.Lobby.Core.Services
                 }
 
                 var lobby = lobbies[roomCode];
-                lobby.Creatures = encounter.Creatures.ToImmutableList();
+                lobby.Creatures = (encounter.Creatures ?? Enumerable.Empty<LobbyCreatureDto>()).ToImmutableList();
                 lobby.CurrentCreatureIndex = encounter.CurrentCreatureIndex;
                 lobby.CurrentTurn = encounter.CurrentTurn;
                 lobby.CurrentMode = encounter.CurrentMode;

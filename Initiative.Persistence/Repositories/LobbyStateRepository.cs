@@ -23,7 +23,7 @@ namespace Initiative.Persistence.Repositories
 
         public async Task<string> UpsertLobbyState(
             string roomCode,
-            string[] creatures,
+            LobbyCreatureStateDto[] creatures,
             int turnNumber,
             int currentCreatureIndex,
             LobbyMode currentMode,

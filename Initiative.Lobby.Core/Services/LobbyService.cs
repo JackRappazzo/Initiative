@@ -1,5 +1,6 @@
 ﻿using Initiative.Lobby.Core.Dtos;
 using Initiative.Persistence.Repositories;
+using Initiative.Persistence.Models.Lobby;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Concurrent;
@@ -80,12 +81,30 @@ namespace Initiative.Lobby.Core.Services
                     .ServiceProvider
                     .GetRequiredService<ILobbyStateRepository>();
 
-                var storedState = await lobbyStateRepository.FetchLobbyStateByRoomCode(roomCode, CancellationToken.None);
+                Initiative.Persistence.Models.Lobby.LobbyStateDto? storedState;
+                try
+                {
+                    storedState = await lobbyStateRepository.FetchLobbyStateByRoomCode(roomCode, CancellationToken.None);
+                }
+                catch
+                {
+                    storedState = null;
+                }
+
                 if (storedState != null)
                 {
                     var recoveredEncounterDto = new EncounterDto
                     {
-                        Creatures = storedState.Creatures.ToImmutableList(),
+                        Creatures = storedState.Creatures
+                            .Select(creature => new LobbyCreatureDto
+                            {
+                                DisplayName = creature.DisplayName,
+                                Statuses = creature.Statuses ?? [],
+                                HealthStatus = creature.HealthStatus,
+                                IsPlayer = creature.IsPlayer,
+                                IsHidden = creature.IsHidden
+                            })
+                            .ToImmutableList(),
                         CurrentCreatureIndex = storedState.CurrentCreatureIndex,
                         CurrentTurn = storedState.TurnNumber,
                         CurrentMode = storedState.CurrentMode
@@ -98,7 +117,7 @@ namespace Initiative.Lobby.Core.Services
                 {
                     return new EncounterDto
                     {
-                        Creatures = Enumerable.Empty<string>(),
+                        Creatures = Enumerable.Empty<LobbyCreatureDto>(),
                         CurrentCreatureIndex = 0,
                         CurrentTurn = 0,
                         CurrentMode = LobbyMode.Waiting
@@ -118,9 +137,20 @@ namespace Initiative.Lobby.Core.Services
                 .ServiceProvider
                 .GetRequiredService<ILobbyStateRepository>();
 
+            var persistedCreatures = encounter.Creatures
+                .Select(creature => new LobbyCreatureStateDto
+                {
+                    DisplayName = creature.DisplayName,
+                    Statuses = creature.Statuses?.ToArray() ?? [],
+                    HealthStatus = creature.HealthStatus,
+                    IsPlayer = creature.IsPlayer,
+                    IsHidden = creature.IsHidden
+                })
+                .ToArray();
+
             await lobbyStateRepository.UpsertLobbyState(
                 roomCode,
-                encounter.Creatures.ToArray(),
+                persistedCreatures,
                 encounter.CurrentTurn,
                 encounter.CurrentCreatureIndex,
                 encounter.CurrentMode,

@@ -104,6 +104,66 @@
     transition: all 0.2s ease;
 }
 
+.creature-name {
+    font-weight: 600;
+}
+
+.creature-name-row,
+.current-creature-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.current-creature-row {
+    justify-content: center;
+}
+
+.health-dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.health-dot.bloodied {
+    background-color: #dc3545;
+}
+
+.health-dot.hurt {
+    background-color: #fd7e14;
+}
+
+.health-dot.healthy {
+    background-color: #28a745;
+}
+
+.creature-statuses,
+.current-creature-statuses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+}
+
+.current-creature-statuses {
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.status-chip {
+    display: inline-block;
+    font-size: 0.75rem;
+    line-height: 1;
+    color: #5a3f00;
+    background-color: #ffecb3;
+    border: 1px solid #ffd54f;
+    border-radius: 999px;
+    padding: 0.25rem 0.5rem;
+    white-space: nowrap;
+}
+
 .initiative-list li.current-creature {
     background-color: #e3f2fd;
     border-color: #2196f3;
@@ -216,6 +276,10 @@
     
     .next-creature {
         font-size: 1.2rem;
+    }
+
+    .current-creature-statuses {
+        margin-bottom: 0.75rem;
     }
     
     .turn-info {

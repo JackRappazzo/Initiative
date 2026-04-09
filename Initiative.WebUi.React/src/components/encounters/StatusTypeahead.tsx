@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 // Combined list of XPHB conditions and statuses
 const PREDEFINED_STATUSES = [
   'Blinded',
-  'Bloodied',
   'Charmed',
   'Concentration',
   'Deafened',

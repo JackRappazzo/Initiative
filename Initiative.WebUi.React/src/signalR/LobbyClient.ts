@@ -1,6 +1,6 @@
 import { Subject, BehaviorSubject } from "rxjs";
 import * as signalR from "@microsoft/signalr";
-import { LobbyState } from "./LobbyState";
+import { LobbyCreatureEntry, LobbyState } from "./LobbyState";
 
 export class LobbyClient {
     public receivedLobbyState$ = new Subject<LobbyState>();
@@ -132,7 +132,7 @@ export class LobbyClient {
         }
     }
     
-    public async setLobbyState(creatureList: string[], currentCreatureIndex: number, currentTurn: number, lobbyMode: string): Promise<void> {
+    public async setLobbyState(creatureList: LobbyCreatureEntry[], currentCreatureIndex: number, currentTurn: number, lobbyMode: string): Promise<void> {
         try {
             await this.connection.invoke("SetLobbyState", { 
                 creatures: creatureList, 

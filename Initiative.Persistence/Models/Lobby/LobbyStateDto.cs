@@ -16,7 +16,7 @@ namespace Initiative.Persistence.Models.Lobby
         public string Id { get; set; }
         
         public string RoomCode { get; set; }
-        public string[] Creatures { get; set; }
+        public LobbyCreatureStateDto[] Creatures { get; set; } = [];
         public int TurnNumber { get; set; }
         public int CurrentCreatureIndex { get; set; }
         public LobbyMode CurrentMode { get; set; } = LobbyMode.Waiting;

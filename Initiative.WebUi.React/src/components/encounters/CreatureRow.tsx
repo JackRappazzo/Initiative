@@ -10,6 +10,7 @@ import { StatusTypeahead } from './StatusTypeahead';
 type EditingField = 'initiative' | 'currentHP' | 'maxHP' | 'displayName' | 'ac' | null;
 
 const bestiaryClient = new BestiaryClient();
+const HEALTH_STATUS_SET = new Set(['healthy', 'hurt', 'bloodied']);
 
 interface CreatureRowProps {
   creature: EditableCreature;
@@ -64,6 +65,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
 
   const openStatBlock = useCallback(async () => {
     if (!creature.creatureId) return;
+
     setStatBlockLoading(true);
     try {
       const detail = await bestiaryClient.getCreatureById(creature.creatureId);
@@ -88,7 +90,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
 
   const handleStatusSelected = useCallback((status: string) => {
     const trimmed = status.trim();
-    if (!trimmed) {
+    if (!trimmed || HEALTH_STATUS_SET.has(trimmed.toLowerCase())) {
       return;
     }
 
@@ -106,6 +108,10 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
     handleFieldChange('statuses', existingStatuses.filter((_, idx) => idx !== statusIndex));
   }, [creature.statuses, handleFieldChange]);
 
+  const visibleStatuses = (creature.statuses ?? [])
+    .map((status, statusIndex) => ({ status, statusIndex }))
+    .filter(({ status }) => !HEALTH_STATUS_SET.has(status.trim().toLowerCase()));
+
   return (
     <>
       <div
@@ -122,7 +128,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
             className="drag-handle"
             {...listeners}
           >
-            ⋮⋮
+            ::
           </div>
 
           <div className="creature-init-cell">
@@ -131,7 +137,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
               onClick={rollInitiative}
               title={`Roll 1d20${(creature.initiativeModifier ?? 0) >= 0 ? '+' : ''}${creature.initiativeModifier ?? 0}`}
             >
-              🎲
+              d20
             </button>
             {editingField === 'initiative' ? (
               <NumericInput
@@ -139,7 +145,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
                 onChange={(value) => handleFieldChange('initiative', value)}
                 onBlur={stopEditing}
                 ariaLabel="Initiative"
-                placeholder="–"
+                placeholder="-"
                 className="creature-field-input creature-init-input"
               />
             ) : (
@@ -148,7 +154,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
                 onClick={() => startEditing('initiative')}
                 title="Click to edit initiative"
               >
-                {displayValue(creature.initiative, '–')}
+                {displayValue(creature.initiative, '-')}
               </span>
             )}
           </div>
@@ -164,7 +170,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
                     onChange={(value) => handleFieldChange('currentHP', value)}
                     onBlur={stopEditing}
                     ariaLabel="Hit Points"
-                    placeholder="–"
+                    placeholder="-"
                     className="creature-field-input creature-hp-input"
                   />
                 ) : (
@@ -173,7 +179,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
                     onClick={() => startEditing('currentHP')}
                     title="Click to edit current HP"
                   >
-                    {displayValue(creature.currentHP, '–')}
+                    {displayValue(creature.currentHP, '-')}
                   </span>
                 )}
                 <span className="creature-hp-sep">/</span>
@@ -183,7 +189,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
                     onChange={(value) => handleFieldChange('maxHP', value)}
                     onBlur={stopEditing}
                     ariaLabel="Maximum Hit Points"
-                    placeholder="–"
+                    placeholder="-"
                     className="creature-field-input creature-hp-input"
                   />
                 ) : (
@@ -192,7 +198,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
                     onClick={() => startEditing('maxHP')}
                     title="Click to edit max HP"
                   >
-                    {displayValue(creature.maxHP, '–')}
+                    {displayValue(creature.maxHP, '-')}
                   </span>
                 )}
               </>
@@ -216,11 +222,11 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
                 onClick={() => startEditing('displayName')}
                 title="Click to edit name"
               >
-                {creature.displayName || '–'}
+                {creature.displayName || '-'}
               </span>
             )}
             <div className="creature-status-inline">
-              {(creature.statuses ?? []).map((status, statusIndex) => (
+              {visibleStatuses.map(({ status, statusIndex }) => (
                 <span key={`${status}-${statusIndex}`} className="creature-status-pill creature-status-pill-inline">
                   {status}
                   <button
@@ -253,7 +259,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
               onChange={(value) => handleFieldChange('ac', value)}
               onBlur={stopEditing}
               ariaLabel="Armor Class"
-              placeholder="–"
+              placeholder="-"
               className="creature-field-input"
             />
           ) : (
@@ -262,7 +268,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
               onClick={() => startEditing('ac')}
               title="Click to edit AC"
             >
-              {displayValue(creature.ac, '–')}
+              {displayValue(creature.ac, '-')}
             </span>
           )}
 
@@ -274,7 +280,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
                 disabled={statBlockLoading}
                 title="View stat block"
               >
-                {statBlockLoading ? '…' : '📋'}
+                {statBlockLoading ? '...' : 'Sheet'}
               </button>
             )}
             {!creature.isPlayer && (
@@ -283,24 +289,23 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
                 onClick={() => handleFieldChange('isHidden', !creature.isHidden)}
                 title={creature.isHidden ? 'Show in lobby' : 'Hide from lobby'}
               >
-                {creature.isHidden ? '�' : '👁️'}
+                {creature.isHidden ? 'Show' : 'Hide'}
               </button>
             )}
             <button
               className="control-button danger"
               onClick={() => onCreatureRemove(index)}
             >
-              ✕
+              X
             </button>
           </div>
         </div>
-
       </div>
 
       {statBlockData && (
         <div className="stat-block-overlay" onClick={() => setStatBlockData(null)}>
           <div className="stat-block-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="stat-block-close" onClick={() => setStatBlockData(null)}>✕</button>
+            <button className="stat-block-close" onClick={() => setStatBlockData(null)}>X</button>
             <CreatureStatBlock data={statBlockData} />
           </div>
         </div>
@@ -308,7 +313,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
 
       {showStatusTypeahead && (
         <StatusTypeahead
-          existingStatuses={creature.statuses ?? []}
+          existingStatuses={(creature.statuses ?? []).filter((status) => !HEALTH_STATUS_SET.has(status.trim().toLowerCase()))}
           onStatusSelected={handleStatusSelected}
           onDismiss={() => setShowStatusTypeahead(false)}
         />

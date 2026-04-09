@@ -15,6 +15,8 @@ import { calculateEncounterDifficulty, challengeRatingToXp } from '../../utils/e
 
 import './EditEncounter.css';
 
+const HEALTH_STATUS_SET = new Set(['healthy', 'hurt', 'bloodied']);
+
 const EditEncounter: React.FC = () => {
   const { encounterId } = useParams<{ encounterId: string }>();
   const encounterClient = useMemo(() => new EncounterClient(), []);
@@ -80,20 +82,59 @@ const EditEncounter: React.FC = () => {
     }
 
     try {
-      const creatureNames = creatureList
+      const getHealthStatus = (creature: (typeof creatureList)[number]): 'Healthy' | 'Hurt' | 'Bloodied' | '' => {
+        if (creature.isPlayer) {
+          return '';
+        }
+
+        const maxHP = Math.max(creature.maxHP ?? 0, 0);
+        const currentHP = Math.max(creature.currentHP ?? 0, 0);
+
+        if (maxHP <= 0) {
+          return 'Healthy';
+        }
+
+        const hpRatio = currentHP / maxHP;
+        if (hpRatio <= 0.5) {
+          return 'Bloodied';
+        }
+
+        if (currentHP < maxHP) {
+          return 'Hurt';
+        }
+
+        return 'Healthy';
+      };
+
+      const formatCreatureForLobby = (creature: (typeof creatureList)[number]) => {
+        const displayName = (creature.displayName || 'Unnamed Creature').trim() || 'Unnamed Creature';
+        const statuses = (creature.statuses ?? [])
+          .map((status) => status.trim())
+          .filter((status) => Boolean(status) && !HEALTH_STATUS_SET.has(status.toLowerCase()));
+
+        return {
+          displayName,
+          statuses,
+          healthStatus: getHealthStatus(creature),
+          isPlayer: creature.isPlayer,
+          isHidden: creature.isHidden ?? false,
+        };
+      };
+
+      const lobbyCreatures = creatureList
         .filter(creature => !creature.isHidden) // Filter out hidden creatures
-        .map(creature => creature.displayName || 'Unnamed Creature');
+        .map(formatCreatureForLobby);
       const lobbyMode = viewersAllowed ? 'InProgress' : 'Waiting';
       
       console.log('[EditEncounter] Sending lobby state:', {
-        creatures: creatureNames,
+        creatures: lobbyCreatures,
         currentCreatureIndex: currentTurn,
         currentTurn: turnNumber,
         mode: lobbyMode
       });
 
       await lobbyClient.setLobbyState(
-        creatureNames,
+        lobbyCreatures,
         currentTurn,
         turnNumber,
         lobbyMode
@@ -108,11 +149,34 @@ const EditEncounter: React.FC = () => {
   // Enhanced creature management functions that send lobby state updates
   const updateCreature = useCallback((index: number, creature: any) => {
     originalUpdateCreature(index, creature);
+
+    const normalizeStatuses = (statuses?: string[]) =>
+      (statuses ?? [])
+        .map((status) => status.trim())
+        .filter((status) => Boolean(status) && !HEALTH_STATUS_SET.has(status.toLowerCase()));
+
+    const haveStatusesChanged = (currentStatuses?: string[], updatedStatuses?: string[]) => {
+      const current = normalizeStatuses(currentStatuses);
+      const updated = normalizeStatuses(updatedStatuses);
+
+      if (current.length !== updated.length) {
+        return true;
+      }
+
+      return current.some((status, statusIndex) => status !== updated[statusIndex]);
+    };
     
-    // Send lobby state if creature displayName or isHidden changed (affects display) and viewers are allowed
+    // Send lobby state if display-affecting fields changed and viewers are allowed
     const oldCreature = creatures[index];
     if (encounterState.viewersAllowed && oldCreature && 
-        (oldCreature.displayName !== creature.displayName || oldCreature.isHidden !== creature.isHidden)) {
+        (
+          oldCreature.displayName !== creature.displayName ||
+          oldCreature.isHidden !== creature.isHidden ||
+          oldCreature.isPlayer !== creature.isPlayer ||
+          oldCreature.currentHP !== creature.currentHP ||
+          oldCreature.maxHP !== creature.maxHP ||
+          haveStatusesChanged(oldCreature.statuses, creature.statuses)
+        )) {
       const updatedCreatures = [...creatures];
       updatedCreatures[index] = creature;
       

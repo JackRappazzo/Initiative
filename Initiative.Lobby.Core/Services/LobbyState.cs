@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Initiative.Lobby.Core.Dtos;
 
 namespace Initiative.Lobby.Core.Services
 {
     public class LobbyState
     {
 
-        public IEnumerable<string> Creatures { get; set; } = Enumerable.Empty<string>();
+        public IEnumerable<LobbyCreatureDto> Creatures { get; set; } = Enumerable.Empty<LobbyCreatureDto>();
         public int CurrentCreatureIndex { get; set; } = 0;
         public int CurrentTurn { get; set; } = 0;
 

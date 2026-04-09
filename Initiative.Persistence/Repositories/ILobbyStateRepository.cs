@@ -6,6 +6,6 @@ namespace Initiative.Persistence.Repositories
     public interface ILobbyStateRepository
     {
         Task<LobbyStateDto> FetchLobbyStateByRoomCode(string roomCode, CancellationToken cancellationToken);
-        Task<string> UpsertLobbyState(string roomCode, string[] creatures, int turnNumber, int currentCreatureIndex, LobbyMode currentMode, CancellationToken cancellationToken);
+        Task<string> UpsertLobbyState(string roomCode, LobbyCreatureStateDto[] creatures, int turnNumber, int currentCreatureIndex, LobbyMode currentMode, CancellationToken cancellationToken);
     }
 }
