@@ -80,8 +80,14 @@ const CR_XP: Record<string, string> = {
  * e.g. {@hit 5} → +5, {@damage 2d6 + 3} → 2d6 + 3, {@dc 14} → DC 14,
  *      {@spell Fireball|PHB} → Fireball, {@condition Grappled|XPHB} → Grappled
  */
-function cleanTags(text: string): string {
-  return text
+function cleanTags(text: unknown): string {
+  const normalized = typeof text === 'string'
+    ? text
+    : (typeof text === 'number' || typeof text === 'boolean')
+      ? String(text)
+      : '';
+
+  return normalized
     .replace(/\{@hit ([^}]+)\}/g, (_, n) => `+${n}`)
     .replace(/\{@damage ([^}]+)\}/g, (_, d) => d)
     .replace(/\{@dice ([^}]+)\}/g, (_, d) => d)
@@ -98,6 +104,27 @@ function cleanTags(text: string): string {
     .replace(/\{@variantrule ([^|}\s]+)[^}]*\}/g, (_, name) => name.replace(/_/g, ' '))
     .replace(/\{@[a-z]+ ([^|}]+)[^}]*\}/g, (_, text) => text)
     .trim();
+}
+
+function renderLooseEntryNodes(raw: unknown, onRoll: OnRoll, keyPrefix: string): React.ReactNode {
+  if (typeof raw === 'string') return renderDiceNodes(raw, onRoll, keyPrefix);
+  if (typeof raw === 'number' || typeof raw === 'boolean') {
+    return renderDiceNodes(String(raw), onRoll, keyPrefix);
+  }
+
+  if (raw && typeof raw === 'object') {
+    const maybeEntry = raw as Partial<FiveEToolsEntry> & { text?: unknown };
+
+    if (Array.isArray(maybeEntry.entries)) {
+      return renderEntriesAsNodes(maybeEntry.entries as (string | FiveEToolsEntry)[], onRoll, keyPrefix);
+    }
+
+    if (typeof maybeEntry.text === 'string') {
+      return renderDiceNodes(maybeEntry.text, onRoll, keyPrefix);
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -326,13 +353,13 @@ function SpellPopover({ spell, onClose }: { spell: SpellDetail; onClose: () => v
         <p className="stat-block__property"><strong>Duration </strong>{capitalize(duration)}</p>
         <div className="stat-block__divider stat-block__divider--thick" />
         <div className="spell-popover__entries">
-          {raw.entries?.map((e, i) => (
-            <p key={i} className="spell-popover__entry">{renderDiceNodes(e, onRoll, `spell-entry-${i}`)}</p>
+          {(raw.entries as unknown[] | undefined)?.map((e, i) => (
+            <p key={i} className="spell-popover__entry">{renderLooseEntryNodes(e, onRoll, `spell-entry-${i}`)}</p>
           ))}
           {raw.entriesHigherLevel?.map((hl, i) => (
             <p key={`hl-${i}`} className="spell-popover__entry">
               <em><strong>{hl.name}. </strong></em>
-              {hl.entries.map((e, j) => renderDiceNodes(e, onRoll, `spell-hl-${i}-${j}`))}
+              {(hl.entries as unknown[]).map((e, j) => renderLooseEntryNodes(e, onRoll, `spell-hl-${i}-${j}`))}
             </p>
           ))}
         </div>
