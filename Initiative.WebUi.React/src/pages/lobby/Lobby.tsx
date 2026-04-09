@@ -113,6 +113,10 @@ const Lobby: React.FC = () => {
         return lobbyState.Creatures[nextIndex] || null;
     };
 
+    const currentTurn = isValidLobbyState(lobbyState)
+        ? Math.max(lobbyState.CurrentTurn, 1)
+        : 1;
+
     return (
         <div className="lobby-container">
             <div className="lobby-header">
@@ -135,7 +139,7 @@ const Lobby: React.FC = () => {
             <div className="lobby-main">
                 {/* Initiative List - Left Side */}
                 <div className="initiative-list">
-                    <h3>Initiative Order</h3>
+                    <h3>Turn {currentTurn}</h3>
                     {!isWaiting && isValidLobbyState(lobbyState) ? (
                         <ul>
                             {lobbyState.Creatures.map((creature, index) => (
@@ -169,10 +173,6 @@ const Lobby: React.FC = () => {
                             </div>
                             <div className="next-creature">
                                 Next: {getNextCreature() || 'No next creature'}
-                            </div>
-                            <div className="turn-info">
-                                <span>Turn {lobbyState?.CurrentTurn || 0}</span>
-                                <span>Creature {(lobbyState?.CurrentCreatureIndex || 0) + 1}</span>
                             </div>
                         </div>
                     )}

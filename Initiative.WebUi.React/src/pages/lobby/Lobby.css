@@ -194,16 +194,19 @@
     .lobby-main {
         flex-direction: column;
         gap: 1rem;
+        align-items: stretch;
     }
     
     .initiative-list {
         flex: none;
         order: 2;
+        width: 100%;
+        box-sizing: border-box;
     }
     
     .central-display {
         order: 1;
-        min-height: 300px;
+        min-height: 160px;
         padding: 1rem;
     }
     
