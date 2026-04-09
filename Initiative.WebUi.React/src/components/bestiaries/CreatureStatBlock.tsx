@@ -576,13 +576,21 @@ const CreatureStatBlock: React.FC<Props> = ({ data }) => {
       {data.save && Object.keys(data.save).length > 0 && (
         <PropertyLine
           label="Saving Throws"
-          value={Object.entries(data.save).map(([k, v]) => `${capitalize(k)} ${v}`).join(', ')}
+          value={renderDiceNodes(
+            Object.entries(data.save).map(([k, v]) => `${capitalize(k)} ${v}`).join(', '),
+            onRoll,
+            'saving-throws'
+          )}
         />
       )}
       {data.skill && Object.keys(data.skill).length > 0 && (
         <PropertyLine
           label="Skills"
-          value={Object.entries(data.skill).map(([k, v]) => `${capitalize(k)} ${v}`).join(', ')}
+          value={renderDiceNodes(
+            Object.entries(data.skill).map(([k, v]) => `${capitalize(k)} ${v}`).join(', '),
+            onRoll,
+            'skills'
+          )}
         />
       )}
       {vulnerableStr && <PropertyLine label="Damage Vulnerabilities" value={vulnerableStr} />}
