@@ -55,6 +55,14 @@ export interface SpellDetail {
   rawData: SpellRawData;
 }
 
+export interface SpellListItem {
+  id: string;
+  name: string;
+  spellSourceId: string;
+  source?: string;
+  school?: string;
+}
+
 // ── Client ────────────────────────────────────────────────────────────────────
 
 export class SpellClient {
@@ -74,6 +82,18 @@ export class SpellClient {
       return response.data;
     } catch {
       return null;
+    }
+  }
+
+  public async searchSpells(name: string, pageSize = 8): Promise<SpellListItem[]> {
+    try {
+      const params = new URLSearchParams({ name, pageSize: String(pageSize) });
+      const response = await this.apiClient.instance.get<{ spells: SpellListItem[] }>(
+        `spell/spells?${params.toString()}`
+      );
+      return response.data.spells ?? [];
+    } catch {
+      return [];
     }
   }
 }

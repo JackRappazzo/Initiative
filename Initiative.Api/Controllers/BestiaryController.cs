@@ -210,6 +210,8 @@ namespace Initiative.Api.Controllers
                 SpellAttackBonus = request.Spellcasting.SpellAttackBonus,
                 SlotSpells = request.Spellcasting.SlotSpells,
                 DailySpells = request.Spellcasting.DailySpells,
+                Description = request.Spellcasting.Description,
+                FreeformText = request.Spellcasting.FreeformText,
             },
         };
     }

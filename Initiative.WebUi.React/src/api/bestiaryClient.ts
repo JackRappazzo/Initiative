@@ -109,6 +109,7 @@ export interface FiveEToolsRawData {
     /** Leveled spell slots: key = level ("1"–"9"), value = { slots, spells } */
     spells?: Record<string, { slots?: number; spells: string[] }>;
     ability?: string;
+    /** 'trait' | 'action' | 'bonus' | 'reaction' — default is trait */
     displayAs?: string;
     hidden?: string[];
   }[];
@@ -149,10 +150,14 @@ export interface CustomCreatureSpellcasting {
   ability?: string;
   spellSaveDc?: number;
   spellAttackBonus?: number;
+  /** Free-text description shown before the spell list (markdown + {@spell} tags) */
+  description?: string;
   /** Slot-based: key = "0" (cantrips/at-will) through "9" */
   slotSpells?: Record<string, string[]>;
   /** X/day entries, e.g. "3/day: Fireball" */
   dailySpells?: string[];
+  /** Freeform spell list text (markdown + {@spell} tags); when set, slotSpells/dailySpells are ignored */
+  freeformText?: string;
 }
 
 export interface CustomCreaturePayload {

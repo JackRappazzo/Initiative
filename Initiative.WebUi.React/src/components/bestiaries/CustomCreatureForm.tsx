@@ -1,11 +1,12 @@
 import './CustomCreatureForm.css';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   BestiaryClient,
   CustomCreatureEntry,
   CustomCreaturePayload,
   CustomCreatureSpellcasting,
 } from '../../api/bestiaryClient';
+import { SpellClient, SpellListItem } from '../../api/spellClient';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -72,6 +73,109 @@ const SIZE_LABELS: Record<string, string> = { T:'Tiny', S:'Small', M:'Medium', L
 const CASTING_ABILITIES = ['str','dex','con','int','wis','cha'] as const;
 
 const MD_HINT = <span className="ccf-md-hint"><strong>**bold**</strong> <em>*italic*</em></span>;
+
+// ── SpellTagTextarea ──────────────────────────────────────────────────────────
+
+const spellClient = new SpellClient();
+
+interface SpellTagTextareaProps {
+  value: string;
+  onChange: (value: string) => void;
+  rows?: number;
+  placeholder?: string;
+}
+
+const SpellTagTextarea: React.FC<SpellTagTextareaProps> = ({ value, onChange, rows = 4, placeholder }) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [suggestions, setSuggestions] = useState<SpellListItem[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Parse the partial spell name from {@spell prefix at the cursor position
+  const getSpellPrefix = (text: string, cursor: number): string | null => {
+    const before = text.slice(0, cursor);
+    const match = before.match(/\{@spell ([^}]*)$/);
+    return match ? match[1] : null;
+  };
+
+  const handleKeyUp = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const prefix = getSpellPrefix(el.value, el.selectionStart);
+    if (prefix === null) {
+      setDropdownOpen(false);
+      return;
+    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      if (prefix.trim().length === 0) {
+        setSuggestions([]);
+        setDropdownOpen(false);
+        return;
+      }
+      try {
+        const results = await spellClient.searchSpells(prefix.trim(), 8);
+        setSuggestions(results);
+        setDropdownOpen(results.length > 0);
+      } catch {
+        setSuggestions([]);
+        setDropdownOpen(false);
+      }
+    }, 200);
+  }, []);
+
+  const selectSuggestion = (spell: SpellListItem) => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const cursor = el.selectionStart;
+    const before = el.value.slice(0, cursor);
+    const after = el.value.slice(cursor);
+    const matchStart = before.search(/\{@spell [^}]*$/);
+    if (matchStart === -1) return;
+    const newBefore = before.slice(0, matchStart) + `{@spell ${spell.name}}`;
+    onChange(newBefore + after);
+    setDropdownOpen(false);
+    // Restore focus and position cursor after the inserted tag
+    setTimeout(() => {
+      el.focus();
+      el.selectionStart = el.selectionEnd = newBefore.length;
+    }, 0);
+  };
+
+  useEffect(() => {
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, []);
+
+  return (
+    <div className="ccf-spell-tag-wrap">
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        onKeyUp={handleKeyUp}
+        rows={rows}
+        placeholder={placeholder}
+        className="ccf-spell-tag-textarea"
+      />
+      {dropdownOpen && (
+        <ul className="ccf-spell-suggestions" role="listbox">
+          {suggestions.map(s => (
+            <li
+              key={s.id}
+              role="option"
+              aria-selected={false}
+              onMouseDown={e => { e.preventDefault(); selectSuggestion(s); }}
+              className="ccf-spell-suggestion-item"
+            >
+              {s.name}
+              {s.source && <span className="ccf-spell-suggestion-source"> ({s.source})</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
 
 // Collapsible section wrapper
 const Section: React.FC<{ title: string; children: React.ReactNode; defaultOpen?: boolean }> = ({ title, children, defaultOpen = false }) => {
@@ -222,6 +326,11 @@ export const CustomCreatureForm: React.FC<Props> = ({ bestiaryId, existing, onSa
     return slots;
   });
   const [scDaily, setScDaily]         = useState(ex?.spellcasting?.dailySpells?.join('\n') ?? '');
+  const [scDescription, setScDescription] = useState(ex?.spellcasting?.description ?? '');
+  const [scFreeform, setScFreeform]       = useState(ex?.spellcasting?.freeformText ?? '');
+  const [scFormat, setScFormat]           = useState<'slot' | 'day' | 'freeform'>(
+    ex?.spellcasting?.freeformText ? 'freeform' : ex?.spellcasting?.dailySpells?.length ? 'day' : 'slot'
+  );
 
   // ── Submit
   const [saving, setSaving] = useState(false);
@@ -234,19 +343,32 @@ export const CustomCreatureForm: React.FC<Props> = ({ bestiaryId, existing, onSa
     // Build spellcasting block only if any sc data provided
     const hasSlots  = scCantrips.trim() || Object.values(scSlots).some(v => v.trim());
     const hasDaily  = scDaily.trim();
+    const hasFreeform = scFreeform.trim();
     let spellcasting: CustomCreatureSpellcasting | undefined;
-    if (scAbility || hasSlots || hasDaily) {
-      const slotSpells: Record<string, string[]> = {};
-      if (scCantrips.trim()) slotSpells['0'] = strToList(scCantrips);
-      for (let l = 1; l <= 9; l++) {
-        if (scSlots[l]?.trim()) slotSpells[String(l)] = strToList(scSlots[l]);
+    if (scAbility || hasSlots || hasDaily || hasFreeform || scDescription.trim()) {
+      let slotSpells: Record<string, string[]> | undefined;
+      let dailySpells: string[] | undefined;
+      let freeformText: string | undefined;
+      if (scFormat === 'freeform') {
+        freeformText = hasFreeform ? scFreeform : undefined;
+      } else if (scFormat === 'day') {
+        dailySpells = hasDaily ? strToList(scDaily) : undefined;
+      } else {
+        const ss: Record<string, string[]> = {};
+        if (scCantrips.trim()) ss['0'] = strToList(scCantrips);
+        for (let l = 1; l <= 9; l++) {
+          if (scSlots[l]?.trim()) ss[String(l)] = strToList(scSlots[l]);
+        }
+        slotSpells = Object.keys(ss).length ? ss : undefined;
       }
       spellcasting = {
         ability:          scAbility || undefined,
         spellSaveDc:      parseNum(scDc),
         spellAttackBonus: parseNum(scAtk),
-        slotSpells:       Object.keys(slotSpells).length ? slotSpells : undefined,
-        dailySpells:      hasDaily ? strToList(scDaily) : undefined,
+        description:      scDescription.trim() || undefined,
+        slotSpells,
+        dailySpells,
+        freeformText,
       };
     }
 
@@ -540,30 +662,87 @@ export const CustomCreatureForm: React.FC<Props> = ({ bestiaryId, existing, onSa
               </label>
             </div>
 
-            <p className="ccf-hint">Slot-based — one spell name per line</p>
             <label>
-              Cantrips / At-will
-              <textarea value={scCantrips} onChange={e => setScCantrips(e.target.value)} rows={2} placeholder="Prestidigitation" />
+              Description <span className="ccf-md-hint">(optional intro text)</span>
+              <textarea
+                value={scDescription}
+                onChange={e => setScDescription(e.target.value)}
+                rows={2}
+                placeholder="The dragon is an 8th-level spellcaster. Its spellcasting ability is Charisma…"
+              />
             </label>
-            {[1,2,3,4,5,6,7,8,9].map(lvl => (
-              <label key={lvl}>
-                {lvl}{lvl === 1 ? 'st' : lvl === 2 ? 'nd' : lvl === 3 ? 'rd' : 'th'}-level slots
-                <textarea
-                  value={scSlots[lvl]}
-                  onChange={e => setScSlots(prev => ({ ...prev, [lvl]: e.target.value }))}
-                  rows={2}
-                  placeholder="Fireball"
-                />
-              </label>
-            ))}
 
-            <p className="ccf-hint">X/day — one entry per line, e.g. <code>3/day: Fireball</code> or <code>1/day each: Misty Step, Fly</code></p>
-            <textarea
-              value={scDaily}
-              onChange={e => setScDaily(e.target.value)}
-              rows={3}
-              placeholder={"3/day: Fireball\n1/day each: Misty Step, Fly"}
-            />
+            <div className="ccf-sc-format-wrap">
+              <span className="ccf-sc-format-label">Spell list format</span>
+              <div className="ccf-sc-format-group" role="group" aria-label="Spell list format">
+                <button
+                  type="button"
+                  className={`ccf-sc-format-btn ${scFormat === 'slot' ? 'ccf-sc-format-btn--active' : ''}`}
+                  onClick={() => setScFormat('slot')}
+                >
+                  Spell slots
+                </button>
+                <button
+                  type="button"
+                  className={`ccf-sc-format-btn ${scFormat === 'day' ? 'ccf-sc-format-btn--active' : ''}`}
+                  onClick={() => setScFormat('day')}
+                >
+                  Per day
+                </button>
+                <button
+                  type="button"
+                  className={`ccf-sc-format-btn ${scFormat === 'freeform' ? 'ccf-sc-format-btn--active' : ''}`}
+                  onClick={() => setScFormat('freeform')}
+                >
+                  Freeform
+                </button>
+              </div>
+            </div>
+
+            {scFormat === 'slot' && (
+              <>
+                <p className="ccf-hint">One spell name per line. Use <code>{'{@spell Name}'}</code> for linked spells.</p>
+                <label>
+                  Cantrips / At-will
+                  <textarea value={scCantrips} onChange={e => setScCantrips(e.target.value)} rows={2} placeholder="Prestidigitation" />
+                </label>
+                {[1,2,3,4,5,6,7,8,9].map(lvl => (
+                  <label key={lvl}>
+                    {lvl}{lvl === 1 ? 'st' : lvl === 2 ? 'nd' : lvl === 3 ? 'rd' : 'th'}-level slots
+                    <textarea
+                      value={scSlots[lvl]}
+                      onChange={e => setScSlots(prev => ({ ...prev, [lvl]: e.target.value }))}
+                      rows={2}
+                      placeholder="Fireball"
+                    />
+                  </label>
+                ))}
+              </>
+            )}
+
+            {scFormat === 'day' && (
+              <>
+                <p className="ccf-hint">One entry per line, e.g. <code>3/day: Fireball</code> or <code>1/day each: Misty Step, Fly</code></p>
+                <textarea
+                  value={scDaily}
+                  onChange={e => setScDaily(e.target.value)}
+                  rows={4}
+                  placeholder={"3/day: Fireball\n1/day each: Misty Step, Fly"}
+                />
+              </>
+            )}
+
+            {scFormat === 'freeform' && (
+              <>
+                <p className="ccf-hint">Free text. Type <code>{'{@spell '}</code> to autocomplete a spell name.</p>
+                <SpellTagTextarea
+                  value={scFreeform}
+                  onChange={setScFreeform}
+                  rows={6}
+                  placeholder={"At will: {@spell Prestidigitation}, {@spell Minor Illusion}\n3/day each: {@spell Fireball}, {@spell Fly}\n1/day: {@spell Wish}"}
+                />
+              </>
+            )}
           </Section>
 
           {error && <p className="form-error">{error}</p>}

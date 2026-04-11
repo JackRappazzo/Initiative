@@ -33,6 +33,10 @@ namespace Initiative.Api.Messages.Bestiary
         public int? SpellAttackBonus { get; set; }
         public Dictionary<string, List<string>>? SlotSpells { get; set; }
         public List<string>? DailySpells { get; set; }
+        /// <summary>Free-text description shown before the spell list (markdown + {@spell} tags supported).</summary>
+        public string? Description { get; set; }
+        /// <summary>Freeform spell list text (markdown + {@spell} tags). When set, SlotSpells/DailySpells are ignored.</summary>
+        public string? FreeformText { get; set; }
     }
 
     public class SaveCustomCreatureRequest

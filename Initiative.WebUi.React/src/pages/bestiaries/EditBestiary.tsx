@@ -245,8 +245,38 @@ const EditBestiary: React.FC = () => {
       let spellcasting: CustomCreatureSpellcasting | undefined;
       if (Array.isArray(rd.spellcasting) && rd.spellcasting.length > 0) {
         const sc = rd.spellcasting[0];
+
+        // Parse headerEntries to recover description, DC, attack bonus, and freeform lines
+        const statLineRe = /spell save DC|to spell attack/i;
+        const rawHeaders: string[] = Array.isArray(sc.headerEntries)
+          ? sc.headerEntries.filter((h: unknown) => typeof h === 'string')
+          : [];
+        const statLineIdx = rawHeaders.findIndex(h => statLineRe.test(h));
+        const statLine = statLineIdx >= 0 ? rawHeaders[statLineIdx] : undefined;
+        // Description is the first headerEntry if it is NOT the stat line
+        const descCandidate = rawHeaders.length > 0 && rawHeaders[0] !== statLine ? rawHeaders[0] : undefined;
+        // Freeform lines: headerEntries after the fixed description/stat entries
+        const fixedCount = (descCandidate ? 1 : 0) + (statLine ? 1 : 0);
+        const freeformLines = rawHeaders.slice(fixedCount).filter(h => h !== statLine);
+
+        // Parse spellSaveDc and spellAttackBonus from the stat line
+        let spellSaveDc: number | undefined;
+        let spellAttackBonus: number | undefined;
+        if (statLine) {
+          const dcMatch = statLine.match(/spell save DC (\d+)/i);
+          if (dcMatch) spellSaveDc = parseInt(dcMatch[1], 10);
+          const atkMatch = statLine.match(/\+(\d+) to spell attack/i);
+          if (atkMatch) spellAttackBonus = parseInt(atkMatch[1], 10);
+        }
+
         const slotSpells: Record<string, string[]> = {};
         if (Array.isArray(sc.will)) slotSpells['0'] = sc.will;
+        // Level 1–9 slot spells stored under sc.spells[level].spells
+        if (sc.spells && typeof sc.spells === 'object') {
+          for (const [lvl, lvlData] of Object.entries(sc.spells as Record<string, any>)) {
+            if (Array.isArray(lvlData?.spells)) slotSpells[lvl] = lvlData.spells;
+          }
+        }
         const dailySpells: string[] = [];
         if (sc.daily) {
           for (const [key, spells] of Object.entries(sc.daily)) {
@@ -254,10 +284,18 @@ const EditBestiary: React.FC = () => {
             if (Array.isArray(spells)) dailySpells.push(...spells.map(s => `${count}/day: ${s}`));
           }
         }
+
+        // Detect freeform: no slot/daily data but extra headerEntries beyond description+stat
+        const hasFreeform = freeformLines.length > 0 && !sc.will && !sc.spells && !sc.daily;
+
         spellcasting = {
           ability: sc.ability,
+          spellSaveDc,
+          spellAttackBonus,
+          description: descCandidate,
           slotSpells: Object.keys(slotSpells).length ? slotSpells : undefined,
           dailySpells: dailySpells.length ? dailySpells : undefined,
+          freeformText: hasFreeform ? freeformLines.join('\n') : undefined,
         };
       }
 

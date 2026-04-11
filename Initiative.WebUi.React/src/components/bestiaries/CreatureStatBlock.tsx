@@ -427,14 +427,33 @@ function SpellLink({ raw }: { raw: string }) {
 
 type SpellcastingEntry = NonNullable<FiveEToolsRawData['spellcasting']>[number];
 
-function SpellcastingBlock({ entry }: { entry: SpellcastingEntry }) {
+/**
+ * Renders a header entry string, turning {@spell} tags into interactive SpellLink
+ * buttons and the rest into standard dice/markdown nodes.
+ */
+function renderHeaderEntry(raw: string, onRoll: OnRoll, keyPrefix: string): React.ReactNode {
+  // Split on {@spell ...} tags, keeping them as captured groups
+  const parts = raw.split(/(\{@spell [^}]+\})/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('{@spell ')) {
+      return <SpellLink key={`${keyPrefix}-${i}`} raw={part} />;
+    }
+    return (
+      <React.Fragment key={`${keyPrefix}-${i}`}>
+        {renderDiceNodes(part, onRoll, `${keyPrefix}-${i}`)}
+      </React.Fragment>
+    );
+  });
+}
+
+function SpellcastingBlock({ entry, onRoll }: { entry: SpellcastingEntry; onRoll: OnRoll }) {
   const hideDaily = entry.hidden?.includes('daily');
 
   return (
     <div className="stat-block__feature">
       <strong className="stat-block__feature-name">{entry.name}. </strong>
       {entry.headerEntries?.map((h, i) => (
-        <span key={i}>{cleanTags(h)} </span>
+        <span key={i}>{renderHeaderEntry(h, onRoll, `sc-header-${i}`)} </span>
       ))}
       {entry.will && entry.will.length > 0 && (
         <span>
@@ -502,7 +521,7 @@ function Section({
       <div className="stat-block__divider" />
       <h4 className="stat-block__section-title">{title}</h4>
       {spellcastingEntries?.map((sc, i) => (
-        <SpellcastingBlock key={`sc-${i}`} entry={sc} />
+        <SpellcastingBlock key={`sc-${i}`} entry={sc} onRoll={onRoll} />
       ))}
       {entries.map((entry, i) => (
         <div key={i} className="stat-block__feature">
@@ -683,12 +702,17 @@ const CreatureStatBlock: React.FC<Props> = ({ data }) => {
       <PropertyLine label="Challenge" value={formatCr(data.cr)} />
 
       {/* Feature sections */}
-      {data.trait?.length ? <Section title="Traits" entries={data.trait} onRoll={onRoll} /> : null}
+      <Section
+        title="Traits"
+        entries={data.trait ?? []}
+        onRoll={onRoll}
+        spellcastingEntries={data.spellcasting?.filter(sc => !sc.displayAs || sc.displayAs === 'trait')}
+      />
       <Section
         title="Actions"
         entries={data.action ?? []}
         onRoll={onRoll}
-        spellcastingEntries={data.spellcasting?.filter(sc => !sc.displayAs || sc.displayAs === 'action')}
+        spellcastingEntries={data.spellcasting?.filter(sc => sc.displayAs === 'action')}
       />
       <Section
         title="Bonus Actions"

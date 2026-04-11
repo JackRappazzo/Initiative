@@ -289,3 +289,102 @@
     width: 100%;
   }
 }
+
+/* ── Spellcasting format selector ─────────────────────────────────────────── */
+.ccf-sc-format-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0.5rem 0;
+}
+
+.ccf-sc-format-label {
+  font-size: 0.78rem;
+  color: var(--text-muted, #c2c8d8);
+}
+
+.ccf-sc-format-group {
+  display: inline-flex;
+  align-self: flex-start;
+  border: 1px solid var(--color-border, #666f86);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.ccf-sc-format-btn {
+  border: 0;
+  border-right: 1px solid var(--color-border, #666f86);
+  background: #2d3950;
+  color: var(--text, #eaf0ff);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.ccf-sc-format-btn:last-child {
+  border-right: 0;
+}
+
+.ccf-sc-format-btn:hover {
+  background: #35425b;
+}
+
+.ccf-sc-format-btn--active {
+  background: #7da2ff;
+  color: #13203a;
+  font-weight: 600;
+}
+
+.ccf-sc-format-btn:focus-visible {
+  outline: 2px solid #8db0ff;
+  outline-offset: -2px;
+}
+
+/* ── SpellTag autocomplete ────────────────────────────────────────────────── */
+.ccf-spell-tag-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.ccf-spell-tag-textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ccf-spell-suggestions {
+  position: absolute;
+  top: auto;
+  bottom: 0.35rem;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: #1e2a40;
+  border: 1px solid var(--color-border, #666f86);
+  border-radius: 4px;
+  max-height: min(220px, 40vh);
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+}
+
+.ccf-spell-suggestion-item {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text, #eaf0ff);
+  cursor: pointer;
+  user-select: none;
+}
+
+.ccf-spell-suggestion-item:hover {
+  background: rgba(125, 162, 255, 0.2);
+}
+
+.ccf-spell-suggestion-source {
+  font-size: 0.75rem;
+  color: var(--text-muted, #c2c8d8);
+  margin-left: 0.25rem;
+}

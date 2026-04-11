@@ -37,6 +37,10 @@ namespace Initiative.Api.Core.Services.Bestiary
         public Dictionary<string, List<string>>? SlotSpells { get; set; }
         // X/day format: each entry like "3/day: Fireball"
         public List<string>? DailySpells { get; set; }
+        // Free-text description (markdown + {@spell} tags)
+        public string? Description { get; set; }
+        // Freeform spell list text (markdown + {@spell} tags); when set, SlotSpells/DailySpells are ignored
+        public string? FreeformText { get; set; }
     }
 
     public class CustomCreatureData
