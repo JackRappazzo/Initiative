@@ -14,6 +14,9 @@ namespace Initiative.UnitTests.Api.Core.Services.Bestiary.BestiaryTriesServiceTe
         [Dependency]
         protected IBestiaryRepository BestiaryRepository;
 
+        [Dependency]
+        protected ICustomCreatureRawDataBuilder CustomCreatureRawDataBuilder;
+
         protected CancellationToken CancellationToken = default;
 
         protected static string NewId() => ObjectId.GenerateNewId().ToString();

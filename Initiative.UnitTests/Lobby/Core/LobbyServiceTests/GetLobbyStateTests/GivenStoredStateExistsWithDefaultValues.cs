@@ -38,14 +38,14 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
             {
                 Id = "test-id",
                 RoomCode = RoomCode,
-                Creatures = new string[0],
+                Creatures = [],
                 TurnNumber = 0,
                 CurrentCreatureIndex = 0,
                 CurrentMode = LobbyMode.Waiting
             };
 
             LobbyStateRepository.FetchLobbyStateByRoomCode(RoomCode, CancellationToken)
-                .Returns(Task.FromResult(StoredState));
+                .Returns(StoredState);
         }
 
         [Given]

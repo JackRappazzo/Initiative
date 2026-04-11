@@ -28,7 +28,12 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyStateManagerTests.GetStateTests
         {
             InitialState = new EncounterDto
             {
-                Creatures = new[] { "Dragon", "Goblin", "Wizard" },
+                Creatures = new[]
+                {
+                    new LobbyCreatureDto { DisplayName = "Dragon" },
+                    new LobbyCreatureDto { DisplayName = "Goblin" },
+                    new LobbyCreatureDto { DisplayName = "Wizard" }
+                },
                 CurrentCreatureIndex = 2,
                 CurrentTurn = 5,
                 CurrentMode = LobbyMode.InProgress
@@ -43,7 +48,7 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyStateManagerTests.GetStateTests
             Assert.That(Result.CurrentMode, Is.EqualTo(InitialState.CurrentMode));
             Assert.That(Result.CurrentCreatureIndex, Is.EqualTo(InitialState.CurrentCreatureIndex));
             Assert.That(Result.CurrentTurn, Is.EqualTo(InitialState.CurrentTurn));
-            Assert.That(Result.Creatures, Is.EquivalentTo(InitialState.Creatures));
+            Assert.That(Result.Creatures.Select(c => c.DisplayName), Is.EquivalentTo(InitialState.Creatures.Select(c => c.DisplayName)));
         }
     }
 }

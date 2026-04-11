@@ -44,7 +44,7 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
         {
             DefaultState = new EncounterDto
             {
-                Creatures = Enumerable.Empty<string>(),
+                Creatures = Enumerable.Empty<LobbyCreatureDto>(),
                 CurrentCreatureIndex = 0,
                 CurrentTurn = 0,
                 CurrentMode = LobbyMode.Waiting

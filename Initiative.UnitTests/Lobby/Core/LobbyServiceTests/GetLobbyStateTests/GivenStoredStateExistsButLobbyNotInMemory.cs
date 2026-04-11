@@ -39,14 +39,18 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
             {
                 Id = "test-id",
                 RoomCode = RoomCode,
-                Creatures = new[] { "StoredCreature1", "StoredCreature2" },
+                Creatures = new[]
+                {
+                    new LobbyCreatureStateDto { DisplayName = "StoredCreature1", Statuses = ["Blessed"], HealthStatus = "Healthy", IsPlayer = false, IsHidden = false },
+                    new LobbyCreatureStateDto { DisplayName = "StoredCreature2", Statuses = ["Poisoned"], HealthStatus = "Injured", IsPlayer = true, IsHidden = true }
+                },
                 TurnNumber = 5,
                 CurrentCreatureIndex = 1,
                 CurrentMode = LobbyMode.InProgress
             };
 
             LobbyStateRepository.FetchLobbyStateByRoomCode(RoomCode, CancellationToken)
-                .Returns(Task.FromResult(StoredState));
+                .Returns(StoredState);
         }
 
         [Given]
@@ -60,7 +64,7 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
         public void ShouldReturnStoredState()
         {
             Assert.That(Result, Is.Not.Null);
-            Assert.That(Result.Creatures, Is.EquivalentTo(StoredState.Creatures));
+            Assert.That(Result.Creatures.Select(c => c.DisplayName), Is.EquivalentTo(StoredState.Creatures.Select(c => c.DisplayName)));
             Assert.That(Result.CurrentCreatureIndex, Is.EqualTo(StoredState.CurrentCreatureIndex));
             Assert.That(Result.CurrentTurn, Is.EqualTo(StoredState.TurnNumber));
             Assert.That(Result.CurrentMode, Is.EqualTo(StoredState.CurrentMode));
@@ -73,7 +77,7 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
             LobbyStateManager.Received(1).SetState(
                 RoomCode,
                 Arg.Is<EncounterDto>(e => 
-                    e.Creatures.SequenceEqual(StoredState.Creatures) &&
+                    e.Creatures.Select(c => c.DisplayName).SequenceEqual(StoredState.Creatures.Select(c => c.DisplayName)) &&
                     e.CurrentCreatureIndex == StoredState.CurrentCreatureIndex &&
                     e.CurrentTurn == StoredState.TurnNumber &&
                     e.CurrentMode == StoredState.CurrentMode));

@@ -41,14 +41,18 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
             {
                 Id = "test-id",
                 RoomCode = RoomCode,
-                Creatures = new[] { "RecoveredCreature1", "RecoveredCreature2" },
+                Creatures = new[]
+                {
+                    new LobbyCreatureStateDto { DisplayName = "RecoveredCreature1", Statuses = ["Focused"], HealthStatus = "Healthy", IsPlayer = false, IsHidden = false },
+                    new LobbyCreatureStateDto { DisplayName = "RecoveredCreature2", Statuses = [], HealthStatus = "Bloodied", IsPlayer = true, IsHidden = false }
+                },
                 TurnNumber = 3,
                 CurrentCreatureIndex = 1,
                 CurrentMode = LobbyMode.InProgress
             };
 
             LobbyStateRepository.FetchLobbyStateByRoomCode(RoomCode, CancellationToken)
-                .Returns(Task.FromResult(StoredState));
+                .Returns(StoredState);
         }
 
         [Given]
@@ -56,7 +60,14 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
         {
             RecoveredState = new EncounterDto
             {
-                Creatures = StoredState.Creatures,
+                Creatures = StoredState.Creatures.Select(creature => new LobbyCreatureDto
+                {
+                    DisplayName = creature.DisplayName,
+                    Statuses = creature.Statuses,
+                    HealthStatus = creature.HealthStatus,
+                    IsPlayer = creature.IsPlayer,
+                    IsHidden = creature.IsHidden
+                }),
                 CurrentCreatureIndex = StoredState.CurrentCreatureIndex,
                 CurrentTurn = StoredState.TurnNumber,
                 CurrentMode = StoredState.CurrentMode
@@ -80,7 +91,7 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
         public void ShouldReturnStoredState()
         {
             Assert.That(Result, Is.Not.Null);
-            Assert.That(Result.Creatures, Is.EquivalentTo(StoredState.Creatures));
+            Assert.That(Result.Creatures.Select(c => c.DisplayName), Is.EquivalentTo(StoredState.Creatures.Select(c => c.DisplayName)));
             Assert.That(Result.CurrentCreatureIndex, Is.EqualTo(StoredState.CurrentCreatureIndex));
             Assert.That(Result.CurrentTurn, Is.EqualTo(StoredState.TurnNumber));
             Assert.That(Result.CurrentMode, Is.EqualTo(StoredState.CurrentMode));
@@ -90,7 +101,7 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyServiceTests.GetLobbyStateTests
         public void SecondCallShouldReturnSameState()
         {
             Assert.That(SecondResult, Is.Not.Null);
-            Assert.That(SecondResult.Creatures, Is.EquivalentTo(Result.Creatures));
+            Assert.That(SecondResult.Creatures.Select(c => c.DisplayName), Is.EquivalentTo(Result.Creatures.Select(c => c.DisplayName)));
             Assert.That(SecondResult.CurrentCreatureIndex, Is.EqualTo(Result.CurrentCreatureIndex));
             Assert.That(SecondResult.CurrentTurn, Is.EqualTo(Result.CurrentTurn));
             Assert.That(SecondResult.CurrentMode, Is.EqualTo(Result.CurrentMode));

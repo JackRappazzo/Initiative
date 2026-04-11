@@ -29,7 +29,10 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyStateManagerTests.SetStateTests
         {
             InitialState = new EncounterDto
             {
-                Creatures = new[] { "Kobold" },
+                Creatures = new[]
+                {
+                    new LobbyCreatureDto { DisplayName = "Kobold" }
+                },
                 CurrentCreatureIndex = 0,
                 CurrentTurn = 1,
                 CurrentMode = LobbyMode.Waiting
@@ -42,7 +45,13 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyStateManagerTests.SetStateTests
         {
             EncounterDto = new EncounterDto
             {
-                Creatures = new[] { "Ancient Dragon", "Lich", "Demon Lord", "Balor" },
+                Creatures = new[]
+                {
+                    new LobbyCreatureDto { DisplayName = "Ancient Dragon" },
+                    new LobbyCreatureDto { DisplayName = "Lich" },
+                    new LobbyCreatureDto { DisplayName = "Demon Lord" },
+                    new LobbyCreatureDto { DisplayName = "Balor" }
+                },
                 CurrentCreatureIndex = 3,
                 CurrentTurn = 10,
                 CurrentMode = LobbyMode.Finished
@@ -58,13 +67,13 @@ namespace Initiative.UnitTests.Lobby.Core.LobbyStateManagerTests.SetStateTests
             Assert.That(RetrievedState.CurrentMode, Is.EqualTo(EncounterDto.CurrentMode));
             Assert.That(RetrievedState.CurrentCreatureIndex, Is.EqualTo(EncounterDto.CurrentCreatureIndex));
             Assert.That(RetrievedState.CurrentTurn, Is.EqualTo(EncounterDto.CurrentTurn));
-            Assert.That(RetrievedState.Creatures, Is.EquivalentTo(EncounterDto.Creatures));
+            Assert.That(RetrievedState.Creatures.Select(c => c.DisplayName), Is.EquivalentTo(EncounterDto.Creatures.Select(c => c.DisplayName)));
             
             // Verify it's different from initial state
             Assert.That(RetrievedState.CurrentMode, Is.Not.EqualTo(InitialState.CurrentMode));
             Assert.That(RetrievedState.CurrentCreatureIndex, Is.Not.EqualTo(InitialState.CurrentCreatureIndex));
             Assert.That(RetrievedState.CurrentTurn, Is.Not.EqualTo(InitialState.CurrentTurn));
-            Assert.That(RetrievedState.Creatures, Is.Not.EquivalentTo(InitialState.Creatures));
+            Assert.That(RetrievedState.Creatures.Select(c => c.DisplayName), Is.Not.EquivalentTo(InitialState.Creatures.Select(c => c.DisplayName)));
         }
     }
 }

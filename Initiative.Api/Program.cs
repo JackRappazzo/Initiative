@@ -72,6 +72,7 @@ builder.Services.AddScoped<ICredentialsFactory, CredentialsFactory>();
 
 builder.Services.AddScoped<IJwtRefreshService, JwtRefreshService>();
 builder.Services.AddScoped<IEncounterService, EncounterService>();
+builder.Services.AddScoped<ICustomCreatureRawDataBuilder, CustomCreatureRawDataBuilder>();
 builder.Services.AddScoped<IBestiaryService, BestiaryService>();
 builder.Services.AddScoped<ISpellService, SpellService>();
 builder.Services.AddScoped<IPartyService, PartyService>();
