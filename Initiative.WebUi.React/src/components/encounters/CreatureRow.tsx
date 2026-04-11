@@ -11,6 +11,10 @@ type EditingField = 'initiative' | 'currentHP' | 'maxHP' | 'displayName' | 'ac' 
 
 const bestiaryClient = new BestiaryClient();
 const HEALTH_STATUS_SET = new Set(['healthy', 'hurt', 'bloodied']);
+const D20_ICON = '\u{1F3B2}';
+const SHEET_ICON = '\u{1F4CB}';
+const HIDE_ICON = '\u{1F441}\uFE0F';
+const SHOW_ICON = '\u{1F513}';
 
 interface CreatureRowProps {
   creature: EditableCreature;
@@ -136,8 +140,9 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
               className="die-button"
               onClick={rollInitiative}
               title={`Roll 1d20${(creature.initiativeModifier ?? 0) >= 0 ? '+' : ''}${creature.initiativeModifier ?? 0}`}
+              aria-label="Roll initiative"
             >
-              d20
+              {D20_ICON}
             </button>
             {editingField === 'initiative' ? (
               <NumericInput
@@ -279,8 +284,9 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
                 onClick={openStatBlock}
                 disabled={statBlockLoading}
                 title="View stat block"
+                aria-label="View stat block"
               >
-                {statBlockLoading ? '...' : 'Sheet'}
+                {statBlockLoading ? '...' : SHEET_ICON}
               </button>
             )}
             {!creature.isPlayer && (
@@ -288,8 +294,9 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
                 className={`control-button secondary ${creature.isHidden ? 'hidden' : ''}`}
                 onClick={() => handleFieldChange('isHidden', !creature.isHidden)}
                 title={creature.isHidden ? 'Show in lobby' : 'Hide from lobby'}
+                aria-label={creature.isHidden ? 'Show in lobby' : 'Hide from lobby'}
               >
-                {creature.isHidden ? 'Show' : 'Hide'}
+                {creature.isHidden ? SHOW_ICON : HIDE_ICON}
               </button>
             )}
             <button
