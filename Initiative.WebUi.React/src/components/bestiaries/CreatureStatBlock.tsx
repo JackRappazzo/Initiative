@@ -447,6 +447,25 @@ function SpellcastingBlock({ entry }: { entry: SpellcastingEntry }) {
           ))}.{' '}
         </span>
       )}
+      {entry.spells && Object.entries(entry.spells)
+        .sort(([a], [b]) => Number(a) - Number(b))
+        .map(([level, { slots, spells }]) => {
+          const lvl = Number(level);
+          const suffixes: Record<number, string> = { 1: 'st', 2: 'nd', 3: 'rd' };
+          const suffix = suffixes[lvl] ?? 'th';
+          const label = `${lvl}${suffix} level${slots !== undefined ? ` (${slots} slot${slots !== 1 ? 's' : ''})` : ''}`;
+          return (
+            <span key={level}>
+              <em>{label}: </em>
+              {spells.map((raw, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && ', '}
+                  <SpellLink raw={raw} />
+                </React.Fragment>
+              ))}.{' '}
+            </span>
+          );
+        })}
       {!hideDaily && entry.daily && Object.entries(entry.daily).map(([key, spells]) => {
         const count = key.replace('e', '');
         const label = key.endsWith('e') ? `${count}/day each` : `${count}/day`;

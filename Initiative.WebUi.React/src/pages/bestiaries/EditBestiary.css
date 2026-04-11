@@ -1,5 +1,5 @@
 /* ── Base button ─────────────────────────────────────────────────────────── */
-.edit-bestiary-page button {
+.edit-bestiary-page button:not(.stat-block__spell-link):not(.stat-block__dice-chip):not(.stat-block__dice-chip--mod):not(.spell-popover__close):not(.stat-block__roll-dismiss) {
   padding: 0.35rem 0.75rem;
   border: none;
   border-radius: 4px;
@@ -10,11 +10,11 @@
   transition: background-color 0.15s ease;
 }
 
-.edit-bestiary-page button:hover:not(:disabled) {
+.edit-bestiary-page button:not(.stat-block__spell-link):not(.stat-block__dice-chip):not(.stat-block__dice-chip--mod):not(.spell-popover__close):not(.stat-block__roll-dismiss):hover:not(:disabled) {
   background-color: #4a4a5e;
 }
 
-.edit-bestiary-page button:disabled {
+.edit-bestiary-page button:not(.stat-block__spell-link):not(.stat-block__dice-chip):not(.stat-block__dice-chip--mod):not(.spell-popover__close):not(.stat-block__roll-dismiss):disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

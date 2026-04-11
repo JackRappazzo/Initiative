@@ -106,6 +106,8 @@ export interface FiveEToolsRawData {
     headerEntries?: string[];
     will?: string[];
     daily?: Record<string, string[]>;
+    /** Leveled spell slots: key = level ("1"–"9"), value = { slots, spells } */
+    spells?: Record<string, { slots?: number; spells: string[] }>;
     ability?: string;
     displayAs?: string;
     hidden?: string[];

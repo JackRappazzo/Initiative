@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { BestiaryClient, CreatureListItem, CreatureSortBy } from '../../api/bestiaryClient';
 import { SortState } from '../../hooks/useBestiarySearch';
+import './CreatureBrowser.css';
 import Pagination from '../Pagination';
 import CreatureStatBlock from './CreatureStatBlock';
 
