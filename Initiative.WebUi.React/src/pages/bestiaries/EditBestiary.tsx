@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { BestiaryClient, BestiaryListItem, CreatureListItem } from '../../api/bestiaryClient';
+import { BestiaryClient, BestiaryListItem, CreatureListItem, CustomCreatureAbilityScores, CustomCreatureEntry, CustomCreatureSpeed, CustomCreatureSpellcasting } from '../../api/bestiaryClient';
 import { CustomCreatureForm } from '../../components/bestiaries/CustomCreatureForm';
-import './EditBestiary.css';
 import './EditBestiary.css';
 
 const client = new BestiaryClient();
@@ -10,12 +9,34 @@ const client = new BestiaryClient();
 interface EditingCreature {
   id: string;
   name: string;
+  size?: string;
   creatureType?: string;
+  subtype?: string;
+  alignment?: string;
   challengeRating?: string;
   isLegendary: boolean;
+  proficiencyBonus?: number;
   hp?: number;
+  hitDice?: string;
   ac?: number;
+  acNote?: string;
+  abilityScores?: CustomCreatureAbilityScores;
+  speed?: CustomCreatureSpeed;
+  savingThrows?: Record<string, string>;
+  skills?: Record<string, string>;
+  damageResistances?: string[];
+  damageImmunities?: string[];
+  damageVulnerabilities?: string[];
+  conditionImmunities?: string[];
+  senses?: string[];
+  languages?: string[];
   traits?: string;
+  actions?: CustomCreatureEntry[];
+  bonusActions?: CustomCreatureEntry[];
+  reactions?: CustomCreatureEntry[];
+  legendaryActions?: CustomCreatureEntry[];
+  legendaryActionCount?: number;
+  spellcasting?: CustomCreatureSpellcasting;
 }
 
 const EditBestiary: React.FC = () => {
@@ -116,12 +137,26 @@ const EditBestiary: React.FC = () => {
     try {
       const detail = await client.getCreatureById(creature.id);
       const rd = detail.rawData;
+
+      // HP
       const hp = typeof rd.hp?.average === 'number' ? rd.hp.average : undefined;
+      const hitDice = rd.hp?.formula;
+
+      // AC
       let ac: number | undefined;
+      let acNote: string | undefined;
       if (Array.isArray(rd.ac) && rd.ac.length > 0) {
         const first = rd.ac[0];
-        ac = typeof first === 'number' ? first : (first as { ac?: number }).ac;
+        if (typeof first === 'number') {
+          ac = first;
+        } else {
+          ac = (first as { ac?: number }).ac;
+          const fromArr = (first as { from?: string[] }).from;
+          acNote = fromArr?.[0];
+        }
       }
+
+      // Traits free-text
       let traits: string | undefined;
       if (Array.isArray(rd.trait)) {
         const traitEntry = rd.trait.find(t => t.name === 'Traits');
@@ -129,15 +164,80 @@ const EditBestiary: React.FC = () => {
           traits = typeof traitEntry.entries[0] === 'string' ? traitEntry.entries[0] : undefined;
         }
       }
+
+      // Ability scores
+      const abilityScores: CustomCreatureAbilityScores | undefined =
+        (rd.str || rd.dex || rd.con || rd.int || rd.wis || rd.cha)
+          ? { str: rd.str, dex: rd.dex, con: rd.con, int: rd.int, wis: rd.wis, cha: rd.cha }
+          : undefined;
+
+      // Speed
+      let speed: CustomCreatureSpeed | undefined;
+      if (rd.speed) {
+        const s = rd.speed;
+        const flyVal = typeof s.fly === 'number' ? s.fly : (s.fly as { number?: number })?.number;
+        const canHover = typeof s.fly === 'object' && (s.fly as { condition?: string })?.condition?.includes('hover');
+        speed = { walk: s.walk, fly: flyVal, swim: s.swim, burrow: s.burrow, climb: s.climb, canHover: canHover || undefined };
+      }
+
+      // Actions helper: parse 5etools entry arrays
+      const parseEntries = (arr?: { name?: string; entries?: (string | { entries?: string[] })[] }[]): CustomCreatureEntry[] | undefined => {
+        if (!arr?.length) return undefined;
+        return arr.map(e => ({
+          name: e.name ?? '',
+          description: typeof e.entries?.[0] === 'string' ? e.entries[0] : '',
+        }));
+      };
+
+      // Spellcasting
+      let spellcasting: CustomCreatureSpellcasting | undefined;
+      if (Array.isArray(rd.spellcasting) && rd.spellcasting.length > 0) {
+        const sc = rd.spellcasting[0];
+        const slotSpells: Record<string, string[]> = {};
+        if (Array.isArray(sc.will)) slotSpells['0'] = sc.will;
+        const dailySpells: string[] = [];
+        if (sc.daily) {
+          for (const [key, spells] of Object.entries(sc.daily)) {
+            const count = key.replace('e', '');
+            if (Array.isArray(spells)) dailySpells.push(...spells.map(s => `${count}/day: ${s}`));
+          }
+        }
+        spellcasting = {
+          ability: sc.ability,
+          slotSpells: Object.keys(slotSpells).length ? slotSpells : undefined,
+          dailySpells: dailySpells.length ? dailySpells : undefined,
+        };
+      }
+
       setEditingCreature({
         id: creature.id,
         name: creature.name,
+        size: Array.isArray(rd.size) ? rd.size[0] : undefined,
         creatureType: creature.creatureType,
+        subtype: undefined,
+        alignment: Array.isArray(rd.alignment) ? rd.alignment[0] : undefined,
         challengeRating: creature.challengeRating,
         isLegendary: creature.isLegendary,
         hp,
+        hitDice,
         ac,
+        acNote,
+        abilityScores,
+        speed,
+        savingThrows: rd.save as Record<string, string> | undefined,
+        skills: rd.skill as Record<string, string> | undefined,
+        damageResistances: rd.resist?.map(r => typeof r === 'string' ? r : '') as string[] | undefined,
+        damageImmunities: rd.immune?.map(r => typeof r === 'string' ? r : '') as string[] | undefined,
+        damageVulnerabilities: rd.vulnerable?.map(r => typeof r === 'string' ? r : '') as string[] | undefined,
+        conditionImmunities: rd.conditionImmune?.map(r => typeof r === 'string' ? r : '') as string[] | undefined,
+        senses: rd.senses,
+        languages: rd.languages,
         traits,
+        actions: parseEntries(rd.action as any),
+        bonusActions: parseEntries(rd.bonus as any),
+        reactions: parseEntries(rd.reaction as any),
+        legendaryActions: parseEntries(rd.legendary as any),
+        spellcasting,
       });
       setShowForm(true);
     } catch {

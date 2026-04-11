@@ -120,14 +120,73 @@ export interface CreatureDetail {
   rawData: FiveEToolsRawData;
 }
 
+export interface CustomCreatureAbilityScores {
+  str?: number;
+  dex?: number;
+  con?: number;
+  int?: number;
+  wis?: number;
+  cha?: number;
+}
+
+export interface CustomCreatureSpeed {
+  walk?: number;
+  fly?: number;
+  swim?: number;
+  burrow?: number;
+  climb?: number;
+  canHover?: boolean;
+}
+
+export interface CustomCreatureEntry {
+  name: string;
+  description: string;
+}
+
+export interface CustomCreatureSpellcasting {
+  ability?: string;
+  spellSaveDc?: number;
+  spellAttackBonus?: number;
+  /** Slot-based: key = "0" (cantrips/at-will) through "9" */
+  slotSpells?: Record<string, string[]>;
+  /** X/day entries, e.g. "3/day: Fireball" */
+  dailySpells?: string[];
+}
+
 export interface CustomCreaturePayload {
   name: string;
+  size?: string;
   creatureType?: string;
+  subtype?: string;
+  alignment?: string;
   challengeRating?: string;
   isLegendary: boolean;
+  proficiencyBonus?: number;
+  /** Flat HP value — neither hp nor hitDice is required */
   hp?: number;
+  /** Hit dice formula, e.g. "8d8+16" — independent of hp */
+  hitDice?: string;
   ac?: number;
+  acNote?: string;
+  abilityScores?: CustomCreatureAbilityScores;
+  speed?: CustomCreatureSpeed;
+  /** key = ability shorthand e.g. "str", value = modifier string e.g. "+5" */
+  savingThrows?: Record<string, string>;
+  /** key = skill name, value = modifier string */
+  skills?: Record<string, string>;
+  damageResistances?: string[];
+  damageImmunities?: string[];
+  damageVulnerabilities?: string[];
+  conditionImmunities?: string[];
+  senses?: string[];
+  languages?: string[];
   traits?: string;
+  actions?: CustomCreatureEntry[];
+  bonusActions?: CustomCreatureEntry[];
+  reactions?: CustomCreatureEntry[];
+  legendaryActions?: CustomCreatureEntry[];
+  legendaryActionCount?: number;
+  spellcasting?: CustomCreatureSpellcasting;
 }
 
 // ── Client ────────────────────────────────────────────────────────────────────

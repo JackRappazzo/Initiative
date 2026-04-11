@@ -160,12 +160,57 @@ namespace Initiative.Api.Controllers
         private static CustomCreatureData MapToCustomCreatureData(SaveCustomCreatureRequest request) => new()
         {
             Name = request.Name,
+            Size = request.Size,
             CreatureType = request.CreatureType,
+            Subtype = request.Subtype,
+            Alignment = request.Alignment,
             ChallengeRating = request.ChallengeRating,
             IsLegendary = request.IsLegendary,
+            ProficiencyBonus = request.ProficiencyBonus,
             HP = request.HP,
+            HitDice = request.HitDice,
             AC = request.AC,
-            Traits = request.Traits
+            AcNote = request.AcNote,
+            AbilityScores = request.AbilityScores == null ? null : new()
+            {
+                Str = request.AbilityScores.Str,
+                Dex = request.AbilityScores.Dex,
+                Con = request.AbilityScores.Con,
+                Int = request.AbilityScores.Int,
+                Wis = request.AbilityScores.Wis,
+                Cha = request.AbilityScores.Cha,
+            },
+            Speed = request.Speed == null ? null : new()
+            {
+                Walk = request.Speed.Walk,
+                Fly = request.Speed.Fly,
+                Swim = request.Speed.Swim,
+                Burrow = request.Speed.Burrow,
+                Climb = request.Speed.Climb,
+                CanHover = request.Speed.CanHover,
+            },
+            SavingThrows = request.SavingThrows,
+            Skills = request.Skills,
+            DamageResistances = request.DamageResistances,
+            DamageImmunities = request.DamageImmunities,
+            DamageVulnerabilities = request.DamageVulnerabilities,
+            ConditionImmunities = request.ConditionImmunities,
+            Senses = request.Senses,
+            Languages = request.Languages,
+            Traits = request.Traits,
+            Actions = request.Actions?.Select(e => new CustomCreatureEntry { Name = e.Name, Description = e.Description }).ToList(),
+            BonusActions = request.BonusActions?.Select(e => new CustomCreatureEntry { Name = e.Name, Description = e.Description }).ToList(),
+            Reactions = request.Reactions?.Select(e => new CustomCreatureEntry { Name = e.Name, Description = e.Description }).ToList(),
+            LegendaryActions = request.LegendaryActions?.Select(e => new CustomCreatureEntry { Name = e.Name, Description = e.Description }).ToList(),
+            LegendaryActionCount = request.LegendaryActionCount,
+            Spellcasting = request.Spellcasting == null ? null : new()
+            {
+                Ability = request.Spellcasting.Ability,
+                SpellSaveDc = request.Spellcasting.SpellSaveDc,
+                SpellAttackBonus = request.Spellcasting.SpellAttackBonus,
+                SlotSpells = request.Spellcasting.SlotSpells,
+                DailySpells = request.Spellcasting.DailySpells,
+            },
         };
     }
 }

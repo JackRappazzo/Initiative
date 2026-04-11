@@ -149,7 +149,7 @@ function renderToHitNodes(text: string, onRoll: OnRoll, keyPrefix: string): Reac
         </button>
       );
     }
-    return <React.Fragment key={`${keyPrefix}-hit-${i}`}>{part}</React.Fragment>;
+    return <React.Fragment key={`${keyPrefix}-hit-${i}`}>{renderMarkdownInline(part, `${keyPrefix}-hit-${i}`)}</React.Fragment>;
   });
 }
 
@@ -162,6 +162,35 @@ function renderToHitNodes(text: string, onRoll: OnRoll, keyPrefix: string): Reac
  * split() with a capturing group produces alternating [text, dice, text, dice, …]
  * so odd indices are always the captured dice expression — no re-test needed.
  */
+/**
+ * Splits a plain-text string on **bold** and *italic* markers and returns
+ * an array of React nodes. Does NOT split on dice expressions (those are
+ * handled by the caller after this pass).
+ */
+function renderMarkdownInline(text: string, keyPrefix: string): React.ReactNode[] {
+  // Split on bold first (**...** or __...__), then italic (*...* or _..._)
+  const boldParts = text.split(/(\*\*[^*]+\*\*|__[^_]+__)/);
+  const nodes: React.ReactNode[] = [];
+  boldParts.forEach((chunk, bi) => {
+    if (/^(\*\*|__)/.test(chunk)) {
+      const inner = chunk.replace(/^\*\*|^__|(\*\*|__)$/g, '');
+      nodes.push(<strong key={`${keyPrefix}-b${bi}`}>{inner}</strong>);
+    } else {
+      // Split remaining plain text on italic markers
+      const italicParts = chunk.split(/(\*[^*]+\*|_[^_]+_)/);
+      italicParts.forEach((ic, ii) => {
+        if (/^(\*|_)/.test(ic)) {
+          const inner = ic.replace(/^\*|^_|(\*|_)$/g, '');
+          nodes.push(<em key={`${keyPrefix}-b${bi}-i${ii}`}>{inner}</em>);
+        } else if (ic) {
+          nodes.push(<React.Fragment key={`${keyPrefix}-b${bi}-i${ii}`}>{ic}</React.Fragment>);
+        }
+      });
+    }
+  });
+  return nodes;
+}
+
 function renderDiceNodes(raw: string, onRoll: OnRoll, keyPrefix: string): React.ReactNode {
   const cleaned = cleanTags(raw);
   // First pass: dice expressions (e.g. 2d6+3, 1d6 + 4)
