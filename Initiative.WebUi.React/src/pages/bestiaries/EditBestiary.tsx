@@ -1,10 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { BestiaryClient, BestiaryListItem, CreatureListItem, CustomCreatureAbilityScores, CustomCreatureEntry, CustomCreatureSpeed, CustomCreatureSpellcasting } from '../../api/bestiaryClient';
+import { BestiaryClient, BestiaryListItem, CreatureListItem, CreatureSortBy, CustomCreatureAbilityScores, CustomCreatureEntry, CustomCreatureSpeed, CustomCreatureSpellcasting } from '../../api/bestiaryClient';
+import { SortState } from '../../hooks/useBestiarySearch';
+import CreatureBrowser from '../../components/bestiaries/CreatureBrowser';
 import { CustomCreatureForm } from '../../components/bestiaries/CustomCreatureForm';
 import './EditBestiary.css';
 
 const client = new BestiaryClient();
+const PAGE_SIZE = 20;
+const DEBOUNCE_MS = 300;
 
 interface EditingCreature {
   id: string;
@@ -44,9 +48,19 @@ const EditBestiary: React.FC = () => {
   const navigate = useNavigate();
 
   const [bestiary, setBestiary] = useState<BestiaryListItem | null>(null);
-  const [creatures, setCreatures] = useState<CreatureListItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingBestiary, setLoadingBestiary] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState(0);
+
+  const [nameInput, setNameInput] = useState('');
+  const [nameFilter, setNameFilter] = useState('');
+  const [creatureTypeFilter, setCreatureTypeFilter] = useState('');
+  const [sort, setSort] = useState<SortState>({ col: 'Name', desc: false });
+  const [creatures, setCreatures] = useState<CreatureListItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [creaturesLoading, setCreaturesLoading] = useState(false);
+  const [creaturesError, setCreaturesError] = useState<string | null>(null);
 
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState('');
@@ -59,33 +73,78 @@ const EditBestiary: React.FC = () => {
   const [deleting, setDeleting] = useState(false);
 
   const renameInputRef = useRef<HTMLInputElement>(null);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!bestiaryId) return;
     const load = async () => {
-      setLoading(true);
+      setLoadingBestiary(true);
       setError(null);
       try {
-        const [all, creatureResult] = await Promise.all([
-          client.getAvailableBestiaries(),
-          client.searchCreatures({ bestiaryIds: [bestiaryId], pageSize: 1000 }),
-        ]);
+        const all = await client.getAvailableBestiaries();
         const found = all.find(b => b.id === bestiaryId) ?? null;
         if (!found || !found.ownerId) {
           setError('Bestiary not found or not editable.');
         } else {
           setBestiary(found);
           setRenameValue(found.name);
-          setCreatures(creatureResult.creatures);
         }
       } catch {
         setError('Failed to load bestiary.');
       } finally {
-        setLoading(false);
+        setLoadingBestiary(false);
       }
     };
     load();
   }, [bestiaryId]);
+
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      setNameFilter(nameInput.trim());
+      setCurrentPage(1);
+    }, DEBOUNCE_MS);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [nameInput]);
+
+  useEffect(() => {
+    if (!bestiaryId || loadingBestiary || !bestiary) return;
+    let cancelled = false;
+
+    const loadCreatures = async () => {
+      setCreaturesLoading(true);
+      setCreaturesError(null);
+      try {
+        const skip = (currentPage - 1) * PAGE_SIZE;
+        const result = await client.searchCreatures({
+          bestiaryIds: [bestiaryId],
+          name: nameFilter || undefined,
+          creatureType: creatureTypeFilter || undefined,
+          sortBy: sort.col,
+          sortDescending: sort.desc ? true : undefined,
+          pageSize: PAGE_SIZE,
+          skip,
+        });
+
+        if (!cancelled) {
+          setCreatures(result.creatures);
+          setTotalCount(result.totalCount);
+        }
+      } catch {
+        if (!cancelled) setCreaturesError('Failed to load creatures');
+      } finally {
+        if (!cancelled) setCreaturesLoading(false);
+      }
+    };
+
+    loadCreatures();
+    return () => {
+      cancelled = true;
+    };
+  }, [bestiaryId, loadingBestiary, bestiary, nameFilter, creatureTypeFilter, sort, currentPage, refreshToken]);
 
   useEffect(() => {
     if (renaming) renameInputRef.current?.focus();
@@ -120,15 +179,8 @@ const EditBestiary: React.FC = () => {
   };
 
   const handleCreatureSaved = (id: string, name: string) => {
-    setCreatures(prev => {
-      const idx = prev.findIndex(c => c.id === id);
-      if (idx >= 0) {
-        const updated = [...prev];
-        updated[idx] = { ...updated[idx], name };
-        return updated;
-      }
-      return [...prev, { id, name, bestiaryId: bestiaryId!, isLegendary: false }];
-    });
+    setRefreshToken(x => x + 1);
+    setCurrentPage(1);
     setShowForm(false);
     setEditingCreature(undefined);
   };
@@ -250,10 +302,34 @@ const EditBestiary: React.FC = () => {
     if (!window.confirm(`Delete "${creature.name}"?`)) return;
     try {
       await client.deleteCustomCreature(bestiaryId, creature.id);
-      setCreatures(prev => prev.filter(c => c.id !== creature.id));
+      setRefreshToken(x => x + 1);
     } catch {
       setError('Failed to delete creature.');
     }
+  };
+
+  const handleNameInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNameInput(e.target.value);
+  };
+
+  const handleCreatureTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCreatureTypeFilter(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleSortClick = (col: CreatureSortBy) => {
+    setSort(prev => prev.col === col ? { col, desc: !prev.desc } : { col, desc: false });
+    setCurrentPage(1);
+  };
+
+  const sortIndicator = (col: CreatureSortBy) => {
+    if (sort.col !== col) return '';
+    return sort.desc ? ' ↓' : ' ↑';
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleOpenNewForm = () => {
@@ -266,7 +342,7 @@ const EditBestiary: React.FC = () => {
     setEditingCreature(undefined);
   };
 
-  if (loading) return <div className="edit-bestiary-page"><p>Loading…</p></div>;
+  if (loadingBestiary) return <div className="edit-bestiary-page"><p>Loading…</p></div>;
   if (error && !bestiary) return <div className="edit-bestiary-page"><p className="error-message">{error}</p></div>;
 
   return (
@@ -307,38 +383,54 @@ const EditBestiary: React.FC = () => {
 
       {error && <p className="error-message">{error}</p>}
 
-      <div className="edit-bestiary-toolbar">
-        <h2>Creatures ({creatures.length})</h2>
-        <button onClick={handleOpenNewForm}>+ Add Creature</button>
-      </div>
-
-      <table className="creature-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>CR</th>
-            <th>Legendary</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {creatures.length === 0 ? (
-            <tr><td colSpan={5} className="table-empty">No creatures yet. Add one above.</td></tr>
-          ) : creatures.map(c => (
-            <tr key={c.id}>
-              <td>{c.name}</td>
-              <td>{c.creatureType ?? '—'}</td>
-              <td>{c.challengeRating ?? '—'}</td>
-              <td>{c.isLegendary ? 'Yes' : '—'}</td>
-              <td className="creature-actions">
-                <button onClick={() => handleEditCreature(c)}>Edit</button>
-                <button className="danger-btn" onClick={() => handleDeleteCreature(c)}>Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <CreatureBrowser
+        creatures={creatures}
+        totalCount={totalCount}
+        totalPages={Math.max(1, Math.ceil(totalCount / PAGE_SIZE))}
+        currentPage={currentPage}
+        creaturesLoading={creaturesLoading}
+        creaturesError={creaturesError}
+        nameInput={nameInput}
+        creatureTypeFilter={creatureTypeFilter}
+        sort={sort}
+        handleNameInputChange={handleNameInputChange}
+        handleCreatureTypeChange={handleCreatureTypeChange}
+        handleSortClick={handleSortClick}
+        sortIndicator={sortIndicator}
+        handlePageChange={handlePageChange}
+        toolbarExtras={(
+          <div className="edit-bestiary-browser-tools">
+            <h1 className="bestiaries-title">Creatures</h1>
+            <button type="button" onClick={handleOpenNewForm}>+ Add Creature</button>
+          </div>
+        )}
+        firstColumn={{
+          header: <span>Actions</span>,
+          cell: (creature) => (
+            <div className="edit-bestiary-actions-cell">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditCreature(creature);
+                }}
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                className="danger-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteCreature(creature);
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          ),
+        }}
+      />
 
       {showForm && bestiaryId && (
         <CustomCreatureForm
