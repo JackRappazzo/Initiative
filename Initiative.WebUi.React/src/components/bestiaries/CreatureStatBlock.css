@@ -175,6 +175,16 @@
   font-style: italic;
 }
 
+.stat-block__spell-list-break {
+  display: block;
+  height: 0;
+  margin-top: 0.2rem;
+}
+
+.stat-block__spell-freeform-line {
+  display: block;
+}
+
 /* ── Dice chips ───────────────────────────────────────────────────────────── */
 
 .stat-block__dice-chip {

@@ -448,13 +448,37 @@ function renderHeaderEntry(raw: string, onRoll: OnRoll, keyPrefix: string): Reac
 
 function SpellcastingBlock({ entry, onRoll }: { entry: SpellcastingEntry; onRoll: OnRoll }) {
   const hideDaily = entry.hidden?.includes('daily');
+  const headerEntries = entry.headerEntries ?? [];
+  const hasSpellList =
+    (entry.will?.length ?? 0) > 0 ||
+    (entry.spells && Object.keys(entry.spells).length > 0) ||
+    (!hideDaily && entry.daily && Object.keys(entry.daily).length > 0);
+  const firstSpellHeaderIndex = headerEntries.findIndex(h => h.includes('{@spell '));
+  const hasInlineFreeformSpellList = !hasSpellList && firstSpellHeaderIndex > 0;
 
   return (
     <div className="stat-block__feature">
       <strong className="stat-block__feature-name">{entry.name}. </strong>
-      {entry.headerEntries?.map((h, i) => (
-        <span key={i}>{renderHeaderEntry(h, onRoll, `sc-header-${i}`)} </span>
-      ))}
+      {hasInlineFreeformSpellList ? (
+        <>
+          {headerEntries.slice(0, firstSpellHeaderIndex).map((h, i) => (
+            <span key={i}>{renderHeaderEntry(h, onRoll, `sc-header-${i}`)} </span>
+          ))}
+          <span className="stat-block__spell-list-break" aria-hidden="true" />
+          {headerEntries.slice(firstSpellHeaderIndex).map((h, i) => (
+            <span key={`${firstSpellHeaderIndex + i}`} className="stat-block__spell-freeform-line">
+              {renderHeaderEntry(h, onRoll, `sc-header-${firstSpellHeaderIndex + i}`)}
+            </span>
+          ))}
+        </>
+      ) : (
+        <>
+          {headerEntries.map((h, i) => (
+            <span key={i}>{renderHeaderEntry(h, onRoll, `sc-header-${i}`)} </span>
+          ))}
+          {headerEntries.length && hasSpellList ? <span className="stat-block__spell-list-break" aria-hidden="true" /> : null}
+        </>
+      )}
       {entry.will && entry.will.length > 0 && (
         <span>
           <em>At will: </em>
