@@ -30,18 +30,51 @@
   text-align: center;
 }
 
-.stat-block-close {
+.stat-block-controls {
   position: sticky;
   top: 0.5rem;
   float: right;
+  display: flex;
+  gap: 0.35rem;
   margin: 0.5rem 0.5rem 0 0;
+  z-index: 1;
+}
+
+.stat-block-copy,
+.stat-block-close {
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid #ccc;
   border-radius: 4px;
-  width: 28px;
+  min-width: 28px;
   height: 28px;
   cursor: pointer;
   font-size: 0.9rem;
   line-height: 1;
+}
+
+.stat-block-copy {
+  padding: 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.stat-block-copy-status {
+  position: sticky;
+  top: 2.8rem;
+  float: right;
+  margin-right: 0.5rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
   z-index: 1;
+}
+
+.stat-block-copy-status.is-success {
+  background: rgba(28, 107, 56, 0.9);
+  color: #fff;
+}
+
+.stat-block-copy-status.is-error {
+  background: rgba(170, 38, 38, 0.9);
+  color: #fff;
 }

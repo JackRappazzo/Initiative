@@ -44,6 +44,7 @@ interface Props {
     legendaryActionCount?: number;
     spellcasting?: CustomCreatureSpellcasting;
   };
+  initial?: Omit<NonNullable<Props['existing']>, 'id'>;
   onSaved: (id: string, name: string) => void;
   onClose: () => void;
 }
@@ -256,80 +257,81 @@ const ChipSelect: React.FC<{
 
 // ── Main form ─────────────────────────────────────────────────────────────────
 
-export const CustomCreatureForm: React.FC<Props> = ({ bestiaryId, existing, onSaved, onClose }) => {
+export const CustomCreatureForm: React.FC<Props> = ({ bestiaryId, existing, initial, onSaved, onClose }) => {
   const ex = existing;
+  const seed = existing ?? initial;
 
   // ── Identity
-  const [name, setName]                   = useState(ex?.name ?? '');
-  const [size, setSize]                   = useState(ex?.size ?? '');
-  const [creatureType, setCreatureType]   = useState(ex?.creatureType ?? '');
-  const [subtype, setSubtype]             = useState(ex?.subtype ?? '');
-  const [alignment, setAlignment]         = useState(ex?.alignment ?? '');
-  const [cr, setCr]                       = useState(ex?.challengeRating ?? '');
-  const [isLegendary, setIsLegendary]     = useState(ex?.isLegendary ?? false);
-  const [profBonus, setProfBonus]         = useState(numStr(ex?.proficiencyBonus));
+  const [name, setName]                   = useState(seed?.name ?? '');
+  const [size, setSize]                   = useState(seed?.size ?? '');
+  const [creatureType, setCreatureType]   = useState(seed?.creatureType ?? '');
+  const [subtype, setSubtype]             = useState(seed?.subtype ?? '');
+  const [alignment, setAlignment]         = useState(seed?.alignment ?? '');
+  const [cr, setCr]                       = useState(seed?.challengeRating ?? '');
+  const [isLegendary, setIsLegendary]     = useState(seed?.isLegendary ?? false);
+  const [profBonus, setProfBonus]         = useState(numStr(seed?.proficiencyBonus));
 
   // ── Vitals
-  const [hp, setHp]         = useState(numStr(ex?.hp));
-  const [hitDice, setHitDice] = useState(ex?.hitDice ?? '');
-  const [ac, setAc]         = useState(numStr(ex?.ac));
-  const [acNote, setAcNote] = useState(ex?.acNote ?? '');
+  const [hp, setHp]         = useState(numStr(seed?.hp));
+  const [hitDice, setHitDice] = useState(seed?.hitDice ?? '');
+  const [ac, setAc]         = useState(numStr(seed?.ac));
+  const [acNote, setAcNote] = useState(seed?.acNote ?? '');
 
   // ── Ability scores
   const [scores, setScores] = useState<Record<string, string>>({
-    str: numStr(ex?.abilityScores?.str), dex: numStr(ex?.abilityScores?.dex),
-    con: numStr(ex?.abilityScores?.con), int: numStr(ex?.abilityScores?.int),
-    wis: numStr(ex?.abilityScores?.wis), cha: numStr(ex?.abilityScores?.cha),
+    str: numStr(seed?.abilityScores?.str), dex: numStr(seed?.abilityScores?.dex),
+    con: numStr(seed?.abilityScores?.con), int: numStr(seed?.abilityScores?.int),
+    wis: numStr(seed?.abilityScores?.wis), cha: numStr(seed?.abilityScores?.cha),
   });
 
   // ── Speed
-  const [walk, setWalk]       = useState(numStr(ex?.speed?.walk));
-  const [fly, setFly]         = useState(numStr(ex?.speed?.fly));
-  const [canHover, setCanHover] = useState(ex?.speed?.canHover ?? false);
-  const [swim, setSwim]       = useState(numStr(ex?.speed?.swim));
-  const [burrow, setBurrow]   = useState(numStr(ex?.speed?.burrow));
-  const [climb, setClimb]     = useState(numStr(ex?.speed?.climb));
+  const [walk, setWalk]       = useState(numStr(seed?.speed?.walk));
+  const [fly, setFly]         = useState(numStr(seed?.speed?.fly));
+  const [canHover, setCanHover] = useState(seed?.speed?.canHover ?? false);
+  const [swim, setSwim]       = useState(numStr(seed?.speed?.swim));
+  const [burrow, setBurrow]   = useState(numStr(seed?.speed?.burrow));
+  const [climb, setClimb]     = useState(numStr(seed?.speed?.climb));
 
   // ── Saves & skills (stored as "ability → modifier string" maps)
-  const [saves, setSaves]   = useState<Record<string, string>>(ex?.savingThrows ?? {});
-  const [skills, setSkills] = useState<Record<string, string>>(ex?.skills ?? {});
+  const [saves, setSaves]   = useState<Record<string, string>>(seed?.savingThrows ?? {});
+  const [skills, setSkills] = useState<Record<string, string>>(seed?.skills ?? {});
 
   // ── Defenses
-  const [resist, setResist]     = useState<string[]>(ex?.damageResistances ?? []);
-  const [immune, setImmune]     = useState<string[]>(ex?.damageImmunities ?? []);
-  const [vuln, setVuln]         = useState<string[]>(ex?.damageVulnerabilities ?? []);
-  const [condImm, setCondImm]   = useState<string[]>(ex?.conditionImmunities ?? []);
+  const [resist, setResist]     = useState<string[]>(seed?.damageResistances ?? []);
+  const [immune, setImmune]     = useState<string[]>(seed?.damageImmunities ?? []);
+  const [vuln, setVuln]         = useState<string[]>(seed?.damageVulnerabilities ?? []);
+  const [condImm, setCondImm]   = useState<string[]>(seed?.conditionImmunities ?? []);
 
   // ── Senses / languages
-  const [senses, setSenses]       = useState(listToStr(ex?.senses));
-  const [languages, setLanguages] = useState(listToStr(ex?.languages));
+  const [senses, setSenses]       = useState(listToStr(seed?.senses));
+  const [languages, setLanguages] = useState(listToStr(seed?.languages));
 
   // ── Traits (free text)
-  const [traits, setTraits] = useState(ex?.traits ?? '');
+  const [traits, setTraits] = useState(seed?.traits ?? '');
 
   // ── Action lists
-  const [actions, setActions]         = useState<CustomCreatureEntry[]>(ex?.actions ?? []);
-  const [bonusActions, setBonusActions] = useState<CustomCreatureEntry[]>(ex?.bonusActions ?? []);
-  const [reactions, setReactions]     = useState<CustomCreatureEntry[]>(ex?.reactions ?? []);
-  const [legendary, setLegendary]     = useState<CustomCreatureEntry[]>(ex?.legendaryActions ?? []);
-  const [legCount, setLegCount]       = useState(numStr(ex?.legendaryActionCount));
+  const [actions, setActions]         = useState<CustomCreatureEntry[]>(seed?.actions ?? []);
+  const [bonusActions, setBonusActions] = useState<CustomCreatureEntry[]>(seed?.bonusActions ?? []);
+  const [reactions, setReactions]     = useState<CustomCreatureEntry[]>(seed?.reactions ?? []);
+  const [legendary, setLegendary]     = useState<CustomCreatureEntry[]>(seed?.legendaryActions ?? []);
+  const [legCount, setLegCount]       = useState(numStr(seed?.legendaryActionCount));
 
   // ── Spellcasting
-  const [scAbility, setScAbility]     = useState(ex?.spellcasting?.ability ?? '');
-  const [scDc, setScDc]               = useState(numStr(ex?.spellcasting?.spellSaveDc));
-  const [scAtk, setScAtk]             = useState(numStr(ex?.spellcasting?.spellAttackBonus));
-  const [scCantrips, setScCantrips]   = useState(ex?.spellcasting?.slotSpells?.['0']?.join('\n') ?? '');
+  const [scAbility, setScAbility]     = useState(seed?.spellcasting?.ability ?? '');
+  const [scDc, setScDc]               = useState(numStr(seed?.spellcasting?.spellSaveDc));
+  const [scAtk, setScAtk]             = useState(numStr(seed?.spellcasting?.spellAttackBonus));
+  const [scCantrips, setScCantrips]   = useState(seed?.spellcasting?.slotSpells?.['0']?.join('\n') ?? '');
   const [scSlots, setScSlots]         = useState<Record<string, string>>(() => {
     const slots: Record<string, string> = {};
-    const ss = ex?.spellcasting?.slotSpells ?? {};
+    const ss = seed?.spellcasting?.slotSpells ?? {};
     for (let l = 1; l <= 9; l++) slots[l] = ss[l]?.join('\n') ?? '';
     return slots;
   });
-  const [scDaily, setScDaily]         = useState(ex?.spellcasting?.dailySpells?.join('\n') ?? '');
-  const [scDescription, setScDescription] = useState(ex?.spellcasting?.description ?? '');
-  const [scFreeform, setScFreeform]       = useState(ex?.spellcasting?.freeformText ?? '');
+  const [scDaily, setScDaily]         = useState(seed?.spellcasting?.dailySpells?.join('\n') ?? '');
+  const [scDescription, setScDescription] = useState(seed?.spellcasting?.description ?? '');
+  const [scFreeform, setScFreeform]       = useState(seed?.spellcasting?.freeformText ?? '');
   const [scFormat, setScFormat]           = useState<'slot' | 'day' | 'freeform'>(
-    ex?.spellcasting?.freeformText ? 'freeform' : ex?.spellcasting?.dailySpells?.length ? 'day' : 'slot'
+    seed?.spellcasting?.freeformText ? 'freeform' : seed?.spellcasting?.dailySpells?.length ? 'day' : 'slot'
   );
 
   // ── Submit

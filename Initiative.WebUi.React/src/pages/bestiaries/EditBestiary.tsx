@@ -4,6 +4,7 @@ import { BestiaryClient, BestiaryListItem, CreatureListItem, CreatureSortBy, Cus
 import { SortState } from '../../hooks/useBestiarySearch';
 import CreatureBrowser from '../../components/bestiaries/CreatureBrowser';
 import { CustomCreatureForm } from '../../components/bestiaries/CustomCreatureForm';
+import { fantasyStatblockYamlToCustomPayload } from '../../utils/fantasyStatblockYaml';
 import './EditBestiary.css';
 
 const client = new BestiaryClient();
@@ -43,6 +44,8 @@ interface EditingCreature {
   spellcasting?: CustomCreatureSpellcasting;
 }
 
+type NewCreatureSeed = Omit<EditingCreature, 'id'>;
+
 const EditBestiary: React.FC = () => {
   const { bestiaryId } = useParams<{ bestiaryId: string }>();
   const navigate = useNavigate();
@@ -68,6 +71,11 @@ const EditBestiary: React.FC = () => {
 
   const [showForm, setShowForm] = useState(false);
   const [editingCreature, setEditingCreature] = useState<EditingCreature | undefined>(undefined);
+  const [newCreatureSeed, setNewCreatureSeed] = useState<NewCreatureSeed | undefined>(undefined);
+
+  const [showYamlImport, setShowYamlImport] = useState(false);
+  const [yamlInput, setYamlInput] = useState('');
+  const [yamlError, setYamlError] = useState<string | null>(null);
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -372,12 +380,63 @@ const EditBestiary: React.FC = () => {
 
   const handleOpenNewForm = () => {
     setEditingCreature(undefined);
+    setNewCreatureSeed(undefined);
     setShowForm(true);
   };
 
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingCreature(undefined);
+    setNewCreatureSeed(undefined);
+  };
+
+  const closeYamlImport = () => {
+    setShowYamlImport(false);
+    setYamlError(null);
+  };
+
+  const parseYamlToForm = () => {
+    try {
+      const payload = fantasyStatblockYamlToCustomPayload(yamlInput);
+      setEditingCreature(undefined);
+      setNewCreatureSeed({
+        name: payload.name,
+        size: payload.size,
+        creatureType: payload.creatureType,
+        subtype: payload.subtype,
+        alignment: payload.alignment,
+        challengeRating: payload.challengeRating,
+        isLegendary: payload.isLegendary,
+        proficiencyBonus: payload.proficiencyBonus,
+        hp: payload.hp,
+        hitDice: payload.hitDice,
+        ac: payload.ac,
+        acNote: payload.acNote,
+        abilityScores: payload.abilityScores,
+        speed: payload.speed,
+        savingThrows: payload.savingThrows,
+        skills: payload.skills,
+        damageResistances: payload.damageResistances,
+        damageImmunities: payload.damageImmunities,
+        damageVulnerabilities: payload.damageVulnerabilities,
+        conditionImmunities: payload.conditionImmunities,
+        senses: payload.senses,
+        languages: payload.languages,
+        traits: payload.traits,
+        actions: payload.actions,
+        bonusActions: payload.bonusActions,
+        reactions: payload.reactions,
+        legendaryActions: payload.legendaryActions,
+        legendaryActionCount: payload.legendaryActionCount,
+        spellcasting: payload.spellcasting,
+      });
+      setShowYamlImport(false);
+      setYamlError(null);
+      setShowForm(true);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'Unable to parse YAML.';
+      setYamlError(reason);
+    }
   };
 
   if (loadingBestiary) return <div className="edit-bestiary-page"><p>Loading…</p></div>;
@@ -440,6 +499,7 @@ const EditBestiary: React.FC = () => {
           <div className="edit-bestiary-browser-tools">
             <h1 className="bestiaries-title">Creatures</h1>
             <button type="button" onClick={handleOpenNewForm}>+ Add Creature</button>
+            <button type="button" onClick={() => setShowYamlImport(true)}>+ Create from YAML</button>
           </div>
         )}
         firstColumn={{
@@ -472,11 +532,34 @@ const EditBestiary: React.FC = () => {
 
       {showForm && bestiaryId && (
         <CustomCreatureForm
+          key={editingCreature?.id ?? `new-${newCreatureSeed?.name ?? 'blank'}`}
           bestiaryId={bestiaryId}
           existing={editingCreature}
+          initial={newCreatureSeed}
           onSaved={handleCreatureSaved}
           onClose={handleCloseForm}
         />
+      )}
+
+      {showYamlImport && (
+        <div className="modal-overlay" onClick={closeYamlImport}>
+          <div className="modal-content yaml-import-modal" onClick={(event) => event.stopPropagation()}>
+            <h3>Create Creature from Fantasy Statblock YAML</h3>
+            <p className="yaml-import-hint">Paste Basic 5e YAML fields. The form opens prefilled for review before saving.</p>
+            <textarea
+              className="yaml-import-textarea"
+              value={yamlInput}
+              onChange={(event) => setYamlInput(event.target.value)}
+              placeholder={"layout: Basic 5e Layout\nname: Goblin\nsize: Small\ntype: humanoid\nac: 15\nhp: 7\nstats: [8, 14, 10, 10, 8, 8]"}
+              rows={14}
+            />
+            {yamlError && <p className="form-error">{yamlError}</p>}
+            <div className="form-actions">
+              <button type="button" onClick={closeYamlImport}>Cancel</button>
+              <button type="button" onClick={parseYamlToForm} disabled={!yamlInput.trim()}>Prefill Form</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { SortState } from '../../hooks/useBestiarySearch';
 import './CreatureBrowser.css';
 import Pagination from '../Pagination';
 import CreatureStatBlock from './CreatureStatBlock';
+import { creatureToFantasyStatblockYaml } from '../../utils/fantasyStatblockYaml';
 
 interface FirstColumnConfig {
   header: React.ReactNode;
@@ -56,6 +57,7 @@ const CreatureBrowser: React.FC<CreatureBrowserProps> = ({
   const bestiaryClient = useMemo(() => new BestiaryClient(), []);
   const [statBlockData, setStatBlockData] = useState<import('../../api/bestiaryClient').FiveEToolsRawData | null>(null);
   const [statBlockLoading, setStatBlockLoading] = useState(false);
+  const [copyState, setCopyState] = useState<'copied' | 'error' | null>(null);
 
   const openStatBlock = useCallback(async (creature: CreatureListItem) => {
     setStatBlockLoading(true);
@@ -70,6 +72,19 @@ const CreatureBrowser: React.FC<CreatureBrowserProps> = ({
   }, [bestiaryClient]);
 
   const overlayClass = `stat-block-overlay${statBlockOverlayClass ? ` ${statBlockOverlayClass}` : ''}`;
+
+  const copyYamlToClipboard = useCallback(async () => {
+    if (!statBlockData) return;
+    try {
+      const yamlText = creatureToFantasyStatblockYaml(statBlockData);
+      await navigator.clipboard.writeText(yamlText);
+      setCopyState('copied');
+      window.setTimeout(() => setCopyState(null), 1800);
+    } catch {
+      setCopyState('error');
+      window.setTimeout(() => setCopyState(null), 2200);
+    }
+  }, [statBlockData]);
 
   return (
     <>
@@ -197,7 +212,15 @@ const CreatureBrowser: React.FC<CreatureBrowserProps> = ({
       {statBlockData && (
         <div className={overlayClass} onClick={() => setStatBlockData(null)}>
           <div className="stat-block-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="stat-block-close" onClick={() => setStatBlockData(null)} aria-label="Close">✕</button>
+            <div className="stat-block-controls">
+              <button className="stat-block-copy" onClick={copyYamlToClipboard} aria-label="Copy Fantasy YAML">YAML</button>
+              <button className="stat-block-close" onClick={() => setStatBlockData(null)} aria-label="Close">✕</button>
+            </div>
+            {copyState && (
+              <div className={`stat-block-copy-status ${copyState === 'error' ? 'is-error' : 'is-success'}`} role="status">
+                {copyState === 'copied' ? 'YAML copied' : 'Copy failed'}
+              </div>
+            )}
             <CreatureStatBlock data={statBlockData} />
           </div>
         </div>

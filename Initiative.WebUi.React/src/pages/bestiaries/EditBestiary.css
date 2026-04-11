@@ -259,6 +259,23 @@
   margin: 0;
 }
 
+.yaml-import-modal {
+  width: min(96vw, 760px);
+}
+
+.yaml-import-hint {
+  margin-top: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted, #b4bccd);
+}
+
+.yaml-import-textarea {
+  width: 100%;
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
 .edit-bestiary-browser-tools button {
   background-color: #28a745;
   color: #fff;
