@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTaleSpireChat } from '../../hooks';
+import { parseTaleSpireChatCommand } from '../../utils/talespireChatCommands';
 import './JoinLobby.css';
 
 const JoinLobby: React.FC = () => {
     const [roomCode, setRoomCode] = useState('');
     const navigate = useNavigate();
+    const taleSpireChatClient = useTaleSpireChat();
+
+    const navigateToLobby = useCallback((nextRoomCode: string) => {
+        navigate(`/lobby/${nextRoomCode}`);
+    }, [navigate]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.slice(0, 6);
@@ -12,16 +19,31 @@ const JoinLobby: React.FC = () => {
         
         // Auto-navigate when 6 characters are entered
         if (value.length === 6) {
-            navigate(`/lobby/${value}`);
+            navigateToLobby(value);
         }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (roomCode.length === 6) {
-            navigate(`/lobby/${roomCode}`);
+            navigateToLobby(roomCode);
         }
     };
+
+    useEffect(() => {
+        const subscription = taleSpireChatClient.chatMessages$.subscribe((message) => {
+            const command = parseTaleSpireChatCommand(message.body);
+            if (command?.type !== 'invite') {
+                return;
+            }
+
+            navigateToLobby(command.roomCode);
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [navigateToLobby, taleSpireChatClient]);
 
     return (
         <div className="join-lobby-container">

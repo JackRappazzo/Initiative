@@ -1,6 +1,5 @@
 .talespire-badge {
   display: inline-block;
-  margin-bottom: 0.75rem;
   padding: 0.25rem 0.75rem;
   background: #2a6;
   color: #fff;
@@ -8,6 +7,34 @@
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.03em;
+}
+
+.talespire-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.talespire-invite-button {
+  border: 1px solid #1f8452;
+  background: #ffffff;
+  color: #1f8452;
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.talespire-invite-button:hover:not(:disabled) {
+  background: #e9f8f0;
+}
+
+.talespire-invite-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .edit-encounter-container {

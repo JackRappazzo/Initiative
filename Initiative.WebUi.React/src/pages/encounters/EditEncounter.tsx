@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { EncounterClient, FetchEncounterResponse } from '../../api/encounterClient';
 import { CreatureListItem, BestiaryClient, FiveEToolsRawData } from '../../api/bestiaryClient';
 import { EncounterState } from '../../types';
-import { useCreatureManagement, useLobbyConnection } from '../../hooks';
+import { useCreatureManagement, useLobbyConnection, useTaleSpireChat } from '../../hooks';
 import { EditableCreatureList, EncounterHeader, EncounterStatus } from '../../components';
 import BestiaryPicker from '../../components/bestiaries/BestiaryPicker';
 import PartyPicker from '../../components/encounters/PartyPicker';
@@ -11,6 +11,7 @@ import CreatureStatBlock from '../../components/bestiaries/CreatureStatBlock';
 import { PartyMember } from '../../api/partyClient';
 import { useUser } from '../../contexts/UserContext';
 import { isTaleSpire } from '../../utils/talespire';
+import { formatInviteCommand, parseTaleSpireChatCommand } from '../../utils/talespireChatCommands';
 import { calculateEncounterDifficulty, challengeRatingToXp } from '../../utils/encounterDifficulty';
 
 import './EditEncounter.css';
@@ -35,6 +36,7 @@ const EditEncounter: React.FC = () => {
     autoConnect: true,
     autoJoinRoom: true
   });
+  const taleSpireChatClient = useTaleSpireChat();
 
   const [encounter, setEncounter] = useState<FetchEncounterResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -218,6 +220,33 @@ const EditEncounter: React.FC = () => {
       sendLobbyState(newCreatures, newCurrentTurn, encounterState.turnNumber, encounterState.viewersAllowed);
     }
   }, [originalRemoveCreature, encounterState.viewersAllowed, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
+
+  const sendInviteToChat = useCallback(() => {
+    if (!roomCode) {
+      return;
+    }
+
+    taleSpireChatClient.send(formatInviteCommand(roomCode), 'board').catch((error) => {
+      console.error('[EditEncounter] Failed to send TaleSpire invite:', error);
+    });
+  }, [roomCode, taleSpireChatClient]);
+
+  useEffect(() => {
+    const subscription = taleSpireChatClient.chatMessages$.subscribe((message) => {
+      const command = parseTaleSpireChatCommand(message.body);
+      if (command?.type !== 'join' || !roomCode) {
+        return;
+      }
+
+      taleSpireChatClient.send(formatInviteCommand(roomCode), 'board').catch((error) => {
+        console.error('[EditEncounter] Failed to send TaleSpire invite reply:', error);
+      });
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [roomCode, taleSpireChatClient]);
 
   const sortByInitiative = useCallback(async () => {
     await originalSortByInitiative();
@@ -554,7 +583,18 @@ const EditEncounter: React.FC = () => {
   return (
     <div className="edit-encounter-container">
       {isTaleSpire() && (
-        <div className="talespire-badge">TaleSpire Connected</div>
+        <div className="talespire-controls">
+          <div className="talespire-badge">TaleSpire Connected</div>
+          <button
+            type="button"
+            className="talespire-invite-button"
+            onClick={sendInviteToChat}
+            disabled={!roomCode}
+            title={roomCode ? `Send ${formatInviteCommand(roomCode)} to board chat` : 'Room code unavailable'}
+          >
+            Send @inv
+          </button>
+        </div>
       )}
       <div className="edit-encounter-header">
         <EncounterHeader

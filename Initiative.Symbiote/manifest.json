@@ -5,7 +5,12 @@
   "entryPoint": "http://localhost:3000",
   "api": {
     "version": "0.1",
-    "initTimeout": 10
+    "initTimeout": 10,
+    "subscriptions": {
+      "chat": {
+        "onChatMessage": "handleInitiativeChatMessage"
+      }
+    }
   },
   "controls": {
     "reload": true
@@ -15,7 +20,8 @@
   },
   "environment": {
     "extras": [
-      "colorStyles"
+      "colorStyles",
+      "/bridge.js"
     ]
   }
 }
