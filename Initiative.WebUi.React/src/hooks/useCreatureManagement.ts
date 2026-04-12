@@ -3,6 +3,15 @@ import { EditableCreature } from '../types';
 import { EncounterClient } from '../api/encounterClient';
 import { BestiaryClient, CreatureListItem, FiveEToolsAc } from '../api/bestiaryClient';
 
+const sortCreaturesByInitiative = (creatureList: EditableCreature[]) =>
+  creatureList
+    .map((creature, index) => ({ creature, index }))
+    .sort((left, right) => {
+      const initiativeDelta = right.creature.initiative - left.creature.initiative;
+      return initiativeDelta !== 0 ? initiativeDelta : left.index - right.index;
+    })
+    .map((entry) => entry.creature);
+
 export const useCreatureManagement = (encounterId: string | undefined, encounterClient: EncounterClient, bestiaryClient?: BestiaryClient) => {
   const [creatures, setCreatures] = useState<EditableCreature[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -22,16 +31,18 @@ export const useCreatureManagement = (encounterId: string | undefined, encounter
   const updateCreature = useCallback((index: number, creature: EditableCreature) => {
     const newCreatures = [...creatures];
     newCreatures[index] = creature;
-    setCreatures(newCreatures);
+    const sortedCreatures = sortCreaturesByInitiative(newCreatures);
+    setCreatures(sortedCreatures);
     // Auto-save after a short delay to avoid too many API calls
-    setTimeout(() => updateCreatureAPI(newCreatures), 300);
+    setTimeout(() => updateCreatureAPI(sortedCreatures), 300);
   }, [creatures, updateCreatureAPI]);
 
   const updateCreatureAndSave = useCallback(async (index: number, creature: EditableCreature) => {
     const newCreatures = [...creatures];
     newCreatures[index] = creature;
-    setCreatures(newCreatures);
-    await updateCreatureAPI(newCreatures);
+    const sortedCreatures = sortCreaturesByInitiative(newCreatures);
+    setCreatures(sortedCreatures);
+    await updateCreatureAPI(sortedCreatures);
   }, [creatures, updateCreatureAPI]);
 
   const addCreatureFromBestiary = useCallback(async (source: CreatureListItem) => {
@@ -80,29 +91,25 @@ export const useCreatureManagement = (encounterId: string | undefined, encounter
       isEditing: false
     };
 
-    const newCreatures = [...creatures, newCreature];
+    const newCreatures = sortCreaturesByInitiative([...creatures, newCreature]);
     setCreatures(newCreatures);
     await updateCreatureAPI(newCreatures);
   }, [creatures, updateCreatureAPI, bestiaryClient]);
 
   const removeCreature = useCallback(async (index: number) => {
-    const newCreatures = creatures.filter((_, i) => i !== index);
+    const newCreatures = sortCreaturesByInitiative(creatures.filter((_, i) => i !== index));
     setCreatures(newCreatures);
     await updateCreatureAPI(newCreatures);
   }, [creatures, updateCreatureAPI]);
 
-  const sortByInitiative = useCallback(async () => {
-    const sortedCreatures = [...creatures].sort((a, b) => b.initiative - a.initiative);
-    setCreatures(sortedCreatures);
-    await updateCreatureAPI(sortedCreatures);
-  }, [creatures, updateCreatureAPI]);
-
   const setCreatureList = useCallback((newCreatures: EditableCreature[]) => {
-    setCreatures(newCreatures);
+    setCreatures(sortCreaturesByInitiative(newCreatures));
   }, []);
 
   const saveCreatures = useCallback(async () => {
-    await updateCreatureAPI(creatures);
+    const sortedCreatures = sortCreaturesByInitiative(creatures);
+    setCreatures(sortedCreatures);
+    await updateCreatureAPI(sortedCreatures);
   }, [creatures, updateCreatureAPI]);
 
   return {
@@ -113,7 +120,6 @@ export const useCreatureManagement = (encounterId: string | undefined, encounter
     updateCreatureAndSave,
     addCreatureFromBestiary,
     removeCreature,
-    sortByInitiative,
     setCreatureList,
     saveCreatures
   };

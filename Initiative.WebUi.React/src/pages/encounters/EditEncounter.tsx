@@ -67,7 +67,6 @@ const EditEncounter: React.FC = () => {
     updateCreature: originalUpdateCreature,
     addCreatureFromBestiary: originalAddCreatureFromBestiary,
     removeCreature: originalRemoveCreature,
-    sortByInitiative: originalSortByInitiative,
     setCreatureList
   } = useCreatureManagement(encounterId, encounterClient, bestiaryClient);
 
@@ -248,24 +247,17 @@ const EditEncounter: React.FC = () => {
     };
   }, [roomCode, taleSpireChatClient]);
 
-  const sortByInitiative = useCallback(async () => {
-    await originalSortByInitiative();
-    
-    if (encounterState.viewersAllowed) {
-      const sortedCreatures = [...creatures].sort((a, b) => b.initiative - a.initiative);
-      sendLobbyState(sortedCreatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.viewersAllowed);
-    }
-  }, [originalSortByInitiative, encounterState.viewersAllowed, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
-
   // Handle creature list changes from EditableCreatureList
   const handleCreaturesChange = useCallback(async (newCreatures: typeof creatures) => {
+    const sortedCreatures = [...newCreatures].sort((a, b) => b.initiative - a.initiative);
+
     // Update local state first
-    setCreatureList(newCreatures);
+    setCreatureList(sortedCreatures);
     
     // Save to repository
     try {
       if (!encounterId) return;
-      await encounterClient.setCreatures(encounterId, newCreatures);
+      await encounterClient.setCreatures(encounterId, sortedCreatures);
     } catch (err) {
       console.error('[EditEncounter] Failed to save creatures after reorder:', err);
       setError('Failed to save creature order');
@@ -275,7 +267,7 @@ const EditEncounter: React.FC = () => {
     if (encounterState.viewersAllowed) {
       console.log('[EditEncounter] Sending lobby state after creature reorder');
       setTimeout(() => {
-        sendLobbyState(newCreatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.viewersAllowed);
+        sendLobbyState(sortedCreatures, encounterState.currentTurn, encounterState.turnNumber, encounterState.viewersAllowed);
       }, 100);
     }
   }, [setCreatureList, encounterId, encounterClient, setError, encounterState.viewersAllowed, encounterState.currentTurn, encounterState.turnNumber, sendLobbyState]);
@@ -650,16 +642,6 @@ const EditEncounter: React.FC = () => {
           />
 
           <div className="creature-list">
-            <div className="creature-list-header">
-              <button 
-                className="control-button secondary sort-initiative-button"
-                onClick={sortByInitiative}
-                title="Sort by Initiative (Descending)"
-              >
-                Sort by Initiative
-              </button>
-            </div>
-            
             <EditableCreatureList
               creatures={creatures}
               highlightedCreatureIndex={encounterState.currentTurn}
