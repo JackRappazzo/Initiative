@@ -402,6 +402,25 @@
   background-color: #e9ecef;
 }
 
+.creature-row-wrap-hidden .creature-item {
+  background: repeating-linear-gradient(
+    -45deg,
+    #f5f6f8,
+    #f5f6f8 10px,
+    #eceff3 10px,
+    #eceff3 20px
+  );
+  border-left: 4px solid #6b7280;
+  opacity: 0.75;
+}
+
+.creature-row-wrap-hidden .creature-field-display,
+.creature-row-wrap-hidden .creature-field-input,
+.creature-row-wrap-hidden .creature-controls,
+.creature-row-wrap-hidden .drag-handle {
+  opacity: 0.85;
+}
+
 .creature-header {
   font-weight: bold;
   background: #f8f9fa;

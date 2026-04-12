@@ -137,12 +137,12 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
       <div
         ref={setNodeRef}
         style={style}
-        className={`creature-row-wrap ${isDragging ? 'dragging' : ''}`}
+        className={`creature-row-wrap ${isDragging ? 'dragging' : ''}${creature.isHidden ? ' creature-row-wrap-hidden' : ''}`}
         {...attributes}
       >
         <div
           style={isCurrentTurn ? { background: '#e9ecef' } : undefined}
-          className="creature-item"
+          className={`creature-item${creature.isHidden ? ' creature-item-hidden' : ''}`}
         >
           <div
             className="drag-handle"

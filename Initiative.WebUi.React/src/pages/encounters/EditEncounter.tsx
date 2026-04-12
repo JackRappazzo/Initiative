@@ -486,6 +486,39 @@ const EditEncounter: React.FC = () => {
     return calculateEncounterDifficulty(partyLevels, monsterXpValues);
   }, [partyLevels, monsterXpValues]);
 
+  const getNextVisibleIndex = useCallback((startIndex: number, direction: 1 | -1) => {
+    if (creatures.length === 0) {
+      return -1;
+    }
+
+    for (let step = 0; step < creatures.length; step++) {
+      const candidate = (startIndex + direction * step + creatures.length) % creatures.length;
+      if (!creatures[candidate]?.isHidden) {
+        return candidate;
+      }
+    }
+
+    return -1;
+  }, [creatures]);
+
+  useEffect(() => {
+    if (creatures.length === 0) {
+      return;
+    }
+
+    const current = creatures[encounterState.currentTurn];
+    if (!current?.isHidden) {
+      return;
+    }
+
+    const firstVisible = getNextVisibleIndex(encounterState.currentTurn, 1);
+    if (firstVisible < 0 || firstVisible === encounterState.currentTurn) {
+      return;
+    }
+
+    setEncounterState((previous) => ({ ...previous, currentTurn: firstVisible }));
+  }, [creatures, encounterState.currentTurn, getNextVisibleIndex]);
+
   const handleNameEdit = async () => {
     if (!encounter || !encounterId || !newName.trim()) return;
     
@@ -532,37 +565,43 @@ const EditEncounter: React.FC = () => {
     }
   }, [encounterState.viewersAllowed]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const nextTurn = () => {
+  const nextTurn = useCallback(() => {
     if (creatures.length === 0) return;
 
     setEncounterState(prev => {
-      let next = prev.currentTurn + 1;
+      const next = getNextVisibleIndex((prev.currentTurn + 1) % creatures.length, 1);
+      if (next < 0) {
+        return prev;
+      }
+
       let nextTurnNumber = prev.turnNumber;
 
-      if (next >= creatures.length) {
-        next = 0;
+      if (next <= prev.currentTurn) {
         nextTurnNumber++;
       }
 
       return { ...prev, currentTurn: next, turnNumber: nextTurnNumber };
     });
-  };
+  }, [creatures.length, getNextVisibleIndex]);
 
-  const prevTurn = () => {
+  const prevTurn = useCallback(() => {
     if (creatures.length === 0) return;
 
     setEncounterState(prev => {
-      let pt = prev.currentTurn - 1;
+      const previousVisible = getNextVisibleIndex((prev.currentTurn - 1 + creatures.length) % creatures.length, -1);
+      if (previousVisible < 0) {
+        return prev;
+      }
+
       let ptNumber = prev.turnNumber;
 
-      if (pt < 0) {
-        pt = creatures.length - 1;
+      if (previousVisible >= prev.currentTurn) {
         ptNumber = Math.max(1, ptNumber - 1);
       }
 
-      return { ...prev, currentTurn: pt, turnNumber: ptNumber };
+      return { ...prev, currentTurn: previousVisible, turnNumber: ptNumber };
     });
-  };
+  }, [creatures.length, getNextVisibleIndex]);
 
   if (loading) {
     return <div className="edit-encounter-container">Loading encounter...</div>;
