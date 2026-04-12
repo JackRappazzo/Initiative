@@ -94,8 +94,8 @@ export const useLobbyConnection = (options: UseLobbyConnectionOptions = {}): Use
       return;
     }
 
-    // Skip if already joined this room globally
-    if (targetRoomCode === lastJoinedRoomCode) {
+    // Skip if already joined this room globally and still in lobby
+    if (targetRoomCode === lastJoinedRoomCode && lobbyClient.isInLobby.value) {
       console.log('[useLobbyConnection] Already joined room globally:', targetRoomCode);
       return;
     }
@@ -156,8 +156,8 @@ export const useLobbyConnection = (options: UseLobbyConnectionOptions = {}): Use
       return;
     }
 
-    // Skip if already joined this room globally
-    if (roomCode === lastJoinedRoomCode) {
+    // Skip if already joined this room globally and still in lobby
+    if (roomCode === lastJoinedRoomCode && lobbyClient.isInLobby.value) {
       console.log('[useLobbyConnection] Already joined room globally:', roomCode);
       currentRoomCodeRef.current = roomCode;
       hasJoinedRef.current = true;
@@ -178,7 +178,7 @@ export const useLobbyConnection = (options: UseLobbyConnectionOptions = {}): Use
     } else {
       // Subscribe to connection state changes
       const subscription = lobbyClient.isConnected$.subscribe((isConnected) => {
-        if (isConnected && roomCode === currentRoomCodeRef.current) {
+        if (isConnected) {
           handleRoomJoin().catch(err => {
             console.error('[useLobbyConnection] Error in subscription room join:', err);
           });
@@ -198,6 +198,30 @@ export const useLobbyConnection = (options: UseLobbyConnectionOptions = {}): Use
       currentRoomCodeRef.current = roomCode || null;
     }
   }, [roomCode]);
+
+  // Rejoin the room after SignalR reconnects (new connection ID means group membership is lost).
+  useEffect(() => {
+    if (!roomCode) {
+      return;
+    }
+
+    const subscription = lobbyClient.reconnected$.subscribe(() => {
+      lobbyClient
+        .rejoinLobbyIfNeeded(roomCode)
+        .then(() => {
+          lastJoinedRoomCode = roomCode;
+          currentRoomCodeRef.current = roomCode;
+          hasJoinedRef.current = true;
+        })
+        .catch((err) => {
+          console.error('[useLobbyConnection] Failed to rejoin room after reconnect:', err);
+        });
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [lobbyClient, roomCode]);
 
   return {
     lobbyClient,

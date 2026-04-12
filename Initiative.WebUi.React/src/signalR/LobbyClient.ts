@@ -16,6 +16,7 @@ export class LobbyClient {
 
     private connection: signalR.HubConnection;
     private isConnecting = false;
+    private joinedRoomCode: string | null = null;
 
     constructor(hubUrl: string) {
         this.connection = new signalR.HubConnectionBuilder()
@@ -28,10 +29,12 @@ export class LobbyClient {
         this.connection.onclose(() => {
             this.closed$.next();
             this.isConnected$.next(false);
+            this.isInLobby.next(false);
         });
         this.connection.onreconnected(() => {
             this.reconnected$.next();
             this.isConnected$.next(true);
+            this.isInLobby.next(false);
         });
         this.connection.onreconnecting(() => {
             // Optionally handle reconnecting
@@ -127,6 +130,8 @@ export class LobbyClient {
                 await this.connection.stop();
             }
             this.isConnected$.next(false);
+            this.isInLobby.next(false);
+            this.joinedRoomCode = null;
         } catch (err) {
             this.error$.next("Error during disconnect: " + err);
         }
@@ -148,9 +153,21 @@ export class LobbyClient {
     public async joinLobby(roomCode: string): Promise<void> {
         try {
             await this.connection.invoke("JoinLobby", roomCode);
+            this.joinedRoomCode = roomCode;
+            this.isInLobby.next(true);
         } catch (err) {
             this.error$.next("Failed to join lobby: " + err);
+            throw err;
         }
+    }
+
+    public async rejoinLobbyIfNeeded(roomCode?: string | null): Promise<void> {
+        const targetRoomCode = roomCode ?? this.joinedRoomCode;
+        if (!targetRoomCode) {
+            return;
+        }
+
+        await this.joinLobby(targetRoomCode);
     }
 
     public async getLobbyState(): Promise<void> {
