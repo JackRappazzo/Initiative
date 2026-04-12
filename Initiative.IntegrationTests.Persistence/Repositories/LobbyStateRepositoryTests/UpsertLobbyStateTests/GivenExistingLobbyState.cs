@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Initiative.Lobby.Core.Services;
+using Initiative.Persistence.Models.Lobby;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.Core.Composable;
 using LeapingGorilla.Testing.NUnit.Attributes;
@@ -9,7 +11,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
 {
     public class GivenExistingLobbyState : WhenTestingUpsertLobbyState
     {
-        protected string[] OriginalCreatures;
+        protected LobbyCreatureStateDto[] OriginalCreatures;
         protected int OriginalTurnNumber;
         protected int OriginalCurrentCreatureIndex;
         protected LobbyMode OriginalCurrentMode;
@@ -35,7 +37,11 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
         [Given]
         public async Task OriginalLobbyStateExists()
         {
-            OriginalCreatures = new[] { "OriginalCreature1", "OriginalCreature2" };
+            OriginalCreatures = new[]
+            {
+                new LobbyCreatureStateDto { DisplayName = "OriginalCreature1" },
+                new LobbyCreatureStateDto { DisplayName = "OriginalCreature2" }
+            };
             OriginalTurnNumber = 1;
             OriginalCurrentCreatureIndex = 0;
             OriginalCurrentMode = LobbyMode.Waiting;
@@ -46,7 +52,12 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
         [Given]
         public void UpdatedCreaturesAreSet()
         {
-            Creatures = new[] { "UpdatedCreature1", "UpdatedCreature2", "UpdatedCreature3" };
+            Creatures = new[]
+            {
+                new LobbyCreatureStateDto { DisplayName = "UpdatedCreature1" },
+                new LobbyCreatureStateDto { DisplayName = "UpdatedCreature2" },
+                new LobbyCreatureStateDto { DisplayName = "UpdatedCreature3" }
+            };
         }
 
         [Given]
@@ -84,13 +95,13 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
             Assert.That(storedState.Id, Is.EqualTo(Result));
             Assert.That(storedState.Id, Is.EqualTo(OriginalId), "ID should remain the same when updating");
             Assert.That(storedState.RoomCode, Is.EqualTo(RoomCode));
-            Assert.That(storedState.Creatures, Is.EquivalentTo(Creatures));
+            Assert.That(storedState.Creatures.Select(c => c.DisplayName), Is.EquivalentTo(Creatures.Select(c => c.DisplayName)));
             Assert.That(storedState.TurnNumber, Is.EqualTo(TurnNumber));
             Assert.That(storedState.CurrentCreatureIndex, Is.EqualTo(CurrentCreatureIndex));
             Assert.That(storedState.CurrentMode, Is.EqualTo(CurrentMode));
             
             // Verify it was updated, not just inserted
-            Assert.That(storedState.Creatures, Is.Not.EquivalentTo(OriginalCreatures));
+            Assert.That(storedState.Creatures.Select(c => c.DisplayName), Is.Not.EquivalentTo(OriginalCreatures.Select(c => c.DisplayName)));
             Assert.That(storedState.TurnNumber, Is.Not.EqualTo(OriginalTurnNumber));
             Assert.That(storedState.CurrentCreatureIndex, Is.Not.EqualTo(OriginalCurrentCreatureIndex));
             Assert.That(storedState.CurrentMode, Is.Not.EqualTo(OriginalCurrentMode));

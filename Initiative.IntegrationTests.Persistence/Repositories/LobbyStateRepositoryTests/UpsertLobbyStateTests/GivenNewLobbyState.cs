@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Initiative.Lobby.Core.Services;
+using Initiative.Persistence.Models.Lobby;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.Core.Composable;
 using LeapingGorilla.Testing.NUnit.Attributes;
@@ -28,7 +30,12 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
         [Given]
         public void CreaturesAreSet()
         {
-            Creatures = new[] { "Creature1", "Creature2", "Creature3" };
+            Creatures = new[]
+            {
+                new LobbyCreatureStateDto { DisplayName = "Creature1" },
+                new LobbyCreatureStateDto { DisplayName = "Creature2" },
+                new LobbyCreatureStateDto { DisplayName = "Creature3" }
+            };
         }
 
         [Given]
@@ -64,7 +71,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
             Assert.That(storedState, Is.Not.Null);
             Assert.That(storedState.Id, Is.EqualTo(Result));
             Assert.That(storedState.RoomCode, Is.EqualTo(RoomCode));
-            Assert.That(storedState.Creatures, Is.EquivalentTo(Creatures));
+            Assert.That(storedState.Creatures.Select(c => c.DisplayName), Is.EquivalentTo(Creatures.Select(c => c.DisplayName)));
             Assert.That(storedState.TurnNumber, Is.EqualTo(TurnNumber));
             Assert.That(storedState.CurrentCreatureIndex, Is.EqualTo(CurrentCreatureIndex));
             Assert.That(storedState.CurrentMode, Is.EqualTo(CurrentMode));

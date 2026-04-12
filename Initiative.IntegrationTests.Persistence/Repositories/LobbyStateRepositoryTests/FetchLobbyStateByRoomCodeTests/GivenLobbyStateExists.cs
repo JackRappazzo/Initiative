@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Initiative.Lobby.Core.Services;
+using Initiative.Persistence.Models.Lobby;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.Core.Composable;
 using LeapingGorilla.Testing.NUnit.Attributes;
@@ -9,7 +11,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
 {
     public class GivenLobbyStateExists : WhenTestingFetchLobbyStateByRoomCode
     {
-        protected string[] ExpectedCreatures;
+        protected LobbyCreatureStateDto[] ExpectedCreatures;
         protected int ExpectedTurnNumber;
         protected int ExpectedCurrentCreatureIndex;
         protected LobbyMode ExpectedCurrentMode;
@@ -29,7 +31,12 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
         [Given]
         public async Task LobbyStateExists()
         {
-            ExpectedCreatures = new[] { "Creature1", "Creature2", "Creature3" };
+            ExpectedCreatures = new[]
+            {
+                new LobbyCreatureStateDto { DisplayName = "Creature1" },
+                new LobbyCreatureStateDto { DisplayName = "Creature2" },
+                new LobbyCreatureStateDto { DisplayName = "Creature3" }
+            };
             ExpectedTurnNumber = 2;
             ExpectedCurrentCreatureIndex = 1;
             ExpectedCurrentMode = LobbyMode.InProgress;
@@ -42,7 +49,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
         {
             Assert.That(Result, Is.Not.Null);
             Assert.That(Result.RoomCode, Is.EqualTo(RoomCode));
-            Assert.That(Result.Creatures, Is.EquivalentTo(ExpectedCreatures));
+            Assert.That(Result.Creatures.Select(c => c.DisplayName), Is.EquivalentTo(ExpectedCreatures.Select(c => c.DisplayName)));
             Assert.That(Result.TurnNumber, Is.EqualTo(ExpectedTurnNumber));
             Assert.That(Result.CurrentCreatureIndex, Is.EqualTo(ExpectedCurrentCreatureIndex));
             Assert.That(Result.CurrentMode, Is.EqualTo(ExpectedCurrentMode));

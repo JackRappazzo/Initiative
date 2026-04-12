@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Initiative.Lobby.Core.Services;
+using Initiative.Persistence.Models.Lobby;
 using LeapingGorilla.Testing.Core.Attributes;
 
 namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateRepositoryTests.UpsertLobbyStateTests
@@ -7,7 +8,7 @@ namespace Initiative.IntegrationTests.Persistence.Repositories.LobbyStateReposit
     public abstract class WhenTestingUpsertLobbyState : WhenTestingLobbyStateRepository
     {
         protected string RoomCode;
-        protected string[] Creatures;
+        protected LobbyCreatureStateDto[] Creatures;
         protected int TurnNumber;
         protected int CurrentCreatureIndex;
         protected LobbyMode CurrentMode;
