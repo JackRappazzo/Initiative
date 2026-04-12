@@ -94,7 +94,7 @@ main {
   box-shadow: -2px 0 8px rgba(0,0,0,0.15);
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(.4,0,.2,1);
-  z-index: 1099;
+  z-index: 900;
   padding: 2rem 1rem;
 }
 
@@ -133,6 +133,7 @@ main {
   position: absolute;
   left: -40px;
   top: 20px;
+  z-index: 901;
   background: #333;
   color: #fff;
   border: none;
