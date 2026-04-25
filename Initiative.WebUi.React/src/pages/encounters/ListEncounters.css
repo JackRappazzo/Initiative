@@ -25,7 +25,7 @@
 }
 
 .encounter-card {
-  background: white;
+  background: var(--card-bg, #1e1e2e);
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -47,18 +47,18 @@
 .encounter-title {
   margin: 0;
   font-size: 1.25rem;
-  color: #333;
+  color: var(--text, #cdd6f4);
 }
 
 .encounter-date {
-  color: #666;
+  color: var(--text-muted, #a6adc8);
   font-size: 0.875rem;
 }
 
 .encounter-stats {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--card-border, #313244);
 }
 
 .encounter-actions {

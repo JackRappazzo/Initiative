@@ -1,12 +1,14 @@
 import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 import { useUser } from "../contexts/UserContext";
 import "./SidebarMenu.css";
 
 const SidebarMenu: React.FC = () => {
   const { isLoggedIn, logout } = useContext(AuthContext);
   const { userInfo } = useUser();
+  const { isDarkMode, setDarkMode } = useTheme();
   const [open, setOpen] = useState(false);
 
   const handleLogout = () => {
@@ -31,6 +33,18 @@ const SidebarMenu: React.FC = () => {
           Room Code: {userInfo.roomCode}
         </div>
       )}
+      <div className="theme-toggle-row">
+        <label className="theme-toggle-label" htmlFor="dark-mode-toggle">
+          Dark Mode
+        </label>
+        <input
+          id="dark-mode-toggle"
+          type="checkbox"
+          checked={isDarkMode}
+          onChange={(event) => setDarkMode(event.target.checked)}
+          aria-label="Enable dark mode"
+        />
+      </div>
       <nav>
         <ul>
           <li>

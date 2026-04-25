@@ -141,8 +141,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
         {...attributes}
       >
         <div
-          style={isCurrentTurn ? { background: '#e9ecef' } : undefined}
-          className={`creature-item${creature.isHidden ? ' creature-item-hidden' : ''}`}
+          className={`creature-item${isCurrentTurn ? ' creature-item-current-turn' : ''}${creature.isHidden ? ' creature-item-hidden' : ''}`}
         >
           <div
             className="drag-handle"

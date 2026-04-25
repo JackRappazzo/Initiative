@@ -13,10 +13,43 @@
   --badge-custom-text: #a6e3a1;
   --legendary-bg: #f38ba8;
   --legendary-text: #1e1e2e;
+  --sidebar-bg: #1e1e2e;
+  --sidebar-text: #cdd6f4;
+  --sidebar-hover: #2a2a3e;
+  --sidebar-toggle-bg: #313244;
+  --sidebar-toggle-text: #cdd6f4;
+  --room-code-bg: #2a2a3e;
+  --room-code-border: #45475a;
+}
+
+body[data-theme="light"] {
+  --bg: #f8fafc;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --card-hover: #f1f5f9;
+  --text: #0f172a;
+  --text-muted: #475569;
+  --accent: #2563eb;
+  --accent-text: #ffffff;
+  --badge-system-bg: #dbeafe;
+  --badge-system-text: #1e3a8a;
+  --badge-custom-bg: #dcfce7;
+  --badge-custom-text: #166534;
+  --legendary-bg: #fecaca;
+  --legendary-text: #7f1d1d;
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #0f172a;
+  --sidebar-hover: #f1f5f9;
+  --sidebar-toggle-bg: #1e293b;
+  --sidebar-toggle-text: #f8fafc;
+  --room-code-bg: #f8fafc;
+  --room-code-border: #e2e8f0;
 }
 
 body {
   margin: 0;
+  background: var(--bg);
+  color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
