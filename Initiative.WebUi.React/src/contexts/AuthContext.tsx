@@ -15,8 +15,30 @@ export const AuthContext = createContext<AuthContextType>({
   isLoggedIn: () => {return false;}
 });
 
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const payloadBase64 = token.split('.')[1];
+    const payload = JSON.parse(atob(payloadBase64));
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp <= now;
+  } catch {
+    return true;
+  }
+};
+
+const getStoredToken = (): string | null => {
+  const stored = localStorage.getItem("token");
+  if (stored && !isTokenExpired(stored)) {
+    return stored;
+  }
+  if (stored) {
+    localStorage.removeItem("token");
+  }
+  return null;
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const [token, setToken] = useState<string | null>(getStoredToken);
 
   const login = (token: string) => {
     localStorage.setItem("token", token);
@@ -29,7 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const isLoggedIn = () => {
-    return token != null && token !== "";
+    return token != null && token !== "" && !isTokenExpired(token);
   }
 
   return (
