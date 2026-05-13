@@ -312,7 +312,10 @@ const EditBestiary: React.FC = () => {
         name: creature.name,
         size: Array.isArray(rd.size) ? rd.size[0] : undefined,
         creatureType: creature.creatureType,
-        subtype: undefined,
+        subtype:
+          rd.type && typeof rd.type === 'object'
+            ? rd.type.tags?.[0]
+            : undefined,
         alignment: Array.isArray(rd.alignment) ? rd.alignment[0] : undefined,
         challengeRating: creature.challengeRating,
         isLegendary: creature.isLegendary,
