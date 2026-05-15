@@ -20,6 +20,7 @@
   --sidebar-toggle-text: #cdd6f4;
   --room-code-bg: #2a2a3e;
   --room-code-border: #45475a;
+  --creature-hidden-stripe: rgba(255, 255, 255, 0.08);
 }
 
 body[data-theme="light"] {
@@ -44,6 +45,7 @@ body[data-theme="light"] {
   --sidebar-toggle-text: #f8fafc;
   --room-code-bg: #f8fafc;
   --room-code-border: #e2e8f0;
+  --creature-hidden-stripe: rgba(0, 0, 0, 0.06);
 }
 
 body {

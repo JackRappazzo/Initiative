@@ -422,12 +422,12 @@
 .creature-row-wrap-hidden .creature-item {
   background: repeating-linear-gradient(
     -45deg,
-    #f5f6f8,
-    #f5f6f8 10px,
-    #eceff3 10px,
-    #eceff3 20px
+    transparent,
+    transparent 10px,
+    var(--creature-hidden-stripe) 10px,
+    var(--creature-hidden-stripe) 20px
   );
-  border-left: 4px solid #6b7280;
+  border-left: 4px solid var(--card-border);
   opacity: 0.75;
 }
 
