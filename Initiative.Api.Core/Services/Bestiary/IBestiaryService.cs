@@ -28,13 +28,19 @@ namespace Initiative.Api.Core.Services.Bestiary
         public required string Description { get; set; }
     }
 
+    public class CustomCreatureSlotLevel
+    {
+        public int Slots { get; set; }
+        public List<string> Spells { get; set; } = new();
+    }
+
     public class CustomCreatureSpellcasting
     {
         public string? Ability { get; set; }
         public int? SpellSaveDc { get; set; }
         public int? SpellAttackBonus { get; set; }
-        // Slot-based: key = "0" (cantrips) through "9"
-        public Dictionary<string, List<string>>? SlotSpells { get; set; }
+        // Slot-based: key = "0" (cantrips) through "9". Level "0" has no slot count; levels 1-9 include SlotLevelEntry with Slots + Spells.
+        public Dictionary<string, CustomCreatureSlotLevel>? SlotSpells { get; set; }
         // X/day format: each entry like "3/day: Fireball"
         public List<string>? DailySpells { get; set; }
         // Free-text description (markdown + {@spell} tags)

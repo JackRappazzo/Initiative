@@ -26,12 +26,19 @@ namespace Initiative.Api.Messages.Bestiary
         public required string Description { get; set; }
     }
 
+    public class SaveCustomCreatureSlotLevel
+    {
+        public int Slots { get; set; }
+        public List<string> Spells { get; set; } = new();
+    }
+
     public class SaveCustomCreatureSpellcasting
     {
         public string? Ability { get; set; }
         public int? SpellSaveDc { get; set; }
         public int? SpellAttackBonus { get; set; }
-        public Dictionary<string, List<string>>? SlotSpells { get; set; }
+        /// <summary>Slot-based spells: key = level ("1"–"9"), value = { slots, spells }. Level "0" (cantrips) has no slot count.</summary>
+        public Dictionary<string, SaveCustomCreatureSlotLevel>? SlotSpells { get; set; }
         public List<string>? DailySpells { get; set; }
         /// <summary>Free-text description shown before the spell list (markdown + {@spell} tags supported).</summary>
         public string? Description { get; set; }

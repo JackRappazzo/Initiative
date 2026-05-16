@@ -4,6 +4,7 @@ import {
   BestiaryClient,
   CustomCreatureEntry,
   CustomCreaturePayload,
+  CustomCreatureSlotLevel,
   CustomCreatureSpellcasting,
 } from '../../api/bestiaryClient';
 import { SpellClient, SpellListItem } from '../../api/spellClient';
@@ -320,12 +321,18 @@ export const CustomCreatureForm: React.FC<Props> = ({ bestiaryId, existing, init
   const [scAbility, setScAbility]     = useState(seed?.spellcasting?.ability ?? '');
   const [scDc, setScDc]               = useState(numStr(seed?.spellcasting?.spellSaveDc));
   const [scAtk, setScAtk]             = useState(numStr(seed?.spellcasting?.spellAttackBonus));
-  const [scCantrips, setScCantrips]   = useState(seed?.spellcasting?.slotSpells?.['0']?.join('\n') ?? '');
+  const [scCantrips, setScCantrips]   = useState(seed?.spellcasting?.slotSpells?.['0']?.spells?.join('\n') ?? '');
   const [scSlots, setScSlots]         = useState<Record<string, string>>(() => {
     const slots: Record<string, string> = {};
     const ss = seed?.spellcasting?.slotSpells ?? {};
-    for (let l = 1; l <= 9; l++) slots[l] = ss[l]?.join('\n') ?? '';
+    for (let l = 1; l <= 9; l++) slots[l] = ss[l]?.spells?.join('\n') ?? '';
     return slots;
+  });
+  const [scSlotCounts, setScSlotCounts] = useState<Record<string, string>>(() => {
+    const counts: Record<string, string> = {};
+    const ss = seed?.spellcasting?.slotSpells ?? {};
+    for (let l = 1; l <= 9; l++) counts[l] = ss[l]?.slots ? String(ss[l].slots) : '';
+    return counts;
   });
   const [scDaily, setScDaily]         = useState(seed?.spellcasting?.dailySpells?.join('\n') ?? '');
   const [scDescription, setScDescription] = useState(seed?.spellcasting?.description ?? '');
@@ -348,7 +355,7 @@ export const CustomCreatureForm: React.FC<Props> = ({ bestiaryId, existing, init
     const hasFreeform = scFreeform.trim();
     let spellcasting: CustomCreatureSpellcasting | undefined;
     if (scAbility || hasSlots || hasDaily || hasFreeform || scDescription.trim()) {
-      let slotSpells: Record<string, string[]> | undefined;
+      let slotSpells: Record<string, CustomCreatureSlotLevel> | undefined;
       let dailySpells: string[] | undefined;
       let freeformText: string | undefined;
       if (scFormat === 'freeform') {
@@ -356,10 +363,11 @@ export const CustomCreatureForm: React.FC<Props> = ({ bestiaryId, existing, init
       } else if (scFormat === 'day') {
         dailySpells = hasDaily ? strToList(scDaily) : undefined;
       } else {
-        const ss: Record<string, string[]> = {};
-        if (scCantrips.trim()) ss['0'] = strToList(scCantrips);
+        const ss: Record<string, CustomCreatureSlotLevel> = {};
+        if (scCantrips.trim()) ss['0'] = { slots: 0, spells: strToList(scCantrips) };
         for (let l = 1; l <= 9; l++) {
-          if (scSlots[l]?.trim()) ss[String(l)] = strToList(scSlots[l]);
+          if (scSlots[l]?.trim())
+            ss[String(l)] = { slots: parseNum(scSlotCounts[l]) ?? 1, spells: strToList(scSlots[l]) };
         }
         slotSpells = Object.keys(ss).length ? ss : undefined;
       }
@@ -710,13 +718,27 @@ export const CustomCreatureForm: React.FC<Props> = ({ bestiaryId, existing, init
                 </label>
                 {[1,2,3,4,5,6,7,8,9].map(lvl => (
                   <label key={lvl}>
-                    {lvl}{lvl === 1 ? 'st' : lvl === 2 ? 'nd' : lvl === 3 ? 'rd' : 'th'}-level slots
-                    <textarea
-                      value={scSlots[lvl]}
-                      onChange={e => setScSlots(prev => ({ ...prev, [lvl]: e.target.value }))}
-                      rows={2}
-                      placeholder="Fireball"
-                    />
+                    {lvl}{lvl === 1 ? 'st' : lvl === 2 ? 'nd' : lvl === 3 ? 'rd' : 'th'}-level
+                    <div className="ccf-sc-slot-row">
+                      <div className="ccf-sc-slot-count-wrap">
+                        <input
+                          type="number"
+                          min={1}
+                          className="ccf-sc-slot-count"
+                          value={scSlotCounts[lvl] ?? ''}
+                          onChange={e => setScSlotCounts(prev => ({ ...prev, [lvl]: e.target.value }))}
+                          placeholder="Slots"
+                          title="Number of spell slots"
+                        />
+                        <span className="ccf-sc-slot-label">slots</span>
+                      </div>
+                      <textarea
+                        value={scSlots[lvl]}
+                        onChange={e => setScSlots(prev => ({ ...prev, [lvl]: e.target.value }))}
+                        rows={2}
+                        placeholder="Fireball"
+                      />
+                    </div>
                   </label>
                 ))}
               </>

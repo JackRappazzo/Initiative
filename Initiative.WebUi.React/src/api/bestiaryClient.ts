@@ -146,14 +146,19 @@ export interface CustomCreatureEntry {
   description: string;
 }
 
+export interface CustomCreatureSlotLevel {
+  slots: number;
+  spells: string[];
+}
+
 export interface CustomCreatureSpellcasting {
   ability?: string;
   spellSaveDc?: number;
   spellAttackBonus?: number;
   /** Free-text description shown before the spell list (markdown + {@spell} tags) */
   description?: string;
-  /** Slot-based: key = "0" (cantrips/at-will) through "9" */
-  slotSpells?: Record<string, string[]>;
+  /** Slot-based: key = "0" (cantrips) through "9". Level "0" has no slot count; levels 1-9 include slots + spells. */
+  slotSpells?: Record<string, CustomCreatureSlotLevel>;
   /** X/day entries, e.g. "3/day: Fireball" */
   dailySpells?: string[];
   /** Freeform spell list text (markdown + {@spell} tags); when set, slotSpells/dailySpells are ignored */

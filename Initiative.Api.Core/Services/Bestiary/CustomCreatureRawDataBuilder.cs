@@ -180,11 +180,11 @@ namespace Initiative.Api.Core.Services.Bestiary
                         var spellsDoc = new BsonDocument();
                         foreach (var kv in sc.SlotSpells)
                         {
-                            var spellArray = new BsonArray(kv.Value.Select(s => (BsonValue)s));
+                            var spellArray = new BsonArray(kv.Value.Spells.Select(s => (BsonValue)s));
                             if (kv.Key == "0")
                                 scDoc["will"] = spellArray;
                             else
-                                spellsDoc[kv.Key] = new BsonDocument { { "slots", int.TryParse(kv.Key, out var lvl) ? lvl : 1 }, { "spells", spellArray } };
+                                spellsDoc[kv.Key] = new BsonDocument { { "slots", kv.Value.Slots }, { "spells", spellArray } };
                         }
                         if (spellsDoc.ElementCount > 0) scDoc["spells"] = spellsDoc;
                     }

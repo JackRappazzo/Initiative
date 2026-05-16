@@ -83,10 +83,10 @@ namespace Initiative.UnitTests.Api.Core.Services.Bestiary
                     SpellAttackBonus = 9,
                     Description = "The archmage is an 18th-level spellcaster.",
                     FreeformText = "At will: mage hand\n3/day each: fly, fireball",
-                    SlotSpells = new Dictionary<string, List<string>>
+                    SlotSpells = new Dictionary<string, CustomCreatureSlotLevel>
                     {
-                        ["0"] = new List<string> { "mage hand" },
-                        ["1"] = new List<string> { "shield" }
+                        ["0"] = new() { Spells = new List<string> { "mage hand" } },
+                        ["1"] = new() { Slots = 4, Spells = new List<string> { "shield" } }
                     },
                     DailySpells = new List<string> { "3/day: fireball" }
                 }
@@ -104,6 +104,44 @@ namespace Initiative.UnitTests.Api.Core.Services.Bestiary
             Assert.That(spellcasting.Contains("spells"), Is.False);
             Assert.That(spellcasting.Contains("daily"), Is.False);
             Assert.That(spellcasting.Contains("will"), Is.False);
+        }
+
+        [Test]
+        public void Build_WithSlotSpellcasting_PreservesSlotCountsPerLevel()
+        {
+            var sut = new CustomCreatureRawDataBuilder();
+            var data = new CustomCreatureData
+            {
+                Name = "Wizard",
+                Spellcasting = new CustomCreatureSpellcasting
+                {
+                    Ability = "int",
+                    SpellSaveDc = 14,
+                    SpellAttackBonus = 6,
+                    Description = "The wizard is a 5th-level spellcaster.",
+                    SlotSpells = new Dictionary<string, CustomCreatureSlotLevel>
+                    {
+                        ["0"] = new() { Spells = new List<string> { "fire bolt", "light" } },
+                        ["1"] = new() { Slots = 4, Spells = new List<string> { "magic missile", "shield" } },
+                        ["2"] = new() { Slots = 3, Spells = new List<string> { "misty step" } },
+                        ["3"] = new() { Slots = 2, Spells = new List<string> { "fireball" } }
+                    }
+                }
+            };
+
+            var doc = sut.Build(data);
+            var spellcasting = doc["spellcasting"].AsBsonArray[0].AsBsonDocument;
+
+            Assert.That(spellcasting["will"].AsBsonArray.Count, Is.EqualTo(2));
+            Assert.That(spellcasting["will"].AsBsonArray[0].AsString, Is.EqualTo("fire bolt"));
+
+            var spells = spellcasting["spells"].AsBsonDocument;
+            Assert.That(spells["1"].AsBsonDocument["slots"].AsInt32, Is.EqualTo(4));
+            Assert.That(spells["1"].AsBsonDocument["spells"].AsBsonArray.Count, Is.EqualTo(2));
+            Assert.That(spells["2"].AsBsonDocument["slots"].AsInt32, Is.EqualTo(3));
+            Assert.That(spells["2"].AsBsonDocument["spells"].AsBsonArray[0].AsString, Is.EqualTo("misty step"));
+            Assert.That(spells["3"].AsBsonDocument["slots"].AsInt32, Is.EqualTo(2));
+            Assert.That(spells["3"].AsBsonDocument["spells"].AsBsonArray[0].AsString, Is.EqualTo("fireball"));
         }
     }
 }

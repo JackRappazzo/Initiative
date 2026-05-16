@@ -208,7 +208,9 @@ namespace Initiative.Api.Controllers
                 Ability = request.Spellcasting.Ability,
                 SpellSaveDc = request.Spellcasting.SpellSaveDc,
                 SpellAttackBonus = request.Spellcasting.SpellAttackBonus,
-                SlotSpells = request.Spellcasting.SlotSpells,
+                SlotSpells = request.Spellcasting.SlotSpells?.ToDictionary(
+                    kv => kv.Key,
+                    kv => new CustomCreatureSlotLevel { Slots = kv.Value.Slots, Spells = kv.Value.Spells }),
                 DailySpells = request.Spellcasting.DailySpells,
                 Description = request.Spellcasting.Description,
                 FreeformText = request.Spellcasting.FreeformText,

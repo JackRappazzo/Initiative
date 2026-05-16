@@ -388,3 +388,29 @@
   color: var(--text-muted, #c2c8d8);
   margin-left: 0.25rem;
 }
+
+/* ── Slot count input ─────────────────────────────────────────────────────── */
+.ccf-sc-slot-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.ccf-sc-slot-count-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 90px;
+}
+
+.ccf-sc-slot-count {
+  width: 54px !important;
+  padding: 0.35rem 0.5rem !important;
+  flex: none !important;
+}
+
+.ccf-sc-slot-label {
+  font-size: 0.75rem;
+  color: var(--text-muted, #c2c8d8);
+  white-space: nowrap;
+}

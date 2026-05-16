@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { BestiaryClient, BestiaryListItem, CreatureListItem, CreatureSortBy, CustomCreatureAbilityScores, CustomCreatureEntry, CustomCreatureSpeed, CustomCreatureSpellcasting } from '../../api/bestiaryClient';
+import { BestiaryClient, BestiaryListItem, CreatureListItem, CreatureSortBy, CustomCreatureAbilityScores, CustomCreatureEntry, CustomCreatureSlotLevel, CustomCreatureSpeed, CustomCreatureSpellcasting } from '../../api/bestiaryClient';
 import { SortState } from '../../hooks/useBestiarySearch';
 import CreatureBrowser from '../../components/bestiaries/CreatureBrowser';
 import { CustomCreatureForm } from '../../components/bestiaries/CustomCreatureForm';
@@ -277,12 +277,13 @@ const EditBestiary: React.FC = () => {
           if (atkMatch) spellAttackBonus = parseInt(atkMatch[1], 10);
         }
 
-        const slotSpells: Record<string, string[]> = {};
-        if (Array.isArray(sc.will)) slotSpells['0'] = sc.will;
+        const slotSpells: Record<string, CustomCreatureSlotLevel> = {};
+        if (Array.isArray(sc.will)) slotSpells['0'] = { slots: 0, spells: sc.will };
         // Level 1–9 slot spells stored under sc.spells[level].spells
         if (sc.spells && typeof sc.spells === 'object') {
           for (const [lvl, lvlData] of Object.entries(sc.spells as Record<string, any>)) {
-            if (Array.isArray(lvlData?.spells)) slotSpells[lvl] = lvlData.spells;
+            if (Array.isArray(lvlData?.spells))
+              slotSpells[lvl] = { slots: typeof lvlData.slots === 'number' ? lvlData.slots : Number(lvl) || 1, spells: lvlData.spells };
           }
         }
         const dailySpells: string[] = [];
