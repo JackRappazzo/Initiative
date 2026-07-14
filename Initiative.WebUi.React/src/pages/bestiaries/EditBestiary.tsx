@@ -41,6 +41,7 @@ interface EditingCreature {
   reactions?: CustomCreatureEntry[];
   legendaryActions?: CustomCreatureEntry[];
   legendaryActionCount?: number;
+  initiativeModifier?: number;
   spellcasting?: CustomCreatureSpellcasting;
 }
 
@@ -339,6 +340,7 @@ const EditBestiary: React.FC = () => {
         bonusActions: parseEntries(rd.bonus as any),
         reactions: parseEntries(rd.reaction as any),
         legendaryActions: parseEntries(rd.legendary as any),
+        initiativeModifier: rd.initiativeModifier,
         spellcasting,
       });
       setShowForm(true);

@@ -76,6 +76,7 @@ namespace Initiative.Api.Messages.Bestiary
         public List<SaveCustomCreatureEntry>? Reactions { get; set; }
         public List<SaveCustomCreatureEntry>? LegendaryActions { get; set; }
         public int? LegendaryActionCount { get; set; }
+        public int? InitiativeModifier { get; set; }
         public SaveCustomCreatureSpellcasting? Spellcasting { get; set; }
     }
 }

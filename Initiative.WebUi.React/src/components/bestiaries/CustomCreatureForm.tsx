@@ -43,6 +43,7 @@ interface Props {
     reactions?: CustomCreatureEntry[];
     legendaryActions?: CustomCreatureEntry[];
     legendaryActionCount?: number;
+    initiativeModifier?: number;
     spellcasting?: CustomCreatureSpellcasting;
   };
   initial?: Omit<NonNullable<Props['existing']>, 'id'>;
@@ -277,6 +278,7 @@ export const CustomCreatureForm: React.FC<Props> = ({ bestiaryId, existing, init
   const [hitDice, setHitDice] = useState(seed?.hitDice ?? '');
   const [ac, setAc]         = useState(numStr(seed?.ac));
   const [acNote, setAcNote] = useState(seed?.acNote ?? '');
+  const [initiativeModifier, setInitiativeModifier] = useState(numStr(seed?.initiativeModifier));
 
   // ── Ability scores
   const [scores, setScores] = useState<Record<string, string>>({
@@ -420,6 +422,7 @@ export const CustomCreatureForm: React.FC<Props> = ({ bestiaryId, existing, init
       reactions:     reactions.length ? reactions : undefined,
       legendaryActions: legendary.length ? legendary : undefined,
       legendaryActionCount: parseNum(legCount),
+      initiativeModifier: parseNum(initiativeModifier),
       spellcasting,
     };
 
@@ -520,6 +523,22 @@ export const CustomCreatureForm: React.FC<Props> = ({ bestiaryId, existing, init
               <label>
                 AC source note
                 <input value={acNote} onChange={e => setAcNote(e.target.value)} placeholder="e.g. natural armour" />
+              </label>
+            </div>
+            <div className="ccf-row">
+              <label>
+                Initiative modifier
+                <input
+                  type="number"
+                  value={initiativeModifier}
+                  onChange={e => setInitiativeModifier(e.target.value)}
+                  placeholder={(() => {
+                    const dexScore = parseNum(scores.dex);
+                    if (dexScore == null) return '';
+                    const mod = Math.floor((dexScore - 10) / 2);
+                    return mod >= 0 ? `+${mod}` : `${mod}`;
+                  })()}
+                />
               </label>
             </div>
           </Section>

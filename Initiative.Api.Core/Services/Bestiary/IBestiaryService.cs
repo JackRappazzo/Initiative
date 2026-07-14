@@ -82,6 +82,7 @@ namespace Initiative.Api.Core.Services.Bestiary
         public List<CustomCreatureEntry>? Reactions { get; set; }
         public List<CustomCreatureEntry>? LegendaryActions { get; set; }
         public int? LegendaryActionCount { get; set; }
+        public int? InitiativeModifier { get; set; }
         public CustomCreatureSpellcasting? Spellcasting { get; set; }
     }
 

@@ -203,6 +203,7 @@ namespace Initiative.Api.Controllers
             Reactions = request.Reactions?.Select(e => new CustomCreatureEntry { Name = e.Name, Description = e.Description }).ToList(),
             LegendaryActions = request.LegendaryActions?.Select(e => new CustomCreatureEntry { Name = e.Name, Description = e.Description }).ToList(),
             LegendaryActionCount = request.LegendaryActionCount,
+            InitiativeModifier = request.InitiativeModifier,
             Spellcasting = request.Spellcasting == null ? null : new()
             {
                 Ability = request.Spellcasting.Ability,

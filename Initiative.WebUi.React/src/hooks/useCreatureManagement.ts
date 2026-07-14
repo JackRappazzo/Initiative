@@ -69,10 +69,9 @@ export const useCreatureManagement = (encounterId: string | undefined, encounter
           ac = typeof first === 'number' ? first : (first as FiveEToolsAc).ac ?? 0;
         }
 
-        // Initiative modifier = DEX modifier = floor((dex - 10) / 2)
-        if (raw.dex !== undefined) {
-          initiativeModifier = Math.floor((raw.dex - 10) / 2);
-        }
+        // Initiative modifier: use explicit override if set, otherwise fall back to DEX modifier
+        const dexMod = raw.dex !== undefined ? Math.floor((raw.dex - 10) / 2) : 0;
+        initiativeModifier = raw.initiativeModifier !== undefined ? raw.initiativeModifier : dexMod;
       } catch {
         // fall through with defaults
       }

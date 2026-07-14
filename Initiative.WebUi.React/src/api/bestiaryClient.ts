@@ -84,6 +84,7 @@ export interface FiveEToolsRawData {
   int?: number;
   wis?: number;
   cha?: number;
+  initiativeModifier?: number;
   save?: Record<string, string>;
   skill?: Record<string, string>;
   passive?: number;
@@ -198,6 +199,7 @@ export interface CustomCreaturePayload {
   reactions?: CustomCreatureEntry[];
   legendaryActions?: CustomCreatureEntry[];
   legendaryActionCount?: number;
+  initiativeModifier?: number;
   spellcasting?: CustomCreatureSpellcasting;
 }
 

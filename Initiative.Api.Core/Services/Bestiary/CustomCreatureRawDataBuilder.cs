@@ -64,6 +64,10 @@ namespace Initiative.Api.Core.Services.Bestiary
                 if (ab.Cha.HasValue) doc["cha"] = ab.Cha.Value;
             }
 
+            // Initiative modifier
+            if (data.InitiativeModifier.HasValue)
+                doc["initiativeModifier"] = data.InitiativeModifier.Value;
+
             // Speed
             var spd = data.Speed;
             if (spd != null)
