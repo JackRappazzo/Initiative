@@ -199,6 +199,7 @@ const EditEncounter: React.FC = () => {
   }, [originalAddCreatureFromBestiary, encounterState.viewersAllowed, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
 
   const removeCreature = useCallback(async (index: number) => {
+    const removedCreature = creatures[index];
     await originalRemoveCreature(index);
     
     const newCreatures = creatures.filter((_, i) => i !== index);
@@ -215,10 +216,19 @@ const EditEncounter: React.FC = () => {
       setEncounterState(prev => ({ ...prev, currentTurn: newCurrentTurn }));
     }
 
+    if (removedCreature.isPlayer && encounterId) {
+      const matchIdx = partyMembers.findIndex(m => m.name === removedCreature.displayName);
+      if (matchIdx >= 0) {
+        const newPartyMembers = partyMembers.filter((_, i) => i !== matchIdx);
+        setPartyMembers(newPartyMembers);
+        encounterClient.setPartyLevels(encounterId, newPartyMembers.map(m => m.level)).catch(() => {});
+      }
+    }
+
     if (encounterState.viewersAllowed) {
       sendLobbyState(newCreatures, newCurrentTurn, encounterState.turnNumber, encounterState.viewersAllowed);
     }
-  }, [originalRemoveCreature, encounterState.viewersAllowed, encounterState.currentTurn, encounterState.turnNumber, creatures, sendLobbyState]);
+  }, [originalRemoveCreature, encounterState.viewersAllowed, encounterState.currentTurn, encounterState.turnNumber, creatures, partyMembers, encounterId, encounterClient, sendLobbyState]);
 
   const sendInviteToChat = useCallback(() => {
     if (!roomCode) {
