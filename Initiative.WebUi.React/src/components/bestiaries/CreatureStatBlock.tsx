@@ -102,8 +102,7 @@ function cleanTags(text: unknown): string {
     .replace(/\{@recharge(?:\s*\d*)?\}/g, '(Recharge)')
     .replace(/\{@spell ([^|}\s]+)[^}]*\}/g, (_, name) => name.replace(/_/g, ' '))
     .replace(/\{@variantrule ([^|}\s]+)[^}]*\}/g, (_, name) => name.replace(/_/g, ' '))
-    .replace(/\{@[a-z]+ ([^|}]+)[^}]*\}/g, (_, text) => text)
-    .trim();
+    .replace(/\{@[a-z]+ ([^|}]+)[^}]*\}/g, (_, text) => text);
 }
 
 function renderLooseEntryNodes(raw: unknown, onRoll: OnRoll, keyPrefix: string): React.ReactNode {
