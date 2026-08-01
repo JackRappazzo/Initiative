@@ -5,6 +5,7 @@ using Initiative.Api.Core.Identity;
 using Initiative.Api.Core.Identity.Roles;
 using Initiative.Api.Core.Services.Authentication;
 using Initiative.Api.Core.Services.Bestiary;
+using Initiative.Api.Core.Services.Condition;
 using Initiative.Api.Core.Services.Spell;
 using Initiative.Api.Core.Services.Encounters;
 using Initiative.Api.Core.Services.Parties;
@@ -61,6 +62,7 @@ builder.Services.AddScoped<IJwtRefreshTokenRepository, JwtRefreshTokenRepository
 builder.Services.AddScoped<IEncounterRepository, EncounterRepository>();
 builder.Services.AddScoped<IBestiaryRepository, BestiaryRepository>();
 builder.Services.AddScoped<ISpellRepository, SpellRepository>();
+builder.Services.AddScoped<IConditionRepository, ConditionRepository>();
 builder.Services.AddScoped<IPartyRepository, PartyRepository>();
 builder.Services.AddScoped<ILobbyStateRepository, LobbyStateRepository>();
 
@@ -75,6 +77,7 @@ builder.Services.AddScoped<IEncounterService, EncounterService>();
 builder.Services.AddScoped<ICustomCreatureRawDataBuilder, CustomCreatureRawDataBuilder>();
 builder.Services.AddScoped<IBestiaryService, BestiaryService>();
 builder.Services.AddScoped<ISpellService, SpellService>();
+builder.Services.AddScoped<IConditionService, ConditionService>();
 builder.Services.AddScoped<IPartyService, PartyService>();
 builder.Services.AddScoped<IBase62CodeGenerator, Base62CodeGenerator>();
 

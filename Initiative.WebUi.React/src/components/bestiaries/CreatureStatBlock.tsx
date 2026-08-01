@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { FiveEToolsRawData, FiveEToolsEntry } from '../../api/bestiaryClient';
 import { spellClient, SpellDetail } from '../../api/spellClient';
+import { conditionClient, ConditionDetail } from '../../api/conditionClient';
 import { isTaleSpire, rollInTray } from '../../utils/talespire';
 import './CreatureStatBlock.css';
 
@@ -100,7 +101,6 @@ function cleanTags(text: unknown): string {
     .replace(/\{@actSaveSuccessOrFail\}/g, 'Success or Failure:')
     .replace(/\{@recharge(?:\s*\d*)?\}/g, '(Recharge)')
     .replace(/\{@spell ([^|}\s]+)[^}]*\}/g, (_, name) => name.replace(/_/g, ' '))
-    .replace(/\{@condition ([^|}\s]+)[^}]*\}/g, (_, name) => name)
     .replace(/\{@variantrule ([^|}\s]+)[^}]*\}/g, (_, name) => name.replace(/_/g, ' '))
     .replace(/\{@[a-z]+ ([^|}]+)[^}]*\}/g, (_, text) => text)
     .trim();
@@ -192,29 +192,35 @@ function renderMarkdownInline(text: string, keyPrefix: string): React.ReactNode[
 }
 
 function renderDiceNodes(raw: string, onRoll: OnRoll, keyPrefix: string): React.ReactNode {
-  const cleaned = cleanTags(raw);
-  // First pass: dice expressions (e.g. 2d6+3, 1d6 + 4)
-  const parts = cleaned.split(/\b(\d*d\d+(?:\s*[+-]\s*\d+)?)\b/i);
-  return parts.map((part, i) => {
-    if (i % 2 === 1) {
-      // odd index → captured dice expression
-      return (
-        <button
-          key={`${keyPrefix}-${i}`}
-          className="stat-block__dice-chip"
-          title={`Roll ${part}`}
-          onClick={() => onRoll(rollExpression(part))}
-        >
-          {part}
-        </button>
-      );
+  // First pass: split on {@condition ...} tags, keeping them as captured groups
+  const condParts = raw.split(/(\{@condition [^}]+\})/g);
+  return condParts.map((part, ci) => {
+    if (part.startsWith('{@condition ')) {
+      const { name } = parseConditionTag(part);
+      return <ConditionLink key={`${keyPrefix}-cond-${ci}`} name={name} />;
     }
-    // Even index → plain text; second pass for standalone to-hit modifiers
-    return (
-      <React.Fragment key={`${keyPrefix}-${i}`}>
-        {renderToHitNodes(part, onRoll, `${keyPrefix}-${i}`)}
-      </React.Fragment>
-    );
+    const cleaned = cleanTags(part);
+    // Second pass: dice expressions (e.g. 2d6+3, 1d6 + 4)
+    const parts = cleaned.split(/\b(\d*d\d+(?:\s*[+-]\s*\d+)?)\b/i);
+    return parts.map((dp, di) => {
+      if (di % 2 === 1) {
+        return (
+          <button
+            key={`${keyPrefix}-cond-${ci}-${di}`}
+            className="stat-block__dice-chip"
+            title={`Roll ${dp}`}
+            onClick={() => onRoll(rollExpression(dp))}
+          >
+            {dp}
+          </button>
+        );
+      }
+      return (
+        <React.Fragment key={`${keyPrefix}-cond-${ci}-${di}`}>
+          {renderToHitNodes(dp, onRoll, `${keyPrefix}-cond-${ci}-${di}`)}
+        </React.Fragment>
+      );
+    });
   });
 }
 
@@ -304,6 +310,13 @@ function parseSpellTag(raw: string): { name: string; source?: string } {
   const m = raw.match(/\{@spell ([^|}\s]+(?:\s[^|}\s]+)*)(?:\|([^}]*))?\}/);
   if (m) return { name: m[1], source: m[2] || undefined };
   return { name: cleanTags(raw) };
+}
+
+/** Extract the display name and optional source from a {@condition Name|Source} tag. */
+function parseConditionTag(raw: string): { name: string; source?: string } {
+  const m = raw.match(/\{@condition ([^|}\s]+)(?:\|([^}]*))?\}/);
+  if (m) return { name: m[1], source: m[2] || undefined };
+  return { name: raw };
 }
 
 // ── Spell school lookup ───────────────────────────────────────────────────────
@@ -397,6 +410,46 @@ function SpellPopover({ spell, onClose }: { spell: SpellDetail; onClose: () => v
   );
 }
 
+function ConditionPopover({ condition, onClose }: { condition: ConditionDetail; onClose: () => void }) {
+  const raw = condition.rawData;
+
+  const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
+  const onRoll = useCallback((result: RollResult) => {
+    if (isTaleSpire()) {
+      rollInTray(result.expression, result.expression);
+    } else {
+      setLastRoll(result);
+    }
+  }, []);
+  const rollDetail = lastRoll && lastRoll.rolls.length > 1 ? ` [${lastRoll.rolls.join(', ')}]` : '';
+
+  return (
+    <div className="condition-popover__overlay" onClick={onClose}>
+      <div className="condition-popover__modal" onClick={e => e.stopPropagation()}>
+        <button className="condition-popover__close" aria-label="Close condition" onClick={onClose}>✕</button>
+        {lastRoll && (
+          <div className="stat-block__roll-banner">
+            <span className="stat-block__roll-expression">{lastRoll.expression}</span>
+            <span className="stat-block__roll-total">{lastRoll.total}</span>
+            {rollDetail && <span className="stat-block__roll-detail">{rollDetail}</span>}
+            <button className="stat-block__roll-dismiss" aria-label="Dismiss" onClick={() => setLastRoll(null)}>×</button>
+          </div>
+        )}
+        <div className="stat-block__header">
+          <h2 className="stat-block__name">{raw.name}</h2>
+          <p className="stat-block__meta">{condition.source} {condition.type}</p>
+        </div>
+        <div className="stat-block__divider stat-block__divider--thick" />
+        <div className="condition-popover__entries">
+          {(raw.entries as unknown[] | undefined)?.map((e, i) => (
+            <p key={i} className="condition-popover__entry">{renderLooseEntryNodes(e, onRoll, `cond-entry-${i}`)}</p>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SpellLink({ raw }: { raw: string }) {
   const [spell, setSpell] = useState<SpellDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -421,6 +474,33 @@ function SpellLink({ raw }: { raw: string }) {
         {loading ? `${name}…` : name}
       </button>
       {spell && <SpellPopover spell={spell} onClose={() => setSpell(null)} />}
+    </>
+  );
+}
+
+function ConditionLink({ name }: { name: string }) {
+  const [condition, setCondition] = useState<ConditionDetail | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const open = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLoading(true);
+    const result = await conditionClient.resolveCondition(name);
+    setLoading(false);
+    if (result) setCondition(result);
+  }, [name]);
+
+  return (
+    <>
+      <button
+        className="stat-block__condition-link"
+        onClick={open}
+        disabled={loading}
+        title={`View ${name}`}
+      >
+        {loading ? `${name}…` : name}
+      </button>
+      {condition && <ConditionPopover condition={condition} onClose={() => setCondition(null)} />}
     </>
   );
 }
@@ -633,7 +713,6 @@ const CreatureStatBlock: React.FC<Props> = ({ data }) => {
   const immuneStr = formatList(data.immune);
   const resistStr = formatList(data.resist);
   const vulnerableStr = formatList(data.vulnerable);
-  const condImmStr = formatList(data.conditionImmune);
 
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
 
@@ -714,7 +793,29 @@ const CreatureStatBlock: React.FC<Props> = ({ data }) => {
       {vulnerableStr && <PropertyLine label="Damage Vulnerabilities" value={vulnerableStr} />}
       {resistStr && <PropertyLine label="Damage Resistances" value={resistStr} />}
       {immuneStr && <PropertyLine label="Damage Immunities" value={immuneStr} />}
-      {condImmStr && <PropertyLine label="Condition Immunities" value={condImmStr} />}
+      {data.conditionImmune && data.conditionImmune.length > 0 && (
+        <PropertyLine
+          label="Condition Immunities"
+          value={
+            data.conditionImmune.map((item, gi) => {
+              const names = typeof item === 'string' ? [item] : (item.conditionImmune ?? []);
+              const note = typeof item === 'string' ? undefined : item.note;
+              return (
+                <React.Fragment key={gi}>
+                  {gi > 0 && '; '}
+                  {names.map((name, ni) => (
+                    <React.Fragment key={ni}>
+                      {ni > 0 && ', '}
+                      <ConditionLink name={capitalize(name)} />
+                    </React.Fragment>
+                  ))}
+                  {note && ` ${note}`}
+                </React.Fragment>
+              );
+            })
+          }
+        />
+      )}
       {data.senses?.length ? (
         <PropertyLine label="Senses" value={[...data.senses, `passive Perception ${data.passive ?? '—'}`].join(', ')} />
       ) : data.passive !== undefined ? (
