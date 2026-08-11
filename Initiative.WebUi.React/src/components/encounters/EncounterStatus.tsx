@@ -33,6 +33,8 @@ export const EncounterStatus: React.FC<EncounterStatusProps> = ({
 }) => {
   const { viewersAllowed, currentTurn, turnNumber } = encounterState;
 
+  const isFm = encounterDifficulty?.formulaType === 'fleeMortals';
+
   const formatNumber = (value: number): string => {
     if (encounterDifficulty?.unit === 'CR') {
       const rounded = Math.round(value * 10) / 10;
@@ -104,12 +106,12 @@ export const EncounterStatus: React.FC<EncounterStatusProps> = ({
                 </div>
                 {overExtremeBy > 0 && (
                   <div className="encounter-difficulty-note encounter-difficulty-note-danger">
-                    Over Extreme by {formatNumber(overExtremeBy)} {encounterDifficulty.unit}.
+                    Over {isFm ? 'Hard' : 'Extreme'} by {formatNumber(overExtremeBy)} {encounterDifficulty.unit}.
                   </div>
                 )}
                 {unknownMonsterCount > 0 && (
                   <div className="encounter-difficulty-note">
-                    {unknownMonsterCount} monster{unknownMonsterCount === 1 ? '' : 's'} with unknown CR were treated as 0 XP.
+                    {unknownMonsterCount} monster{unknownMonsterCount === 1 ? '' : 's'} with unknown CR were treated as 0 {encounterDifficulty.unit}.
                   </div>
                 )}
               </>

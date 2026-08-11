@@ -2,7 +2,7 @@ export type FormulaType = 'standard' | 'fleeMortals';
 
 export type StandardDifficultyBand = 'Trivial' | 'Low' | 'Moderate' | 'High' | 'Extreme';
 
-export type FleeMortalsDifficultyBand = 'Easy' | 'Standard' | 'Hard' | 'Extreme';
+export type FleeMortalsDifficultyBand = 'Easy' | 'Standard' | 'Hard';
 
 export type EncounterDifficultyBand = StandardDifficultyBand | FleeMortalsDifficultyBand;
 
@@ -63,7 +63,29 @@ type PerLevelBudgets = {
   extreme: number;
 };
 
-// 2024/5.5e encounter-building style bands, using the standard XP budget progression.
+// Flee, Mortals! per-character CR budgets, from the Encounter CR per Character table.
+const FLEE_MORTALS_BUDGETS: Record<number, { easy: number; standard: number; hard: number }> = {
+  1:  { easy: 1/8, standard: 1/8, hard: 1/4 },
+  2:  { easy: 1/8, standard: 1/4, hard: 1/2 },
+  3:  { easy: 1/4, standard: 1/2, hard: 3/4 },
+  4:  { easy: 1/2, standard: 3/4, hard: 1   },
+  5:  { easy: 1,   standard: 1.5, hard: 2.5 },
+  6:  { easy: 1.5, standard: 2,   hard: 3   },
+  7:  { easy: 2,   standard: 2.5, hard: 3.5 },
+  8:  { easy: 2.5, standard: 3,   hard: 4   },
+  9:  { easy: 3,   standard: 3.5, hard: 4.5 },
+  10: { easy: 3.5, standard: 4,   hard: 6   },
+  11: { easy: 4,   standard: 4.5, hard: 5.5 },
+  12: { easy: 4.5, standard: 5,   hard: 6   },
+  13: { easy: 5,   standard: 5.5, hard: 6.5 },
+  14: { easy: 5.5, standard: 6,   hard: 7   },
+  15: { easy: 6,   standard: 6.5, hard: 7.5 },
+  16: { easy: 6.5, standard: 7,   hard: 8   },
+  17: { easy: 7,   standard: 7.5, hard: 8.5 },
+  18: { easy: 7.5, standard: 8,   hard: 9   },
+  19: { easy: 8,   standard: 8.5, hard: 9.5 },
+  20: { easy: 8.5, standard: 9,   hard: 10  },
+};
 const LEVEL_BUDGETS: Record<number, PerLevelBudgets> = {
   1: { low: 25, moderate: 50, high: 75, extreme: 100 },
   2: { low: 50, moderate: 100, high: 150, extreme: 200 },
@@ -156,22 +178,27 @@ export function calculateEncounterDifficulty(partyLevels: number[], monsterXpVal
 }
 
 export function calculateFleeMortalsEncounterDifficulty(partyLevels: number[], monsterCrValues: number[]): EncounterDifficultySummary {
-  const totalPartyLevel = partyLevels.reduce((sum, level) => sum + level, 0);
+  const thresholds = partyLevels.reduce(
+    (totals, level) => {
+      const clampedLevel = Math.max(1, Math.min(20, Math.floor(level)));
+      const budget = FLEE_MORTALS_BUDGETS[clampedLevel];
 
-  const thresholds = {
-    low: totalPartyLevel * 0.25,
-    moderate: totalPartyLevel * 0.5,
-    high: totalPartyLevel * 0.75,
-    extreme: totalPartyLevel,
-  };
+      totals.low += budget.easy;
+      totals.moderate += budget.standard;
+      totals.high += budget.hard;
+
+      return totals;
+    },
+    { low: 0, moderate: 0, high: 0, extreme: 0 }
+  );
+
+  thresholds.extreme = thresholds.high;
 
   const totalMonsterCr = monsterCrValues.reduce((sum, cr) => sum + cr, 0);
 
   let difficulty: FleeMortalsDifficultyBand = 'Easy';
 
-  if (totalMonsterCr >= thresholds.extreme) {
-    difficulty = 'Extreme';
-  } else if (totalMonsterCr >= thresholds.high) {
+  if (totalMonsterCr >= thresholds.high) {
     difficulty = 'Hard';
   } else if (totalMonsterCr >= thresholds.moderate) {
     difficulty = 'Standard';
