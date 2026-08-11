@@ -108,6 +108,7 @@ builder.Services.Configure<JwtSettings>(options =>
     options.Issuer = builder.Configuration["JwtSettings:Issuer"];
     options.Audience = builder.Configuration["JwtSettings:Audience"];
     options.ExpiresInMinutes = int.Parse(builder.Configuration["JwtSettings:ExpiresInMinutes"] ?? "60");
+    options.RefreshTokenExpiresInDays = int.Parse(builder.Configuration["JwtSettings:RefreshTokenExpiresInDays"] ?? "60");
 });
 
 builder.Services.AddAuthentication(authOptions =>

@@ -23,6 +23,7 @@ namespace Initiative.UnitTests.Api.Services.LoginServiceTests.LoginTests
             .Given(EmailAndPasswordAreSet)
             .And(UserManagerCanFindUser)
             .And(PasswordMatches)
+            .And(JwtSettingsAreSet)
             .And(JwtServiceReturnsJwt)
             .And(JwtServiceGeneratesRefreshToken)
             .When(LoginIsCalled)
@@ -56,6 +57,21 @@ namespace Initiative.UnitTests.Api.Services.LoginServiceTests.LoginTests
         {
             UserManager.CheckPasswordAsync(Arg.Is<ApplicationIdentity>(u => u.Email == Email), Password)
                 .Returns(true);
+        }
+
+        [Given]
+        public void JwtSettingsAreSet()
+        {
+            JwtSettings = new JwtSettings()
+            {
+                Secret = "secret",
+                Audience = "audience",
+                ExpiresInMinutes = 10,
+                Issuer = "unittest",
+                RefreshTokenExpiresInDays = 60
+            };
+
+            JwtSettingsContainer.Value.Returns(JwtSettings);
         }
 
         [Given]

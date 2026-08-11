@@ -2,6 +2,7 @@
 using Initiative.Api.Core.Services.Authentication;
 using Initiative.Persistence.Repositories;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace Initiative.Api.Core.Services.Users
 {
@@ -9,11 +10,13 @@ namespace Initiative.Api.Core.Services.Users
     {
         IUserManager<Core.Identity.ApplicationIdentity> userManager;
         IJwtService jwtService;
+        IOptions<JwtSettings> jwtSettingsContainer;
 
-        public UserLoginService(IUserManager<Core.Identity.ApplicationIdentity> userManager, IJwtService jwtService)
+        public UserLoginService(IUserManager<Core.Identity.ApplicationIdentity> userManager, IJwtService jwtService, IOptions<JwtSettings> jwtSettings)
         {
             this.userManager = userManager;
             this.jwtService = jwtService;
+            jwtSettingsContainer = jwtSettings;
         }
 
         public async Task<LoginResult> LoginAndFetchTokens(string email, string password, CancellationToken cancellationToken)
@@ -40,7 +43,7 @@ namespace Initiative.Api.Core.Services.Users
                     {
                         var jwt = jwtService.GenerateToken(user);
 
-                        var refresh = await jwtService.GenerateAndStoreRefreshToken(user, DateTime.UtcNow.AddDays(60), cancellationToken);
+                        var refresh = await jwtService.GenerateAndStoreRefreshToken(user, DateTime.UtcNow.AddDays(jwtSettingsContainer.Value.RefreshTokenExpiresInDays), cancellationToken);
 
                         return new LoginResult()
                         {

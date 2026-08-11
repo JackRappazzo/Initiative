@@ -10,6 +10,7 @@ using Initiative.Persistence.Repositories;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.NUnit.Composable;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 
 namespace Initiative.UnitTests.Api.Services.LoginServiceTests
@@ -19,6 +20,9 @@ namespace Initiative.UnitTests.Api.Services.LoginServiceTests
         [ItemUnderTest] protected UserLoginService UserLoginService;
         [Dependency] protected IJwtService JwtService;
         [Dependency] protected IUserManager<ApplicationIdentity> UserManager;
+        [Dependency] protected IOptions<JwtSettings> JwtSettingsContainer;
+
+        protected JwtSettings JwtSettings;
 
         protected CancellationToken CancellationToken = default(CancellationToken);
 

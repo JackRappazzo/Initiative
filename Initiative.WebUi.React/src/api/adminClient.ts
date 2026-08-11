@@ -3,6 +3,10 @@ import { LoginResponse } from "./messages/LoginResponse";
 import { AxiosResponse } from "axios";
 import { HttpClient } from "./httpClient";
 
+export interface RefreshResponse {
+    accessToken: string;
+}
+
 export class AdminClient {
     
     private apiClient: HttpClient;
@@ -17,6 +21,12 @@ export class AdminClient {
             password
         });
 
+        return response;
+    }
+
+    public async Refresh() : Promise<RefreshResponse>
+    {
+        const response = await this.apiClient.post<RefreshResponse>("admin/refresh", {});
         return response;
     }
 

@@ -1,5 +1,6 @@
 // src/context/AuthContext.tsx
-import { createContext, useState, ReactNode } from "react";
+import { createContext, useState, useEffect, ReactNode } from "react";
+import { AdminClient } from "../api/adminClient";
 
 interface AuthContextType {
   token: string | null;
@@ -39,6 +40,25 @@ const getStoredToken = (): string | null => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(getStoredToken);
+
+  useEffect(() => {
+    const trySilentRefresh = async () => {
+      try {
+        const adminClient = new AdminClient();
+        const res = await adminClient.Refresh();
+        if (res.accessToken) {
+          localStorage.setItem("token", res.accessToken);
+          setToken(res.accessToken);
+        }
+      } catch {
+        // refresh failed, stay logged out
+      }
+    };
+
+    if (!token) {
+      trySilentRefresh();
+    }
+  }, []);
 
   const login = (token: string) => {
     localStorage.setItem("token", token);

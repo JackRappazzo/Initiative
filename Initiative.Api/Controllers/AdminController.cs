@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Initiative.Api.Messages;
 using Initiative.Api.Core.Identity;
 using System.Threading.Tasks;
@@ -19,12 +20,14 @@ namespace Initiative.Api.Controllers
         IUserService registrationService;
         IUserLoginService loginService;
         IJwtRefreshService jwtRefreshService;
+        IOptions<JwtSettings> jwtSettingsContainer;
 
-        public AdminController(IUserService registrationService, IUserLoginService loginService, IJwtRefreshService jwtRefreshService)
+        public AdminController(IUserService registrationService, IUserLoginService loginService, IJwtRefreshService jwtRefreshService, IOptions<JwtSettings> jwtSettings)
         {
             this.registrationService = registrationService;
             this.loginService = loginService;
             this.jwtRefreshService = jwtRefreshService;
+            jwtSettingsContainer = jwtSettings;
         }
 
 
@@ -53,7 +56,7 @@ namespace Initiative.Api.Controllers
             {
                 Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions()
                 {
-                    Expires = DateTime.UtcNow.AddDays(30),
+                    Expires = DateTime.UtcNow.AddDays(jwtSettingsContainer.Value.RefreshTokenExpiresInDays),
                     HttpOnly = true,
                     Secure = true,
                     SameSite = SameSiteMode.None,
@@ -97,6 +100,15 @@ namespace Initiative.Api.Controllers
 
             if(success)
             {
+                Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions()
+                {
+                    Expires = DateTime.UtcNow.AddDays(jwtSettingsContainer.Value.RefreshTokenExpiresInDays),
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Path = "/"
+                });
+
                 return Ok(new RefreshJwtResponse()
                 {
                     AccessToken = token

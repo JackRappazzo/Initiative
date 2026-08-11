@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Initiative.Api.Core.Identity;
+using Initiative.Api.Core.Services.Authentication;
 using Initiative.Persistence.Models.Authentication;
 using LeapingGorilla.Testing.Core.Attributes;
 using LeapingGorilla.Testing.Core.Composable;
@@ -19,10 +20,12 @@ namespace Initiative.UnitTests.Core.Authentication.JwtRefreshServiceTests.Refres
         protected override ComposedTest ComposeTest() => TestComposer
             .Given(UserExists)
             .And(RefreshTokenNotExpired)
+            .And(JwtSettingsAreSet)
             .And(JwtServiceCanGenerateToken)
             .When(RefreshIsCalled)
             .Then(ShouldReturnSuccess)
-            .And(ShouldReturnToken);
+            .And(ShouldReturnToken)
+            .And(ShouldExtendRefreshTokenExpiration);
 
 
         [Given]
@@ -38,6 +41,21 @@ namespace Initiative.UnitTests.Core.Authentication.JwtRefreshServiceTests.Refres
                     Id = ObjectId.GenerateNewId(),
                     UserId = UserId
                 });
+        }
+
+        [Given]
+        public void JwtSettingsAreSet()
+        {
+            JwtSettings = new JwtSettings()
+            {
+                Secret = "secret",
+                Audience = "audience",
+                ExpiresInMinutes = 10,
+                Issuer = "unittest",
+                RefreshTokenExpiresInDays = 60
+            };
+
+            JwtSettingsContainer.Value.Returns(JwtSettings);
         }
 
         [Given]
@@ -59,6 +77,17 @@ namespace Initiative.UnitTests.Core.Authentication.JwtRefreshServiceTests.Refres
         {
             Assert.That(ResultToken, Is.Not.Null);
             Assert.That(ResultToken, Is.EqualTo(ExpectedToken));
+        }
+
+        [Then]
+        public void ShouldExtendRefreshTokenExpiration()
+        {
+            JwtRefreshTokenRepository.Received()
+                .UpsertRefreshToken(
+                    Arg.Is<string>(s => s == UserId.ToString()),
+                    Arg.Is<string>(s => s == RefreshToken),
+                    Arg.Is<DateTime>(d => d > DateTime.UtcNow.AddDays(59) && d < DateTime.UtcNow.AddDays(61)),
+                    Arg.Any<CancellationToken>());
         }
     }
 }
