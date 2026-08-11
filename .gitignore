@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudio,dotnetcore,react
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudio,dotnetcore,react
 
+### AI coding agent files ###
+**/AGENTS.md
+
 ### DotnetCore ###
 # .NET Core build folders
 bin/

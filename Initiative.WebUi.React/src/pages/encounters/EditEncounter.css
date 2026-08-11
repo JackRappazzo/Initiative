@@ -560,6 +560,11 @@
   margin-bottom: 0.35rem;
 }
 
+.encounter-difficulty-header-controls {
+  display: flex;
+  gap: 0.35rem;
+}
+
 .encounter-difficulty-toggle {
   font-size: 0.72rem;
   padding: 0.18rem 0.45rem;
@@ -583,15 +588,18 @@
 
 .encounter-difficulty-meter-none,
 .encounter-difficulty-meter-trivial,
-.encounter-difficulty-meter-low {
+.encounter-difficulty-meter-low,
+.encounter-difficulty-meter-easy {
   background: #5ca95b;
 }
 
-.encounter-difficulty-meter-moderate {
+.encounter-difficulty-meter-moderate,
+.encounter-difficulty-meter-standard {
   background: #d8b500;
 }
 
-.encounter-difficulty-meter-high {
+.encounter-difficulty-meter-high,
+.encounter-difficulty-meter-hard {
   background: #d07a24;
 }
 

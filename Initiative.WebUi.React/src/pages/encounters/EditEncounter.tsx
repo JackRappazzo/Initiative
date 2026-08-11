@@ -12,7 +12,7 @@ import { PartyMember } from '../../api/partyClient';
 import { useUser } from '../../contexts/UserContext';
 import { isTaleSpire } from '../../utils/talespire';
 import { formatInviteCommand, parseTaleSpireChatCommand } from '../../utils/talespireChatCommands';
-import { calculateEncounterDifficulty, challengeRatingToXp } from '../../utils/encounterDifficulty';
+import { calculateEncounterDifficulty, calculateFleeMortalsEncounterDifficulty, challengeRatingToXp, challengeRatingToNumber } from '../../utils/encounterDifficulty';
 
 import './EditEncounter.css';
 
@@ -45,6 +45,7 @@ const EditEncounter: React.FC = () => {
   const [showPartyPicker, setShowPartyPicker] = useState(false);
   const [newName, setNewName] = useState('');
   const [showDifficulty, setShowDifficulty] = useState(true);
+  const [useFleeMortals, setUseFleeMortals] = useState(false);
   const [encounterState, setEncounterState] = useState<EncounterState>({
     currentTurn: 0,
     turnNumber: 1,
@@ -362,9 +363,12 @@ const EditEncounter: React.FC = () => {
         return;
       }
 
-      const parsed = JSON.parse(raw) as { showDifficulty?: boolean };
+      const parsed = JSON.parse(raw) as { showDifficulty?: boolean; useFleeMortals?: boolean };
       if (typeof parsed.showDifficulty === 'boolean') {
         setShowDifficulty(parsed.showDifficulty);
+      }
+      if (typeof parsed.useFleeMortals === 'boolean') {
+        setUseFleeMortals(parsed.useFleeMortals);
       }
     } catch {
       // Ignore malformed persisted encounter UI preferences.
@@ -378,10 +382,11 @@ const EditEncounter: React.FC = () => {
 
     const payload = {
       showDifficulty,
+      useFleeMortals,
     };
 
     window.localStorage.setItem(encounterUiPrefsStorageKey, JSON.stringify(payload));
-  }, [encounterUiPrefsStorageKey, showDifficulty]);
+  }, [encounterUiPrefsStorageKey, showDifficulty, useFleeMortals]);
 
   // Fetch stat block for the current creature whenever the active turn changes
   useEffect(() => {
@@ -471,6 +476,20 @@ const EditEncounter: React.FC = () => {
     [creatures, creatureCrById]
   );
 
+  const monsterCrValues = useMemo(
+    () =>
+      creatures
+        .filter((creature) => !creature.isPlayer)
+        .map((creature) => {
+          if (!creature.creatureId) {
+            return 0;
+          }
+
+          return challengeRatingToNumber(creatureCrById[creature.creatureId]);
+        }),
+    [creatures, creatureCrById]
+  );
+
   const unknownMonsterCount = useMemo(
     () =>
       creatures.filter((creature) => {
@@ -483,9 +502,17 @@ const EditEncounter: React.FC = () => {
         }
 
         const cr = creatureCrById[creature.creatureId];
-        return !cr || challengeRatingToXp(cr) === 0;
+        if (!cr) {
+          return true;
+        }
+
+        if (useFleeMortals) {
+          return challengeRatingToNumber(cr) === 0 && cr !== '0';
+        }
+
+        return challengeRatingToXp(cr) === 0;
       }).length,
-    [creatures, creatureCrById]
+    [creatures, creatureCrById, useFleeMortals]
   );
 
   const encounterDifficulty = useMemo(() => {
@@ -493,8 +520,12 @@ const EditEncounter: React.FC = () => {
       return null;
     }
 
+    if (useFleeMortals) {
+      return calculateFleeMortalsEncounterDifficulty(partyLevels, monsterCrValues);
+    }
+
     return calculateEncounterDifficulty(partyLevels, monsterXpValues);
-  }, [partyLevels, monsterXpValues]);
+  }, [partyLevels, monsterXpValues, monsterCrValues, useFleeMortals]);
 
   const getNextVisibleIndex = useCallback((startIndex: number, direction: 1 | -1) => {
     if (creatures.length === 0) {
@@ -688,6 +719,8 @@ const EditEncounter: React.FC = () => {
             encounterDifficulty={encounterDifficulty}
             partyMemberCount={partyMembers.length}
             unknownMonsterCount={unknownMonsterCount}
+            useFleeMortals={useFleeMortals}
+            onToggleFleeMortals={() => setUseFleeMortals((previous) => !previous)}
           />
 
           <div className="creature-list">

@@ -13,6 +13,8 @@ interface EncounterStatusProps {
   encounterDifficulty: EncounterDifficultySummary | null;
   partyMemberCount: number;
   unknownMonsterCount: number;
+  useFleeMortals: boolean;
+  onToggleFleeMortals: () => void;
 }
 
 export const EncounterStatus: React.FC<EncounterStatusProps> = ({
@@ -26,10 +28,18 @@ export const EncounterStatus: React.FC<EncounterStatusProps> = ({
   encounterDifficulty,
   partyMemberCount,
   unknownMonsterCount,
+  useFleeMortals,
+  onToggleFleeMortals,
 }) => {
   const { viewersAllowed, currentTurn, turnNumber } = encounterState;
 
-  const formatNumber = (value: number): string => value.toLocaleString();
+  const formatNumber = (value: number): string => {
+    if (encounterDifficulty?.unit === 'CR') {
+      const rounded = Math.round(value * 10) / 10;
+      return rounded % 1 === 0 ? rounded.toFixed(0) : rounded.toFixed(1);
+    }
+    return value.toLocaleString();
+  };
 
   const meterColorClass = encounterDifficulty
     ? `encounter-difficulty-meter-${encounterDifficulty.difficulty.toLowerCase()}`
@@ -56,13 +66,22 @@ export const EncounterStatus: React.FC<EncounterStatusProps> = ({
         <div className="encounter-difficulty">
           <div className="encounter-difficulty-header">
             <strong>Encounter Difficulty</strong>
-            <button
-              className="control-button secondary encounter-difficulty-toggle"
-              onClick={onToggleShowDifficulty}
-              title={showDifficulty ? 'Hide encounter difficulty meter' : 'Show encounter difficulty meter'}
-            >
-              {showDifficulty ? 'Hide' : 'Show'}
-            </button>
+            <div className="encounter-difficulty-header-controls">
+              <button
+                className="control-button secondary encounter-difficulty-toggle"
+                onClick={onToggleFleeMortals}
+                title={useFleeMortals ? 'Switch to 2024 XP-based calculation' : 'Switch to Flee, Mortals! CR-based calculation'}
+              >
+                {useFleeMortals ? 'FM! CR' : '2024 XP'}
+              </button>
+              <button
+                className="control-button secondary encounter-difficulty-toggle"
+                onClick={onToggleShowDifficulty}
+                title={showDifficulty ? 'Hide encounter difficulty meter' : 'Show encounter difficulty meter'}
+              >
+                {showDifficulty ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
 
           {showDifficulty && (
@@ -79,13 +98,13 @@ export const EncounterStatus: React.FC<EncounterStatusProps> = ({
                 <div className="encounter-difficulty-meta">
                   <strong>{encounterDifficulty.difficulty}</strong>
                   {' · '}
-                  {formatNumber(encounterDifficulty.totalMonsterXp)} / {formatNumber(encounterDifficulty.thresholds.extreme)} XP
+                  {formatNumber(encounterDifficulty.totalMonsterXp)} / {formatNumber(encounterDifficulty.thresholds.extreme)} {encounterDifficulty.unit}
                   {' · '}
                   {partyMemberCount} member{partyMemberCount === 1 ? '' : 's'}
                 </div>
                 {overExtremeBy > 0 && (
                   <div className="encounter-difficulty-note encounter-difficulty-note-danger">
-                    Over Extreme by {formatNumber(overExtremeBy)} XP.
+                    Over Extreme by {formatNumber(overExtremeBy)} {encounterDifficulty.unit}.
                   </div>
                 )}
                 {unknownMonsterCount > 0 && (

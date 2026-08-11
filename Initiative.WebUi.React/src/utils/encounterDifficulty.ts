@@ -1,4 +1,10 @@
-export type EncounterDifficultyBand = 'Trivial' | 'Low' | 'Moderate' | 'High' | 'Extreme';
+export type FormulaType = 'standard' | 'fleeMortals';
+
+export type StandardDifficultyBand = 'Trivial' | 'Low' | 'Moderate' | 'High' | 'Extreme';
+
+export type FleeMortalsDifficultyBand = 'Easy' | 'Standard' | 'Hard' | 'Extreme';
+
+export type EncounterDifficultyBand = StandardDifficultyBand | FleeMortalsDifficultyBand;
 
 export interface EncounterDifficultySummary {
   totalMonsterXp: number;
@@ -9,6 +15,8 @@ export interface EncounterDifficultySummary {
     extreme: number;
   };
   difficulty: EncounterDifficultyBand;
+  unit: 'XP' | 'CR';
+  formulaType: FormulaType;
 }
 
 const CR_TO_XP: Record<string, number> = {
@@ -87,6 +95,27 @@ export function challengeRatingToXp(cr?: string | null): number {
   return CR_TO_XP[cr.trim()] ?? 0;
 }
 
+export function challengeRatingToNumber(cr?: string | null): number {
+  if (!cr) {
+    return 0;
+  }
+
+  const trimmed = cr.trim();
+
+  if (trimmed.includes('/')) {
+    const [numerator, denominator] = trimmed.split('/');
+    const num = Number(numerator);
+    const den = Number(denominator);
+    if (Number.isFinite(num) && Number.isFinite(den) && den !== 0) {
+      return num / den;
+    }
+    return 0;
+  }
+
+  const parsed = Number(trimmed);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 export function calculateEncounterDifficulty(partyLevels: number[], monsterXpValues: number[]): EncounterDifficultySummary {
   const thresholds = partyLevels.reduce(
     (totals, level) => {
@@ -105,7 +134,7 @@ export function calculateEncounterDifficulty(partyLevels: number[], monsterXpVal
 
   const totalMonsterXp = monsterXpValues.reduce((sum, xp) => sum + Math.max(0, xp), 0);
 
-  let difficulty: EncounterDifficultyBand = 'Trivial';
+  let difficulty: StandardDifficultyBand = 'Trivial';
 
   if (totalMonsterXp >= thresholds.extreme) {
     difficulty = 'Extreme';
@@ -121,5 +150,40 @@ export function calculateEncounterDifficulty(partyLevels: number[], monsterXpVal
     totalMonsterXp,
     thresholds,
     difficulty,
+    unit: 'XP',
+    formulaType: 'standard',
+  };
+}
+
+export function calculateFleeMortalsEncounterDifficulty(partyLevels: number[], monsterCrValues: number[]): EncounterDifficultySummary {
+  const totalPartyLevel = partyLevels.reduce((sum, level) => sum + level, 0);
+
+  const thresholds = {
+    low: totalPartyLevel * 0.25,
+    moderate: totalPartyLevel * 0.5,
+    high: totalPartyLevel * 0.75,
+    extreme: totalPartyLevel,
+  };
+
+  const totalMonsterCr = monsterCrValues.reduce((sum, cr) => sum + cr, 0);
+
+  let difficulty: FleeMortalsDifficultyBand = 'Easy';
+
+  if (totalMonsterCr >= thresholds.extreme) {
+    difficulty = 'Extreme';
+  } else if (totalMonsterCr >= thresholds.high) {
+    difficulty = 'Hard';
+  } else if (totalMonsterCr >= thresholds.moderate) {
+    difficulty = 'Standard';
+  } else if (totalMonsterCr >= thresholds.low) {
+    difficulty = 'Easy';
+  }
+
+  return {
+    totalMonsterXp: totalMonsterCr,
+    thresholds,
+    difficulty,
+    unit: 'CR',
+    formulaType: 'fleeMortals',
   };
 }
