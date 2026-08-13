@@ -251,7 +251,18 @@ function renderEntriesAsNodes(
         </ul>
       );
     }
-    if (e.entries) return renderEntriesAsNodes(e.entries, onRoll, `${keyPrefix}-${i}`);
+    if (e.entries) {
+      const body = renderEntriesAsNodes(e.entries, onRoll, `${keyPrefix}-${i}`);
+      if (e.name) {
+        return (
+          <div key={`${keyPrefix}-${i}`} className="stat-block__entry-line">
+            <strong>{e.name}. </strong>
+            {body}
+          </div>
+        );
+      }
+      return <React.Fragment key={`${keyPrefix}-${i}`}>{body}</React.Fragment>;
+    }
     return null;
   });
 }
@@ -395,7 +406,7 @@ function SpellPopover({ spell, onClose }: { spell: SpellDetail; onClose: () => v
         <div className="stat-block__divider stat-block__divider--thick" />
         <div className="spell-popover__entries">
           {(raw.entries as unknown[] | undefined)?.map((e, i) => (
-            <p key={i} className="spell-popover__entry">{renderLooseEntryNodes(e, onRoll, `spell-entry-${i}`)}</p>
+            <div key={i} className="spell-popover__entry">{renderLooseEntryNodes(e, onRoll, `spell-entry-${i}`)}</div>
           ))}
           {raw.entriesHigherLevel?.map((hl, i) => (
             <p key={`hl-${i}`} className="spell-popover__entry">
@@ -441,7 +452,7 @@ function ConditionPopover({ condition, onClose }: { condition: ConditionDetail; 
         <div className="stat-block__divider stat-block__divider--thick" />
         <div className="condition-popover__entries">
           {(raw.entries as unknown[] | undefined)?.map((e, i) => (
-            <p key={i} className="condition-popover__entry">{renderLooseEntryNodes(e, onRoll, `cond-entry-${i}`)}</p>
+            <div key={i} className="condition-popover__entry">{renderLooseEntryNodes(e, onRoll, `cond-entry-${i}`)}</div>
           ))}
         </div>
       </div>
@@ -629,7 +640,7 @@ function Section({
       {entries.map((entry, i) => (
         <div key={i} className="stat-block__feature">
           {entry.name && <strong className="stat-block__feature-name">{entry.name}. </strong>}
-          <span>{entry.entries ? renderEntriesAsNodes(entry.entries, onRoll, `${title}-${i}`) : ''}</span>
+          {entry.entries ? renderEntriesAsNodes(entry.entries, onRoll, `${title}-${i}`) : ''}
         </div>
       ))}
     </>

@@ -247,6 +247,10 @@
   margin: 0.3rem 0;
 }
 
+.stat-block__entry-line {
+  margin: 0.2rem 0;
+}
+
 .stat-block__feature-name {
   color: var(--stat-block-text, #1a1a1a);
   font-style: italic;
