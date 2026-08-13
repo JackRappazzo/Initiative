@@ -29,7 +29,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 var environmentType = builder.Environment.IsDevelopment() ? EnvironmentType.Local : EnvironmentType.Deployed;
-var connectionString = Environment.GetEnvironmentVariable(EnvironmentVariableNames.MongoDbConnectionString) ?? ConnectionStrings.Local;
+var connectionString = Environment.GetEnvironmentVariable(EnvironmentVariableNames.MongoDbConnectionString) ?? builder.Configuration.GetConnectionString("MongoDb") ?? ConnectionStrings.Local;
 
 builder.Services.AddCors(options =>
 {

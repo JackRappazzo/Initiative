@@ -3,10 +3,19 @@ using Import.Bestiaries.Core.Services;
 using Import.Bestiaries.ConsoleApp;
 using Initiative.Persistence.Configuration;
 using Initiative.Persistence.Repositories;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
+var configuration = new ConfigurationBuilder()
+    .SetBasePath(AppContext.BaseDirectory)
+    .AddJsonFile("appsettings.json", optional: true)
+    .AddJsonFile("appsettings.local.json", optional: true)
+    .AddEnvironmentVariables()
+    .Build();
 
 var services = new ServiceCollection();
 
+services.AddSingleton<IConfiguration>(configuration);
 services.AddScoped<IDatabaseConnectionFactory, DatabaseConnectionFactory>();
 services.AddScoped<IBestiaryRepository, BestiaryRepository>();
 services.AddScoped<IFivEToolsParser, FivEToolsParser>();

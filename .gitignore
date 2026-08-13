@@ -4,6 +4,9 @@
 ### AI coding agent files ###
 **/AGENTS.md
 
+### Local configuration (may contain secrets) ###
+**/appsettings.local.json
+
 ### DotnetCore ###
 # .NET Core build folders
 bin/
