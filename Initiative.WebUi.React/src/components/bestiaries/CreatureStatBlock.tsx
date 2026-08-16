@@ -361,7 +361,9 @@ function SpellPopover({ spell, onClose }: { spell: SpellDetail; onClose: () => v
   const castingTime = raw.time?.map(t => `${t.number} ${t.unit}`).join(' or ') ?? '—';
   const range = raw.range
     ? (raw.range.type === 'point' && raw.range.distance
-        ? `${raw.range.distance.amount} ${raw.range.distance.type}`
+        ? (raw.range.distance.amount != null
+            ? `${raw.range.distance.amount} ${raw.range.distance.type}`
+            : raw.range.distance.type)
         : raw.range.type)
     : '—';
   const components = formatComponents(raw.components) || '—';
