@@ -99,7 +99,8 @@ function cleanTags(text: unknown): string {
     .replace(/\{@actSaveFail\}/g, 'Failure:')
     .replace(/\{@actSaveSuccess\}/g, 'Success:')
     .replace(/\{@actSaveSuccessOrFail\}/g, 'Success or Failure:')
-    .replace(/\{@recharge(?:\s*\d*)?\}/g, '(Recharge)')
+    .replace(/\{@recharge(?: (\d+))?\}/g, (_, n) =>
+      n && Number(n) < 6 ? `(Recharge ${n}-6)` : '(Recharge 6)')
     .replace(/\{@spell ([^|}\s]+)[^}]*\}/g, (_, name) => name.replace(/_/g, ' '))
     .replace(/\{@variantrule ([^|}\s]+)[^}]*\}/g, (_, name) => name.replace(/_/g, ' '))
     .replace(/\{@[a-z]+ ([^|}]+)[^}]*\}/g, (_, text) => text);
@@ -550,7 +551,7 @@ function SpellcastingBlock({ entry, onRoll }: { entry: SpellcastingEntry; onRoll
 
   return (
     <div className="stat-block__feature">
-      <strong className="stat-block__feature-name">{entry.name}. </strong>
+      <strong className="stat-block__feature-name">{cleanTags(entry.name)}. </strong>
       {hasInlineFreeformSpellList ? (
         <>
           {headerEntries.slice(0, firstSpellHeaderIndex).map((h, i) => (
@@ -641,7 +642,7 @@ function Section({
       ))}
       {entries.map((entry, i) => (
         <div key={i} className="stat-block__feature">
-          {entry.name && <strong className="stat-block__feature-name">{entry.name}. </strong>}
+          {entry.name && <strong className="stat-block__feature-name">{cleanTags(entry.name)}. </strong>}
           {entry.entries ? renderEntriesAsNodes(entry.entries, onRoll, `${title}-${i}`) : ''}
         </div>
       ))}
