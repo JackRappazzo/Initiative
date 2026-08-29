@@ -1,5 +1,5 @@
 // src/context/AuthContext.tsx
-import { createContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useState, useEffect, useRef, ReactNode } from "react";
 import { AdminClient } from "../api/adminClient";
 
 interface AuthContextType {
@@ -40,6 +40,7 @@ const getStoredToken = (): string | null => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(getStoredToken);
+  const initialTokenRef = useRef(token);
 
   useEffect(() => {
     const trySilentRefresh = async () => {
@@ -55,7 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    if (!token) {
+    if (!initialTokenRef.current) {
       trySilentRefresh();
     }
   }, []);
