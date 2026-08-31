@@ -242,7 +242,9 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
                       className="creature-field-display creature-hp-linked"
                       title="D&D Beyond HP (read-only)"
                     >
-                      {dndBeyondHp ? `${dndBeyondHp.currentHP} / ${dndBeyondHp.maxHP}` : '…'}
+                      {dndBeyondHp
+                        ? `${dndBeyondHp.temporaryHP > 0 ? `(${dndBeyondHp.temporaryHP}) ` : ''}${dndBeyondHp.currentHP} / ${dndBeyondHp.maxHP}`
+                        : '…'}
                     </span>
                   ) : (
                     renderEditableHp()

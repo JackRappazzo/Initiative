@@ -56,7 +56,7 @@ namespace Initiative.Api.Core.Services.DndBeyond
             var bonusHp = GetInt(data, "bonusHitPoints");
             var removedHp = GetInt(data, "removedHitPoints");
 
-            var maxHp = overrideHp ?? baseHp + bonusHp;
+            var maxHp = overrideHp ?? (baseHp + bonusHp + 10);
             var currentHp = Math.Max(maxHp - removedHp, 0);
 
             return new DndBeyondCharacterDetail
