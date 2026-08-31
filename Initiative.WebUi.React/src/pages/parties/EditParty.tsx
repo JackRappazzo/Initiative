@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PartyClient, PartyMember } from '../../api/partyClient';
-import { DndBeyondClient, DndBeyondCharacter, DndBeyondCharacterDetail } from '../../api/dndBeyondClient';
+import { DndBeyondClient, DndBeyondCharacterDetail } from '../../api/dndBeyondClient';
 import { useDndBeyondSession } from '../../contexts/DndBeyondContext';
 import './EditParty.css';
 
@@ -34,10 +34,8 @@ const EditParty: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [pickerMemberId, setPickerMemberId] = useState<number | null>(null);
-  const [pickerCharacters, setPickerCharacters] = useState<DndBeyondCharacter[]>([]);
-  const [pickerLoading, setPickerLoading] = useState(false);
-  const [pickerError, setPickerError] = useState<string | null>(null);
+  const [idPromptMemberId, setIdPromptMemberId] = useState<number | null>(null);
+  const [idDraft, setIdDraft] = useState('');
 
   const [confirmingMemberId, setConfirmingMemberId] = useState<number | null>(null);
   const [confirmDetail, setConfirmDetail] = useState<DndBeyondCharacterDetail | null>(null);
@@ -105,44 +103,34 @@ const EditParty: React.FC = () => {
     setMembers((prev) => prev.filter((m) => m.id !== id));
   };
 
-  const openCharacterPicker = async (memberId: number) => {
+  const openIdPrompt = (memberId: number) => {
     if (!hasToken) {
       setError('No D&D Beyond token set. Add one in Settings first.');
       return;
     }
     setError(null);
-    setPickerMemberId(memberId);
-    setPickerLoading(true);
-    setPickerError(null);
-    try {
-      const characters = await dndBeyondClient.getCharacters();
-      setPickerCharacters(characters);
-    } catch (err) {
-      console.error('Error loading D&D Beyond characters:', err);
-      setPickerError('Failed to load D&D Beyond characters');
-      setPickerCharacters([]);
-    } finally {
-      setPickerLoading(false);
-    }
+    setIdPromptMemberId(memberId);
+    setIdDraft('');
   };
 
-  const closePicker = () => {
-    setPickerMemberId(null);
-    setPickerCharacters([]);
-    setPickerError(null);
+  const closeIdPrompt = () => {
+    setIdPromptMemberId(null);
+    setIdDraft('');
   };
 
-  const selectCharacter = async (character: DndBeyondCharacter) => {
-    const memberId = pickerMemberId;
-    closePicker();
-    if (memberId === null) return;
+  const lookUpCharacter = async (memberId: number, rawId: string) => {
+    const characterId = rawId.trim();
+    if (!characterId) return;
+
+    setIdPromptMemberId(null);
+    setIdDraft('');
 
     setConfirmingMemberId(memberId);
     setConfirmLoading(true);
     setConfirmError(null);
     setConfirmDetail(null);
     try {
-      const detail = await dndBeyondClient.getCharacter(character.id);
+      const detail = await dndBeyondClient.getCharacter(characterId);
       setConfirmDetail(detail);
     } catch (err) {
       console.error('Error loading character details:', err);
@@ -236,7 +224,7 @@ const EditParty: React.FC = () => {
                 onCommitName={(name) => commitName(member.id, name)}
                 onSetLevel={(level) => setLevel(member.id, level)}
                 onRemove={() => removeMember(member.id)}
-                onLinkCharacter={() => openCharacterPicker(member.id)}
+                onLinkCharacter={() => openIdPrompt(member.id)}
                 onUnlink={() => unlink(member.id)}
               />
               {confirmingMemberId === member.id && (
@@ -271,33 +259,39 @@ const EditParty: React.FC = () => {
         </button>
       </div>
 
-      {pickerMemberId !== null && (
-        <div className="ddb-picker-overlay" onClick={closePicker}>
+      {idPromptMemberId !== null && (
+        <div className="ddb-picker-overlay" onClick={closeIdPrompt}>
           <div className="ddb-picker-modal" onClick={(e) => e.stopPropagation()}>
             <div className="ddb-picker-header">
-              <h2>Choose D&D Beyond Character</h2>
-              <button className="ddb-picker-close" onClick={closePicker} aria-label="Close">×</button>
+              <h2>Link D&D Beyond Character</h2>
+              <button className="ddb-picker-close" onClick={closeIdPrompt} aria-label="Close">×</button>
             </div>
-
-            {pickerLoading && <div className="ddb-picker-body">Loading characters...</div>}
-            {pickerError && <div className="ddb-picker-body ddb-picker-error">{pickerError}</div>}
-
-            {!pickerLoading && !pickerError && (
-              <ul className="ddb-picker-list">
-                {pickerCharacters.length === 0 && (
-                  <li className="ddb-picker-empty">No characters found.</li>
-                )}
-                {pickerCharacters.map((character) => (
-                  <li
-                    key={character.id}
-                    className="ddb-picker-item"
-                    onClick={() => selectCharacter(character)}
-                  >
-                    {character.name ?? `Character ${character.id}`}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <div className="ddb-picker-body">
+              <label className="ddb-id-label" htmlFor="ddb-character-id">Character ID</label>
+              <input
+                id="ddb-character-id"
+                className="ddb-id-input"
+                type="text"
+                value={idDraft}
+                onChange={(e) => setIdDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') lookUpCharacter(idPromptMemberId, idDraft);
+                  if (e.key === 'Escape') closeIdPrompt();
+                }}
+                placeholder="e.g. 12345678"
+                autoFocus
+              />
+              <div className="ddb-id-actions">
+                <button
+                  className="btn-primary"
+                  onClick={() => lookUpCharacter(idPromptMemberId, idDraft)}
+                  disabled={!idDraft.trim()}
+                >
+                  Look Up
+                </button>
+                <button className="btn-secondary" onClick={closeIdPrompt}>Cancel</button>
+              </div>
+            </div>
           </div>
         </div>
       )}

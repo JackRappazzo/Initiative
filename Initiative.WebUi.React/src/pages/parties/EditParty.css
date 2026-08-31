@@ -250,6 +250,36 @@
   color: var(--text-muted, #a6adc8);
 }
 
+.ddb-id-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text, #cdd6f4);
+  margin-bottom: 0.35rem;
+}
+
+.ddb-id-input {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.95rem;
+  font-family: monospace;
+  border: 1px solid var(--card-border, #313244);
+  background: var(--card-bg, #1e1e2e);
+  color: var(--text, #cdd6f4);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.ddb-id-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.ddb-id-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
 .ddb-picker-error {
   color: #dc3545;
 }

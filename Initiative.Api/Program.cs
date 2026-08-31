@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Converters;
+using RestSharp;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -82,11 +83,13 @@ builder.Services.AddScoped<IConditionService, ConditionService>();
 builder.Services.AddScoped<IPartyService, PartyService>();
 builder.Services.AddScoped<IBase62CodeGenerator, Base62CodeGenerator>();
 
-builder.Services.AddHttpClient<IDndBeyondProxyService, DndBeyondProxyService>(client =>
+builder.Services.AddSingleton(new RestClient(new RestClientOptions
 {
-    client.BaseAddress = new Uri("https://character-service.dndbeyond.com/character/v5/");
-    client.DefaultRequestHeaders.Add("Accept", "application/json");
-});
+    BaseUrl = new Uri("https://character-service.dndbeyond.com/character/v5/"),
+    Timeout = TimeSpan.FromSeconds(30)
+}));
+builder.Services.AddSingleton<DndBeyondClient>();
+builder.Services.AddScoped<IDndBeyondProxyService, DndBeyondProxyService>();
 
 builder.Services.AddScoped<IUserManager<ApplicationIdentity>, UserManagerFacade<ApplicationIdentity>>();
 

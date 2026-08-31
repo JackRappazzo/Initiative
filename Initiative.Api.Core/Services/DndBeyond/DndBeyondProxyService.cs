@@ -1,25 +1,19 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Initiative.Api.Core.Services.DndBeyond
 {
     public class DndBeyondProxyService : IDndBeyondProxyService
     {
-        private readonly HttpClient httpClient;
+        private readonly DndBeyondClient dndBeyondClient;
 
-        public DndBeyondProxyService(HttpClient httpClient)
+        public DndBeyondProxyService(DndBeyondClient dndBeyondClient)
         {
-            this.httpClient = httpClient;
+            this.dndBeyondClient = dndBeyondClient;
         }
 
         public async Task<IEnumerable<DndBeyondCharacterListItem>> GetCharacters(string token, CancellationToken cancellationToken)
         {
-            var userId = ExtractUserId(token);
-            var relativeUrl = userId.HasValue ? $"characters?userId={userId.Value}" : "characters";
-
-            using var document = await GetJsonDocument(relativeUrl, token, cancellationToken);
+            using var document = await dndBeyondClient.GetCharactersAsync(token, cancellationToken);
 
             if (!document.RootElement.TryGetProperty("data", out var data) || data.ValueKind != JsonValueKind.Array)
             {
@@ -46,7 +40,11 @@ namespace Initiative.Api.Core.Services.DndBeyond
 
         public async Task<DndBeyondCharacterDetail?> GetCharacter(string token, string characterId, CancellationToken cancellationToken)
         {
-            using var document = await GetJsonDocument($"character/{Uri.EscapeDataString(characterId)}", token, cancellationToken);
+            using var document = await dndBeyondClient.GetCharacterAsync(token, characterId, cancellationToken);
+            if (document is null)
+            {
+                return null;
+            }
 
             if (!document.RootElement.TryGetProperty("data", out var data) || data.ValueKind != JsonValueKind.Object)
             {
@@ -71,85 +69,6 @@ namespace Initiative.Api.Core.Services.DndBeyond
                 CurrentHP = currentHp,
                 TemporaryHP = GetInt(data, "temporaryHitPoints")
             };
-        }
-
-        private async Task<JsonDocument> GetJsonDocument(string relativeUrl, string token, CancellationToken cancellationToken)
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Get, relativeUrl);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-
-            if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
-            {
-                throw new DndBeyondRequestException(response.StatusCode, "D&D Beyond session token is invalid or has expired.");
-            }
-
-            if (!response.IsSuccessStatusCode)
-            {
-                TimeSpan? retryAfter = null;
-                if (response.StatusCode is HttpStatusCode.TooManyRequests or HttpStatusCode.ServiceUnavailable)
-                {
-                    retryAfter = ParseRetryAfter(response);
-                }
-
-                throw new DndBeyondRequestException(
-                    response.StatusCode,
-                    $"D&D Beyond request failed with status {(int)response.StatusCode}.",
-                    retryAfter);
-            }
-
-            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            return await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
-        }
-
-        private static long? ExtractUserId(string token)
-        {
-            try
-            {
-                var handler = new JwtSecurityTokenHandler();
-                var jwt = handler.ReadJwtToken(token);
-
-                var userId = jwt.Claims.FirstOrDefault(c => c.Type == "userId")?.Value
-                             ?? jwt.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-
-                if (long.TryParse(userId, out var parsed))
-                {
-                    return parsed;
-                }
-            }
-            catch
-            {
-                // Not a readable JWT; caller will fall back to a userId-less request.
-            }
-
-            return null;
-        }
-
-        private static TimeSpan? ParseRetryAfter(HttpResponseMessage response)
-        {
-            if (response.Headers.TryGetValues("Retry-After", out var values))
-            {
-                var value = values.FirstOrDefault();
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    if (int.TryParse(value, out var seconds))
-                    {
-                        return TimeSpan.FromSeconds(Math.Max(0, seconds));
-                    }
-
-                    if (DateTimeOffset.TryParse(value, out var date))
-                    {
-                        var delay = date - DateTimeOffset.UtcNow;
-                        if (delay > TimeSpan.Zero)
-                        {
-                            return delay;
-                        }
-                    }
-                }
-            }
-
-            return null;
         }
 
         private static int GetLevel(JsonElement data)
