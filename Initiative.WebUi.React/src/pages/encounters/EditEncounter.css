@@ -386,6 +386,34 @@
   user-select: none;
 }
 
+.hp-link-toggle {
+  background: none;
+  border: 1px solid var(--card-border, #313244);
+  border-radius: 4px;
+  color: var(--text-muted, #a6adc8);
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 2px 3px;
+  flex-shrink: 0;
+}
+
+.hp-link-toggle:hover {
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.hp-link-toggle.linked {
+  border-color: #007bff;
+  color: #007bff;
+  background: rgba(0, 123, 255, 0.12);
+}
+
+.creature-hp-linked {
+  color: var(--text, #cdd6f4);
+  white-space: nowrap;
+}
+
 .creature-player-checkbox {
   justify-self: center;
   width: 16px;

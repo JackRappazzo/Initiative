@@ -4,5 +4,6 @@ namespace Initiative.Api.Messages.Parties
     {
         public required string Name { get; set; }
         public int Level { get; set; }
+        public string? DndBeyondCharacterId { get; set; }
     }
 }

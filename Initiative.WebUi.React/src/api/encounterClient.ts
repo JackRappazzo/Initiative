@@ -5,6 +5,8 @@ export interface EncounterCreatureJsonModel {
   displayName: string;
   creatureName?: string;
   creatureId?: string;
+  dndBeyondCharacterId?: string;
+  isHpLinkedToDndBeyond?: boolean;
   statuses?: string[];
   isHidden?: boolean;
   initiative: number;

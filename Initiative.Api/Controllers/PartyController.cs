@@ -24,7 +24,8 @@ namespace Initiative.Api.Controllers
             var members = request.Members.Select(m => new PartyMember
             {
                 Name = m.Name,
-                Level = m.Level
+                Level = m.Level,
+                DndBeyondCharacterId = m.DndBeyondCharacterId
             });
 
             var newPartyId = await partyService.CreateParty(User.GetUserId()!, request.Name, members, cancellationToken);
@@ -48,7 +49,8 @@ namespace Initiative.Api.Controllers
                 Members = p.Members.Select(m => new PartyMemberJsonModel
                 {
                     Name = m.Name,
-                    Level = m.Level
+                    Level = m.Level,
+                    DndBeyondCharacterId = m.DndBeyondCharacterId
                 })
             });
 
@@ -72,7 +74,8 @@ namespace Initiative.Api.Controllers
                 Members = party.Members.Select(m => new PartyMemberJsonModel
                 {
                     Name = m.Name,
-                    Level = m.Level
+                    Level = m.Level,
+                    DndBeyondCharacterId = m.DndBeyondCharacterId
                 })
             });
         }

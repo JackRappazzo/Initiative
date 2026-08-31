@@ -3,6 +3,7 @@ import { HttpClient } from "./httpClient";
 export interface PartyMember {
   name: string;
   level: number;
+  dndBeyondCharacterId?: string;
 }
 
 export interface Party {

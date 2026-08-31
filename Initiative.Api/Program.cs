@@ -6,6 +6,7 @@ using Initiative.Api.Core.Identity.Roles;
 using Initiative.Api.Core.Services.Authentication;
 using Initiative.Api.Core.Services.Bestiary;
 using Initiative.Api.Core.Services.Condition;
+using Initiative.Api.Core.Services.DndBeyond;
 using Initiative.Api.Core.Services.Spell;
 using Initiative.Api.Core.Services.Encounters;
 using Initiative.Api.Core.Services.Parties;
@@ -80,6 +81,12 @@ builder.Services.AddScoped<ISpellService, SpellService>();
 builder.Services.AddScoped<IConditionService, ConditionService>();
 builder.Services.AddScoped<IPartyService, PartyService>();
 builder.Services.AddScoped<IBase62CodeGenerator, Base62CodeGenerator>();
+
+builder.Services.AddHttpClient<IDndBeyondProxyService, DndBeyondProxyService>(client =>
+{
+    client.BaseAddress = new Uri("https://character-service.dndbeyond.com/character/v5/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 
 builder.Services.AddScoped<IUserManager<ApplicationIdentity>, UserManagerFacade<ApplicationIdentity>>();
 

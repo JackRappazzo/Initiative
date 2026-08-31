@@ -72,6 +72,9 @@ const SidebarMenu: React.FC = () => {
                 <Link to="/bestiaries" onClick={() => setOpen(false)}>Bestiaries</Link>
               </li>
               <li>
+                <Link to="/settings" onClick={() => setOpen(false)}>Settings</Link>
+              </li>
+              <li>
                 <button onClick={handleLogout}>Logout</button>
               </li>
             </>

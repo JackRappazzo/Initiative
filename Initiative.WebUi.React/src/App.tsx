@@ -12,16 +12,19 @@ import ViewCreature from "./pages/bestiaries/ViewCreature";
 import EditBestiary from "./pages/bestiaries/EditBestiary";
 import ListParties from './pages/parties/ListParties';
 import EditParty from './pages/parties/EditParty';
+import SettingsPage from './pages/SettingsPage';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { UserProvider } from './contexts/UserContext';
+import { DndBeyondProvider } from './contexts/DndBeyondContext';
 import './App.css'; 
 
 const App: React.FC = () => {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <UserProvider>
+        <DndBeyondProvider>
+          <UserProvider>
           <Router>
             <Routes>
               {/* Login and Register pages without layout */}
@@ -40,10 +43,12 @@ const App: React.FC = () => {
                 <Route path="/parties" element={<ListParties />} />
                 <Route path="/parties/new" element={<EditParty />} />
                 <Route path="/parties/:partyId/edit" element={<EditParty />} />
+                <Route path="/settings" element={<SettingsPage />} />
               </Route>
             </Routes>
           </Router>
         </UserProvider>
+        </DndBeyondProvider>
       </AuthProvider>
     </ThemeProvider>
   );

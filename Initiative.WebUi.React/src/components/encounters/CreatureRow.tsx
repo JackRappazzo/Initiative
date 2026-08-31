@@ -7,6 +7,7 @@ import { BestiaryClient, FiveEToolsRawData } from '../../api/bestiaryClient';
 import CreatureStatBlock from '../bestiaries/CreatureStatBlock';
 import { StatusTypeahead } from './StatusTypeahead';
 import { creatureToFantasyStatblockYaml } from '../../utils/fantasyStatblockYaml';
+import { DndBeyondHpSnapshot } from '../../hooks/useDndBeyondHealthSync';
 
 type EditingField = 'initiative' | 'currentHP' | 'maxHP' | 'displayName' | 'ac' | null;
 
@@ -16,11 +17,13 @@ const D20_ICON = '\u{1F3B2}';
 const SHEET_ICON = '\u{1F4CB}';
 const HIDE_ICON = '\u{1F441}\uFE0F';
 const SHOW_ICON = '\u{1F513}';
+const LINK_ICON = '\u{1F517}';
 
 interface CreatureRowProps {
   creature: EditableCreature;
   index: number;
   isCurrentTurn: boolean;
+  dndBeyondHp?: DndBeyondHpSnapshot;
   onCreatureChange: (index: number, creature: EditableCreature) => void;
   onCreatureRemove: (index: number) => void;
 }
@@ -29,6 +32,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
   creature,
   index,
   isCurrentTurn,
+  dndBeyondHp,
   onCreatureChange,
   onCreatureRemove,
 }) => {
@@ -132,6 +136,48 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
     .map((status, statusIndex) => ({ status, statusIndex }))
     .filter(({ status }) => !HEALTH_STATUS_SET.has(status.trim().toLowerCase()));
 
+  const renderEditableHp = () => (
+    <>
+      {editingField === 'currentHP' ? (
+        <NumericInput
+          value={creature.currentHP}
+          onChange={(value) => handleFieldChange('currentHP', value)}
+          onBlur={stopEditing}
+          ariaLabel="Hit Points"
+          placeholder="-"
+          className="creature-field-input creature-hp-input"
+        />
+      ) : (
+        <span
+          className="creature-field-display creature-hp-part"
+          onClick={() => startEditing('currentHP')}
+          title="Click to edit current HP"
+        >
+          {displayValue(creature.currentHP, '-')}
+        </span>
+      )}
+      <span className="creature-hp-sep">/</span>
+      {editingField === 'maxHP' ? (
+        <NumericInput
+          value={creature.maxHP}
+          onChange={(value) => handleFieldChange('maxHP', value)}
+          onBlur={stopEditing}
+          ariaLabel="Maximum Hit Points"
+          placeholder="-"
+          className="creature-field-input creature-hp-input"
+        />
+      ) : (
+        <span
+          className="creature-field-display creature-hp-part"
+          onClick={() => startEditing('maxHP')}
+          title="Click to edit max HP"
+        >
+          {displayValue(creature.maxHP, '-')}
+        </span>
+      )}
+    </>
+  );
+
   return (
     <>
       <div
@@ -181,47 +227,32 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
 
           <div className="creature-hp-cell">
             {creature.isPlayer ? (
-              <span className="creature-field-display creature-player-dash">--</span>
+              creature.dndBeyondCharacterId ? (
+                <>
+                  <button
+                    className={`hp-link-toggle${creature.isHpLinkedToDndBeyond ? ' linked' : ''}`}
+                    onClick={() => handleFieldChange('isHpLinkedToDndBeyond', !creature.isHpLinkedToDndBeyond)}
+                    title={creature.isHpLinkedToDndBeyond ? 'Unlink HP from D&D Beyond' : 'Link HP to D&D Beyond'}
+                    aria-label={creature.isHpLinkedToDndBeyond ? 'Unlink HP from D&D Beyond' : 'Link HP to D&D Beyond'}
+                  >
+                    {LINK_ICON}
+                  </button>
+                  {creature.isHpLinkedToDndBeyond ? (
+                    <span
+                      className="creature-field-display creature-hp-linked"
+                      title="D&D Beyond HP (read-only)"
+                    >
+                      {dndBeyondHp ? `${dndBeyondHp.currentHP} / ${dndBeyondHp.maxHP}` : '…'}
+                    </span>
+                  ) : (
+                    renderEditableHp()
+                  )}
+                </>
+              ) : (
+                <span className="creature-field-display creature-player-dash">--</span>
+              )
             ) : (
-              <>
-                {editingField === 'currentHP' ? (
-                  <NumericInput
-                    value={creature.currentHP}
-                    onChange={(value) => handleFieldChange('currentHP', value)}
-                    onBlur={stopEditing}
-                    ariaLabel="Hit Points"
-                    placeholder="-"
-                    className="creature-field-input creature-hp-input"
-                  />
-                ) : (
-                  <span
-                    className="creature-field-display creature-hp-part"
-                    onClick={() => startEditing('currentHP')}
-                    title="Click to edit current HP"
-                  >
-                    {displayValue(creature.currentHP, '-')}
-                  </span>
-                )}
-                <span className="creature-hp-sep">/</span>
-                {editingField === 'maxHP' ? (
-                  <NumericInput
-                    value={creature.maxHP}
-                    onChange={(value) => handleFieldChange('maxHP', value)}
-                    onBlur={stopEditing}
-                    ariaLabel="Maximum Hit Points"
-                    placeholder="-"
-                    className="creature-field-input creature-hp-input"
-                  />
-                ) : (
-                  <span
-                    className="creature-field-display creature-hp-part"
-                    onClick={() => startEditing('maxHP')}
-                    title="Click to edit max HP"
-                  >
-                    {displayValue(creature.maxHP, '-')}
-                  </span>
-                )}
-              </>
+              renderEditableHp()
             )}
           </div>
 

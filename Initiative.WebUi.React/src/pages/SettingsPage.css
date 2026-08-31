@@ -1,0 +1,46 @@
+.settings-container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.settings-section {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--card-bg);
+  border-radius: 8px;
+}
+
+.settings-hint {
+  color: var(--text-muted, #777);
+  font-size: 0.9rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.settings-status {
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.settings-status.success {
+  color: #2e7d32;
+}
+
+.settings-status.error {
+  color: #c62828;
+}
+
+.settings-token-input {
+  width: 100%;
+  padding: 0.5rem;
+  font-family: monospace;
+  font-size: 0.85rem;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.settings-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+}

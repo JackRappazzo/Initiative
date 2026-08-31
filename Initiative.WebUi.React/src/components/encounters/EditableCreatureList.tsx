@@ -15,10 +15,12 @@ import {
 } from '@dnd-kit/sortable';
 import { CreatureRow } from './CreatureRow';
 import { EditableCreature } from '../../types';
+import { DndBeyondHpSnapshot } from '../../hooks/useDndBeyondHealthSync';
 
 interface EditableCreatureListProps {
   creatures: EditableCreature[];
   highlightedCreatureIndex?: number;
+  dndBeyondHpById?: Record<string, DndBeyondHpSnapshot | undefined>;
   onCreaturesChange: (creatures: EditableCreature[]) => void;
   onCreatureUpdate: (index: number, creature: EditableCreature) => void;
   onCreatureRemove: (index: number) => void;
@@ -28,6 +30,7 @@ interface EditableCreatureListProps {
 export const EditableCreatureList: React.FC<EditableCreatureListProps> = ({
   creatures,
   highlightedCreatureIndex,
+  dndBeyondHpById,
   onCreaturesChange,
   onCreatureUpdate,
   onCreatureRemove,
@@ -116,6 +119,7 @@ export const EditableCreatureList: React.FC<EditableCreatureListProps> = ({
               creature={creature}
               index={index}
               isCurrentTurn={index === highlightedCreatureIndex}
+              dndBeyondHp={dndBeyondHpById?.[creature.dndBeyondCharacterId ?? '']}
               onCreatureChange={onCreatureUpdate}
               onCreatureRemove={onCreatureRemove}
             />

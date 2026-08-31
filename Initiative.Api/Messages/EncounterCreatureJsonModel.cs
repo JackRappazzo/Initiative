@@ -13,6 +13,10 @@ namespace Initiative.Api.Messages
 
         public string? CreatureId { get; set; }
 
+        public string? DndBeyondCharacterId { get; set; }
+
+        public bool IsHpLinkedToDndBeyond { get; set; } = false;
+
         public List<string> Statuses { get; set; } = new();
 
         public bool IsHidden { get; set; } = false;

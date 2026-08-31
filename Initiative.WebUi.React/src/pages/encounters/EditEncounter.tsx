@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { EncounterClient, FetchEncounterResponse } from '../../api/encounterClient';
 import { CreatureListItem, BestiaryClient, FiveEToolsRawData } from '../../api/bestiaryClient';
 import { EncounterState } from '../../types';
-import { useCreatureManagement, useLobbyConnection, useTaleSpireChat } from '../../hooks';
+import { useCreatureManagement, useLobbyConnection, useTaleSpireChat, useDndBeyondHealthSync } from '../../hooks';
 import { EditableCreatureList, EncounterHeader, EncounterStatus } from '../../components';
 import BestiaryPicker from '../../components/bestiaries/BestiaryPicker';
 import PartyPicker from '../../components/encounters/PartyPicker';
@@ -70,6 +70,8 @@ const EditEncounter: React.FC = () => {
     removeCreature: originalRemoveCreature,
     setCreatureList
   } = useCreatureManagement(encounterId, encounterClient, bestiaryClient);
+
+  const { hpById: dndBeyondHpById } = useDndBeyondHealthSync(creatures);
 
   // Method to send lobby state
   const sendLobbyState = useCallback(async (
@@ -311,6 +313,8 @@ const EditEncounter: React.FC = () => {
       displayName: m.name,
       creatureName: undefined,
       creatureId: undefined,
+      dndBeyondCharacterId: m.dndBeyondCharacterId,
+      isHpLinkedToDndBeyond: false,
       initiative: 0,
       initiativeModifier: 0,
       maxHP: 0,
@@ -727,6 +731,7 @@ const EditEncounter: React.FC = () => {
             <EditableCreatureList
               creatures={creatures}
               highlightedCreatureIndex={encounterState.currentTurn}
+              dndBeyondHpById={dndBeyondHpById}
               onCreaturesChange={handleCreaturesChange}
               onCreatureUpdate={updateCreature}
               onCreatureRemove={removeCreature}
