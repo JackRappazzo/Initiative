@@ -51,24 +51,67 @@ namespace Initiative.Api.Core.Services.DndBeyond
                 return null;
             }
 
-            var overrideHp = GetNullableInt(data, "overrideHitPoints");
-            var baseHp = GetInt(data, "baseHitPoints");
-            var bonusHp = GetInt(data, "bonusHitPoints");
             var removedHp = GetInt(data, "removedHitPoints");
+            var level = GetLevel(data);
 
-            var maxHp = overrideHp ?? (baseHp + bonusHp + 10);
+            var maxHp = CalculateMaxHitPoints(data, level);
             var currentHp = Math.Max(maxHp - removedHp, 0);
 
             return new DndBeyondCharacterDetail
             {
                 Id = GetLong(data, "id"),
                 Name = GetString(data, "characterName") ?? GetString(data, "name"),
-                Level = GetLevel(data),
+                Level = level,
                 ClassName = GetClassName(data),
                 MaxHP = maxHp,
                 CurrentHP = currentHp,
                 TemporaryHP = GetInt(data, "temporaryHitPoints")
             };
+        }
+
+        internal static int CalculateMaxHitPoints(JsonElement data, int level)
+        {
+            var overrideHp = GetNullableInt(data, "overrideHitPoints");
+            var baseHp = GetInt(data, "baseHitPoints");
+
+            return overrideHp ?? (baseHp + GetConstitutionHitPoints(data, level));
+        }
+
+        private static int GetConstitutionHitPoints(JsonElement data, int level)
+        {
+            const int ConstitutionAbilityId = 3;
+
+            var score = GetAbilityScore(data, ConstitutionAbilityId);
+            var modifier = (int)Math.Floor((score - 10) / 2.0);
+
+            return modifier * level;
+        }
+
+        private static int GetAbilityScore(JsonElement data, int abilityId)
+        {
+            var baseScore = GetStatValue(data, "stats", abilityId);
+            var bonusScore = GetStatValue(data, "bonusStats", abilityId);
+            var overrideScore = GetStatValue(data, "overrideStats", abilityId);
+
+            return overrideScore != 0 ? overrideScore : baseScore + bonusScore;
+        }
+
+        private static int GetStatValue(JsonElement data, string property, int abilityId)
+        {
+            if (!data.TryGetProperty(property, out var array) || array.ValueKind != JsonValueKind.Array)
+            {
+                return 0;
+            }
+
+            foreach (var entry in array.EnumerateArray())
+            {
+                if (GetInt(entry, "id") == abilityId)
+                {
+                    return GetInt(entry, "value");
+                }
+            }
+
+            return 0;
         }
 
         private static int GetLevel(JsonElement data)
