@@ -5,6 +5,8 @@ import { NumericInput } from '../ui';
 import { EditableCreature } from '../../types';
 import { BestiaryClient, FiveEToolsRawData } from '../../api/bestiaryClient';
 import CreatureStatBlock from '../bestiaries/CreatureStatBlock';
+import PlayerStatBlock from './PlayerStatBlock';
+import { DndBeyondClient, DndBeyondCharacterDetail } from '../../api/dndBeyondClient';
 import { StatusTypeahead } from './StatusTypeahead';
 import { creatureToFantasyStatblockYaml } from '../../utils/fantasyStatblockYaml';
 import { DndBeyondHpSnapshot } from '../../hooks/useDndBeyondHealthSync';
@@ -12,6 +14,7 @@ import { DndBeyondHpSnapshot } from '../../hooks/useDndBeyondHealthSync';
 type EditingField = 'initiative' | 'currentHP' | 'maxHP' | 'displayName' | 'ac' | null;
 
 const bestiaryClient = new BestiaryClient();
+const dndBeyondClient = new DndBeyondClient();
 const HEALTH_STATUS_SET = new Set(['healthy', 'hurt', 'bloodied']);
 const D20_ICON = '\u{1F3B2}';
 const SHEET_ICON = '\u{1F4CB}';
@@ -40,6 +43,8 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
   const nameInputRef = useRef<HTMLInputElement>(null);
   const [statBlockData, setStatBlockData] = useState<FiveEToolsRawData | null>(null);
   const [statBlockLoading, setStatBlockLoading] = useState(false);
+  const [playerStatBlockData, setPlayerStatBlockData] = useState<DndBeyondCharacterDetail | null>(null);
+  const [playerStatBlockLoading, setPlayerStatBlockLoading] = useState(false);
   const [copyState, setCopyState] = useState<'copied' | 'error' | null>(null);
   const [showStatusTypeahead, setShowStatusTypeahead] = useState(false);
 
@@ -84,6 +89,20 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
       setStatBlockLoading(false);
     }
   }, [creature.creatureId]);
+
+  const openPlayerStatBlock = useCallback(async () => {
+    if (!creature.dndBeyondCharacterId) return;
+
+    setPlayerStatBlockLoading(true);
+    try {
+      const detail = await dndBeyondClient.getCharacter(creature.dndBeyondCharacterId);
+      setPlayerStatBlockData(detail);
+    } catch {
+      // Ignore failures (e.g. missing session token / rate limited).
+    } finally {
+      setPlayerStatBlockLoading(false);
+    }
+  }, [creature.dndBeyondCharacterId]);
 
   const copyYamlToClipboard = useCallback(async () => {
     if (!statBlockData) return;
@@ -337,6 +356,17 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
                 {statBlockLoading ? '...' : SHEET_ICON}
               </button>
             )}
+            {creature.isPlayer && creature.dndBeyondCharacterId && (
+              <button
+                className="control-button secondary"
+                onClick={openPlayerStatBlock}
+                disabled={playerStatBlockLoading}
+                title="View character stat block"
+                aria-label="View character stat block"
+              >
+                {playerStatBlockLoading ? '...' : SHEET_ICON}
+              </button>
+            )}
             {!creature.isPlayer && (
               <button
                 className={`control-button secondary ${creature.isHidden ? 'hidden' : ''}`}
@@ -370,6 +400,17 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
               </div>
             )}
             <CreatureStatBlock data={statBlockData} />
+          </div>
+        </div>
+      )}
+
+      {playerStatBlockData && (
+        <div className="stat-block-overlay" onClick={() => setPlayerStatBlockData(null)}>
+          <div className="stat-block-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="stat-block-controls">
+              <button className="stat-block-close" onClick={() => setPlayerStatBlockData(null)} aria-label="Close">X</button>
+            </div>
+            <PlayerStatBlock detail={playerStatBlockData} />
           </div>
         </div>
       )}

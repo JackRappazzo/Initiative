@@ -72,7 +72,64 @@ namespace Initiative.Api.Controllers
                     ClassName = character.ClassName,
                     MaxHP = character.MaxHP,
                     CurrentHP = character.CurrentHP,
-                    TemporaryHP = character.TemporaryHP
+                    TemporaryHP = character.TemporaryHP,
+
+                    Strength = character.Strength,
+                    Dexterity = character.Dexterity,
+                    Constitution = character.Constitution,
+                    Intelligence = character.Intelligence,
+                    Wisdom = character.Wisdom,
+                    Charisma = character.Charisma,
+
+                    ArmorClass = character.ArmorClass,
+                    ProficiencyBonus = character.ProficiencyBonus,
+                    Race = character.Race,
+                    Speed = character.Speed,
+
+                    SpellSlots = character.SpellSlots
+                        .Select(s => new GetDndBeyondCharacterResponse.SpellSlot
+                        {
+                            Level = s.Level,
+                            Used = s.Used,
+                            Available = s.Available
+                        })
+                        .ToList(),
+                    PactSlots = character.PactSlots
+                        .Select(s => new GetDndBeyondCharacterResponse.SpellSlot
+                        {
+                            Level = s.Level,
+                            Used = s.Used,
+                            Available = s.Available
+                        })
+                        .ToList(),
+                    PreparedSpells = character.PreparedSpells
+                        .Select(p => new GetDndBeyondCharacterResponse.PreparedSpell
+                        {
+                            Name = p.Name,
+                            Level = p.Level,
+                            IsCantrip = p.IsCantrip
+                        })
+                        .ToList(),
+                    FocusPoints = character.FocusPoints is null
+                        ? null
+                        : new GetDndBeyondCharacterResponse.Resource
+                        {
+                            Current = character.FocusPoints.Current,
+                            Max = character.FocusPoints.Max
+                        },
+                    Attacks = character.Attacks
+                        .Select(a => new GetDndBeyondCharacterResponse.Attack
+                        {
+                            Name = a.Name,
+                            ToHitBonus = a.ToHitBonus,
+                            DamageDice = a.DamageDice,
+                            DamageBonus = a.DamageBonus,
+                            DamageType = a.DamageType,
+                            Range = a.Range,
+                            LongRange = a.LongRange,
+                            IsRanged = a.IsRanged
+                        })
+                        .ToList()
                 });
             }
             catch (DndBeyondRequestException ex)

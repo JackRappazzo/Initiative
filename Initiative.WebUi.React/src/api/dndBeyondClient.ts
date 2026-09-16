@@ -5,6 +5,34 @@ export interface DndBeyondCharacter {
   name?: string;
 }
 
+export interface DndBeyondSpellSlot {
+  level: number;
+  used: number;
+  available: number;
+}
+
+export interface DndBeyondPreparedSpell {
+  name: string;
+  level: number;
+  isCantrip: boolean;
+}
+
+export interface DndBeyondResource {
+  current: number;
+  max: number;
+}
+
+export interface DndBeyondAttack {
+  name: string;
+  toHitBonus: number;
+  damageDice: string;
+  damageBonus: number;
+  damageType?: string | null;
+  range: number;
+  longRange: number;
+  isRanged: boolean;
+}
+
 export interface DndBeyondCharacterDetail {
   id: number;
   name?: string;
@@ -13,6 +41,21 @@ export interface DndBeyondCharacterDetail {
   maxHP: number;
   currentHP: number;
   temporaryHP: number;
+  strength: number;
+  dexterity: number;
+  constitution: number;
+  intelligence: number;
+  wisdom: number;
+  charisma: number;
+  armorClass: number;
+  proficiencyBonus: number;
+  race?: string;
+  speed: number;
+  spellSlots: DndBeyondSpellSlot[];
+  pactSlots: DndBeyondSpellSlot[];
+  preparedSpells: DndBeyondPreparedSpell[];
+  focusPoints?: DndBeyondResource | null;
+  attacks: DndBeyondAttack[];
 }
 
 export class DndBeyondRateLimitedError extends Error {
