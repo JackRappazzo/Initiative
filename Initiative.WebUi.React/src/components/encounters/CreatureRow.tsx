@@ -104,6 +104,12 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
     }
   }, [creature.dndBeyondCharacterId]);
 
+  const openSidekickStatBlock = useCallback(() => {
+    if (creature.rawData) {
+      setStatBlockData(creature.rawData);
+    }
+  }, [creature.rawData]);
+
   const copyYamlToClipboard = useCallback(async () => {
     if (!statBlockData) return;
 
@@ -245,7 +251,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
           </div>
 
           <div className="creature-hp-cell">
-            {creature.isPlayer ? (
+            {creature.isPlayer && !creature.sidekickId ? (
               creature.dndBeyondCharacterId ? (
                 <>
                   <button
@@ -322,7 +328,7 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
             </div>
           </div>
 
-          {creature.isPlayer ? (
+          {creature.isPlayer && !creature.sidekickId ? (
             <span className="creature-field-display creature-player-dash">--</span>
           ) : editingField === 'ac' ? (
             <NumericInput
@@ -365,6 +371,16 @@ export const CreatureRow: React.FC<CreatureRowProps> = ({
                 aria-label="View character stat block"
               >
                 {playerStatBlockLoading ? '...' : SHEET_ICON}
+              </button>
+            )}
+            {creature.sidekickId && creature.rawData && (
+              <button
+                className="control-button secondary"
+                onClick={openSidekickStatBlock}
+                title="View sidekick stat block"
+                aria-label="View sidekick stat block"
+              >
+                {SHEET_ICON}
               </button>
             )}
             {!creature.isPlayer && (
