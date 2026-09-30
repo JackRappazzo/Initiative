@@ -150,6 +150,29 @@ namespace Initiative.Persistence.Repositories
                 { "then", numericValue }
             };
 
+        /// <summary>Standard CR strings in ascending numeric order.</summary>
+        private static readonly string[] CrStrings = new[]
+        {
+            "0", "1/8", "1/4", "1/2"
+        }.Concat(Enumerable.Range(1, 30).Select(i => i.ToString())).ToArray();
+
+        private static readonly Dictionary<string, double> CrNumeric = new[]
+        {
+            ("0", 0.0), ("1/8", 0.125), ("1/4", 0.25), ("1/2", 0.5)
+        }.Concat(Enumerable.Range(1, 30).Select(i => (i.ToString(), (double)i)))
+            .ToDictionary(x => x.Item1, x => x.Item2);
+
+        /// <summary>Returns all standard CR strings whose numeric value is at most <paramref name="maxCr"/>.</summary>
+        private static string[] CrStringsUpTo(string maxCr)
+        {
+            if (!CrNumeric.TryGetValue(maxCr, out var limit))
+            {
+                return Array.Empty<string>();
+            }
+
+            return CrStrings.Where(cr => CrNumeric[cr] <= limit).ToArray();
+        }
+
         public async Task<long> CountCreatures(BestiarySearchQuery query, CancellationToken cancellationToken)
         {
             var collection = GetMongoDatabase().GetCollection<BestiaryCreatureDocument>(CreaturesCollection);
@@ -192,6 +215,13 @@ namespace Initiative.Persistence.Repositories
             if (!string.IsNullOrWhiteSpace(query.ChallengeRating))
             {
                 filters.Add(Builders<BestiaryCreatureDocument>.Filter.Eq(c => c.ChallengeRating, query.ChallengeRating.Trim()));
+            }
+
+            // Maximum challenge rating: inclusive bound over the standard CR strings
+            if (!string.IsNullOrWhiteSpace(query.MaxChallengeRating))
+            {
+                var allowed = CrStringsUpTo(query.MaxChallengeRating.Trim());
+                filters.Add(Builders<BestiaryCreatureDocument>.Filter.In(c => c.ChallengeRating, allowed));
             }
 
             // Legendary filter

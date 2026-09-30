@@ -9,16 +9,29 @@ import './BestiaryPicker.css';
 interface BestiaryPickerProps {
   onCreatureSelect: (creature: CreatureListItem) => void;
   onClose: () => void;
+  title?: string;
+  selectButtonLabel?: string;
+  selectButtonTitle?: string;
+  maxChallengeRating?: string;
+  nonLegendaryOnly?: boolean;
 }
 
-const BestiaryPicker: React.FC<BestiaryPickerProps> = ({ onCreatureSelect, onClose }) => {
+const BestiaryPicker: React.FC<BestiaryPickerProps> = ({
+  onCreatureSelect,
+  onClose,
+  title = 'Add Creature',
+  selectButtonLabel = '+',
+  selectButtonTitle = 'Add to encounter',
+  maxChallengeRating,
+  nonLegendaryOnly,
+}) => {
   const {
     bestiaries, selectedIds, bestiariesLoading, bestiariesError,
     toggleBestiary, selectOnly, selectAll, clearAll,
     nameInput, creatureTypeFilter, sort, handleNameInputChange, handleCreatureTypeChange, handleSortClick, sortIndicator,
     creatures, totalCount, totalPages, currentPage,
     creaturesLoading, creaturesError, handlePageChange,
-  } = useBestiarySearch();
+  } = useBestiarySearch({ maxChallengeRating, nonLegendaryOnly });
 
   return (
     <>
@@ -32,7 +45,7 @@ const BestiaryPicker: React.FC<BestiaryPickerProps> = ({ onCreatureSelect, onClo
         >
           {/* Header */}
           <div className="bestiary-picker-header">
-            <span className="bestiary-picker-title">Add Creature</span>
+            <span className="bestiary-picker-title">{title}</span>
             <button
               className="bestiary-picker-close"
               onClick={onClose}
@@ -78,10 +91,10 @@ const BestiaryPicker: React.FC<BestiaryPickerProps> = ({ onCreatureSelect, onClo
                   <button
                     className="control-button secondary"
                     onClick={(e) => { e.stopPropagation(); onCreatureSelect(creature); }}
-                    aria-label={`Add ${creature.name} to encounter`}
-                    title="Add to encounter"
+                    aria-label={`${selectButtonLabel} ${creature.name}`}
+                    title={selectButtonTitle}
                   >
-                    +
+                    {selectButtonLabel}
                   </button>
                 ),
               }}

@@ -10,6 +10,7 @@ using Initiative.Api.Core.Services.DndBeyond;
 using Initiative.Api.Core.Services.Spell;
 using Initiative.Api.Core.Services.Encounters;
 using Initiative.Api.Core.Services.Parties;
+using Initiative.Api.Core.Services.Sidekicks;
 using Initiative.Api.Core.Services.Users;
 using Initiative.Api.Core.Utilities;
 using Initiative.Lobby.Core;
@@ -23,6 +24,7 @@ using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using RestSharp;
 using System.Text;
 
@@ -81,6 +83,8 @@ builder.Services.AddScoped<IBestiaryService, BestiaryService>();
 builder.Services.AddScoped<ISpellService, SpellService>();
 builder.Services.AddScoped<IConditionService, ConditionService>();
 builder.Services.AddScoped<IPartyService, PartyService>();
+builder.Services.AddScoped<ISidekickStatBlockBuilder, SidekickStatBlockBuilder>();
+builder.Services.AddScoped<ISidekickService, SidekickService>();
 builder.Services.AddScoped<IBase62CodeGenerator, Base62CodeGenerator>();
 
 builder.Services.AddSingleton(new RestClient(new RestClientOptions
@@ -164,7 +168,10 @@ builder.Services.AddAuthentication(authOptions =>
     });
 
 
-builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
+{
+    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+});
 
 var app = builder.Build();
 

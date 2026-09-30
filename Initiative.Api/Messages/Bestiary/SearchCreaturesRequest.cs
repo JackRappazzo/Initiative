@@ -8,6 +8,7 @@ namespace Initiative.Api.Messages.Bestiary
         public string? Name { get; set; }
         public string? CreatureType { get; set; }
         public string? ChallengeRating { get; set; }
+        public string? MaxChallengeRating { get; set; }
         public bool? IsLegendary { get; set; }
         public CreatureSortBy SortBy { get; set; } = CreatureSortBy.Name;
         public bool SortDescending { get; set; } = false;

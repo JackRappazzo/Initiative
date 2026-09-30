@@ -27,6 +27,11 @@ namespace Initiative.Api.Core.Services.Parties
             return await partyRepository.FetchPartiesByOwnerId(ownerId, cancellationToken);
         }
 
+        public async Task<bool> UpdatePartyMembers(string partyId, string ownerId, IEnumerable<PartyMember> members, CancellationToken cancellationToken)
+        {
+            return await partyRepository.UpdatePartyMembers(partyId, ownerId, members, cancellationToken);
+        }
+
         public async Task<bool> DeleteParty(string partyId, string ownerId, CancellationToken cancellationToken)
         {
             return await partyRepository.DeleteParty(partyId, ownerId, cancellationToken);

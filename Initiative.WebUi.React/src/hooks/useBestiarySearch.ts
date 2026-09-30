@@ -37,7 +37,12 @@ export interface UseBestiarySearchResult {
   handlePageChange: (page: number) => void;
 }
 
-export const useBestiarySearch = (): UseBestiarySearchResult => {
+export interface UseBestiarySearchOptions {
+  maxChallengeRating?: string;
+  nonLegendaryOnly?: boolean;
+}
+
+export const useBestiarySearch = (options: UseBestiarySearchOptions = {}): UseBestiarySearchResult => {
   const bestiaryClient = useMemo(() => new BestiaryClient(), []);
 
   // Sidebar / filter state
@@ -88,6 +93,8 @@ export const useBestiarySearch = (): UseBestiarySearchResult => {
           bestiaryIds: idArray,
           name: nameFilter || undefined,
           creatureType: creatureTypeFilter || undefined,
+          maxChallengeRating: options.maxChallengeRating,
+          isLegendary: options.nonLegendaryOnly ? false : undefined,
           sortBy: sort.col,
           sortDescending: sort.desc ? true : undefined,
           pageSize: PAGE_SIZE,
@@ -103,7 +110,7 @@ export const useBestiarySearch = (): UseBestiarySearchResult => {
     };
     run();
     return () => { cancelled = true; };
-  }, [bestiariesLoading, selectedIds, nameFilter, creatureTypeFilter, sort, currentPage, bestiaryClient]);
+  }, [bestiariesLoading, selectedIds, nameFilter, creatureTypeFilter, sort, currentPage, bestiaryClient, options.maxChallengeRating, options.nonLegendaryOnly]);
 
   // Debounce name input → nameFilter
   const handleNameInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

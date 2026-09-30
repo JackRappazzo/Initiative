@@ -22,11 +22,19 @@ namespace Initiative.Persistence.Models.Encounters
 
         public bool IsHpLinkedToDndBeyond { get; set; } = false;
 
+        /// <summary>References the party member id when this creature is a sidekick.</summary>
+        public string? SidekickId { get; set; }
+
+        /// <summary>Rendered 5etools-style statblock snapshot for sidekicks.</summary>
+        public BsonDocument? RawData { get; set; }
+
         public List<string> Statuses { get; set; } = new();
 
         public bool IsHidden { get; set; } = false;
 
         public int Initiative { get; set; }
+
+        public int InitiativeModifier { get; set; }
 
         public int MaxHP { get; set; }
 

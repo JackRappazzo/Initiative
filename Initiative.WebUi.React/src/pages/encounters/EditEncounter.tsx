@@ -308,20 +308,41 @@ const EditEncounter: React.FC = () => {
 
     // Remove existing player characters, keep non-player creatures
     const nonPlayers = creatures.filter((c) => !c.isPlayer);
-    const partyCreatures = party.members.map((m) => ({
-      isPlayer: true,
-      displayName: m.name,
-      creatureName: undefined,
-      creatureId: undefined,
-      dndBeyondCharacterId: m.dndBeyondCharacterId,
-      isHpLinkedToDndBeyond: false,
-      initiative: 0,
-      initiativeModifier: 0,
-      maxHP: 0,
-      currentHP: 0,
-      ac: 0,
-      isEditing: false,
-    }));
+    const partyCreatures = party.members.map((m) => {
+      if (m.sidekick) {
+        const r = m.sidekick.rawData;
+        const hp = r?.hp?.average ?? 0;
+        const acEntry = Array.isArray(r?.ac) ? r.ac[0] : r?.ac;
+        const ac = typeof acEntry === 'number' ? acEntry : (acEntry?.ac ?? 0);
+        const dexMod = Math.floor(((r?.dex ?? 10) - 10) / 2);
+        return {
+          isPlayer: true,
+          displayName: m.name,
+          sidekickId: m.id,
+          rawData: r,
+          initiative: 0,
+          initiativeModifier: dexMod,
+          maxHP: hp,
+          currentHP: hp,
+          ac,
+          isEditing: false,
+        };
+      }
+      return {
+        isPlayer: true,
+        displayName: m.name,
+        creatureName: undefined,
+        creatureId: undefined,
+        dndBeyondCharacterId: m.dndBeyondCharacterId,
+        isHpLinkedToDndBeyond: false,
+        initiative: 0,
+        initiativeModifier: 0,
+        maxHP: 0,
+        currentHP: 0,
+        ac: 0,
+        isEditing: false,
+      };
+    });
     handleCreaturesChange([...nonPlayers, ...partyCreatures]);
   }, [creatures, handleCreaturesChange, encounterId, encounterClient, setError]);
 
@@ -395,6 +416,10 @@ const EditEncounter: React.FC = () => {
   // Fetch stat block for the current creature whenever the active turn changes
   useEffect(() => {
     const current = creatures[encounterState.currentTurn];
+    if (current?.rawData) {
+      setActiveStatBlock(current.rawData);
+      return;
+    }
     if (!current?.creatureId || current.isPlayer) {
       setActiveStatBlock(null);
       return;

@@ -1,12 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { PartyClient, PartyMember } from '../../api/partyClient';
+import { PartyClient, PartyMember, Sidekick } from '../../api/partyClient';
 import { DndBeyondClient, DndBeyondCharacterDetail } from '../../api/dndBeyondClient';
 import { useDndBeyondSession } from '../../contexts/DndBeyondContext';
 import './EditParty.css';
 
-interface MemberRow extends PartyMember {
-  id: number;
+interface MemberRow {
+  key: number;
+  id?: string;
+  name: string;
+  level: number;
+  dndBeyondCharacterId?: string;
+  sidekick?: Sidekick | null;
   editing: boolean;
   dndBeyondLabel?: string;
 }
@@ -34,10 +39,10 @@ const EditParty: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [idPromptMemberId, setIdPromptMemberId] = useState<number | null>(null);
+  const [idPromptMemberKey, setIdPromptMemberKey] = useState<number | null>(null);
   const [idDraft, setIdDraft] = useState('');
 
-  const [confirmingMemberId, setConfirmingMemberId] = useState<number | null>(null);
+  const [confirmingMemberKey, setConfirmingMemberKey] = useState<number | null>(null);
   const [confirmDetail, setConfirmDetail] = useState<DndBeyondCharacterDetail | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [confirmError, setConfirmError] = useState<string | null>(null);
@@ -48,7 +53,15 @@ const EditParty: React.FC = () => {
       try {
         const party = await partyClient.getParty(partyId!);
         setPartyName(party.name);
-        const rows = party.members.map((m) => ({ ...m, id: nextId++, editing: false }));
+        const rows = party.members.map((m) => ({
+          key: nextId++,
+          id: m.id,
+          name: m.name,
+          level: m.level,
+          dndBeyondCharacterId: m.dndBeyondCharacterId,
+          sidekick: m.sidekick ?? null,
+          editing: false,
+        }));
         setMembers(rows);
 
         for (const row of rows) {
@@ -56,12 +69,12 @@ const EditParty: React.FC = () => {
           dndBeyondClient.getCharacter(row.dndBeyondCharacterId)
             .then((detail) => {
               setMembers((prev) => prev.map((r) =>
-                r.id === row.id ? { ...r, dndBeyondLabel: buildCharacterLabel(detail) } : r
+                r.key === row.key ? { ...r, dndBeyondLabel: buildCharacterLabel(detail) } : r
               ));
             })
             .catch(() => {
               setMembers((prev) => prev.map((r) =>
-                r.id === row.id ? { ...r, dndBeyondLabel: `DDB #${row.dndBeyondCharacterId}` } : r
+                r.key === row.key ? { ...r, dndBeyondLabel: `DDB #${row.dndBeyondCharacterId}` } : r
               ));
             });
         }
@@ -77,55 +90,55 @@ const EditParty: React.FC = () => {
   const addMember = () => {
     setMembers((prev) => [
       ...prev,
-      { id: nextId++, name: '', level: 1, editing: true },
+      { key: nextId++, name: '', level: 1, editing: true },
     ]);
   };
 
-  const startEditing = (id: number) => {
+  const startEditing = (key: number) => {
     setMembers((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, editing: true } : m))
+      prev.map((m) => (m.key === key ? { ...m, editing: true } : m))
     );
   };
 
-  const commitName = (id: number, name: string) => {
+  const commitName = (key: number, name: string) => {
     setMembers((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, name, editing: false } : m))
+      prev.map((m) => (m.key === key ? { ...m, name, editing: false } : m))
     );
   };
 
-  const setLevel = (id: number, level: number) => {
+  const setLevel = (key: number, level: number) => {
     setMembers((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, level } : m))
+      prev.map((m) => (m.key === key ? { ...m, level } : m))
     );
   };
 
-  const removeMember = (id: number) => {
-    setMembers((prev) => prev.filter((m) => m.id !== id));
+  const removeMember = (key: number) => {
+    setMembers((prev) => prev.filter((m) => m.key !== key));
   };
 
-  const openIdPrompt = (memberId: number) => {
+  const openIdPrompt = (memberKey: number) => {
     if (!hasToken) {
       setError('No D&D Beyond token set. Add one in Settings first.');
       return;
     }
     setError(null);
-    setIdPromptMemberId(memberId);
+    setIdPromptMemberKey(memberKey);
     setIdDraft('');
   };
 
   const closeIdPrompt = () => {
-    setIdPromptMemberId(null);
+    setIdPromptMemberKey(null);
     setIdDraft('');
   };
 
-  const lookUpCharacter = async (memberId: number, rawId: string) => {
+  const lookUpCharacter = async (memberKey: number, rawId: string) => {
     const characterId = rawId.trim();
     if (!characterId) return;
 
-    setIdPromptMemberId(null);
+    setIdPromptMemberKey(null);
     setIdDraft('');
 
-    setConfirmingMemberId(memberId);
+    setConfirmingMemberKey(memberKey);
     setConfirmLoading(true);
     setConfirmError(null);
     setConfirmDetail(null);
@@ -141,31 +154,31 @@ const EditParty: React.FC = () => {
   };
 
   const confirmLink = () => {
-    if (confirmingMemberId === null || !confirmDetail) return;
-    const memberId = confirmingMemberId;
+    if (confirmingMemberKey === null || !confirmDetail) return;
+    const memberKey = confirmingMemberKey;
     const characterId = String(confirmDetail.id);
     setMembers((prev) =>
       prev.map((m) =>
-        m.id === memberId
+        m.key === memberKey
           ? { ...m, dndBeyondCharacterId: characterId, dndBeyondLabel: buildCharacterLabel(confirmDetail) }
           : m
       )
     );
-    setConfirmingMemberId(null);
+    setConfirmingMemberKey(null);
     setConfirmDetail(null);
     setConfirmError(null);
   };
 
   const cancelConfirm = () => {
-    setConfirmingMemberId(null);
+    setConfirmingMemberKey(null);
     setConfirmDetail(null);
     setConfirmError(null);
   };
 
-  const unlink = (memberId: number) => {
+  const unlink = (memberKey: number) => {
     setMembers((prev) =>
       prev.map((m) =>
-        m.id === memberId ? { ...m, dndBeyondCharacterId: undefined, dndBeyondLabel: undefined } : m
+        m.key === memberKey ? { ...m, dndBeyondCharacterId: undefined, dndBeyondLabel: undefined } : m
       )
     );
   };
@@ -178,13 +191,16 @@ const EditParty: React.FC = () => {
     setSaving(true);
     setError(null);
     try {
-      const payload = members.map(({ name, level, dndBeyondCharacterId }) => ({ name, level, dndBeyondCharacterId }));
+      const payload: PartyMember[] = members.map(({ id, name, level, dndBeyondCharacterId }) => ({
+        id,
+        name,
+        level,
+        dndBeyondCharacterId,
+      }));
       if (isNew) {
         await partyClient.createParty(partyName.trim(), payload);
       } else {
-        // Delete the old party and recreate with updated data (no PUT endpoint yet)
-        await partyClient.deleteParty(partyId!);
-        await partyClient.createParty(partyName.trim(), payload);
+        await partyClient.updatePartyMembers(partyId!, payload);
       }
       navigate('/parties');
     } catch (err) {
@@ -217,17 +233,18 @@ const EditParty: React.FC = () => {
         <h2>Members</h2>
         <ul className="members-list">
           {members.map((member) => (
-            <React.Fragment key={member.id}>
+            <React.Fragment key={member.key}>
               <MemberRowItem
                 member={member}
-                onStartEditing={() => startEditing(member.id)}
-                onCommitName={(name) => commitName(member.id, name)}
-                onSetLevel={(level) => setLevel(member.id, level)}
-                onRemove={() => removeMember(member.id)}
-                onLinkCharacter={() => openIdPrompt(member.id)}
-                onUnlink={() => unlink(member.id)}
+                onStartEditing={() => startEditing(member.key)}
+                onCommitName={(name) => commitName(member.key, name)}
+                onSetLevel={(level) => setLevel(member.key, level)}
+                onRemove={() => removeMember(member.key)}
+                onLinkCharacter={() => openIdPrompt(member.key)}
+                onUnlink={() => unlink(member.key)}
+                onEditSidekick={() => member.id && navigate(`/parties/${partyId}/sidekicks/${member.id}/edit`)}
               />
-              {confirmingMemberId === member.id && (
+              {confirmingMemberKey === member.key && (
                 <li className="member-confirm-row">
                   {confirmLoading && <span>Loading character…</span>}
                   {confirmError && <span className="confirm-error">{confirmError}</span>}
@@ -245,9 +262,16 @@ const EditParty: React.FC = () => {
             </React.Fragment>
           ))}
         </ul>
-        <button className="btn-add-member" onClick={addMember}>
-          + Add Member
-        </button>
+        <div className="edit-party-member-actions">
+          <button className="btn-add-member" onClick={addMember}>
+            + Add Member
+          </button>
+          {!isNew && (
+            <button className="btn-add-member" onClick={() => navigate(`/parties/${partyId}/sidekicks/new`)}>
+              + Add Sidekick
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="edit-party-actions">
@@ -259,7 +283,7 @@ const EditParty: React.FC = () => {
         </button>
       </div>
 
-      {idPromptMemberId !== null && (
+      {idPromptMemberKey !== null && (
         <div className="ddb-picker-overlay" onClick={closeIdPrompt}>
           <div className="ddb-picker-modal" onClick={(e) => e.stopPropagation()}>
             <div className="ddb-picker-header">
@@ -275,7 +299,7 @@ const EditParty: React.FC = () => {
                 value={idDraft}
                 onChange={(e) => setIdDraft(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') lookUpCharacter(idPromptMemberId, idDraft);
+                  if (e.key === 'Enter') lookUpCharacter(idPromptMemberKey, idDraft);
                   if (e.key === 'Escape') closeIdPrompt();
                 }}
                 placeholder="e.g. 12345678"
@@ -284,7 +308,7 @@ const EditParty: React.FC = () => {
               <div className="ddb-id-actions">
                 <button
                   className="btn-primary"
-                  onClick={() => lookUpCharacter(idPromptMemberId, idDraft)}
+                  onClick={() => lookUpCharacter(idPromptMemberKey, idDraft)}
                   disabled={!idDraft.trim()}
                 >
                   Look Up
@@ -307,6 +331,7 @@ interface MemberRowItemProps {
   onRemove: () => void;
   onLinkCharacter: () => void;
   onUnlink: () => void;
+  onEditSidekick: () => void;
 }
 
 const MemberRowItem: React.FC<MemberRowItemProps> = ({
@@ -317,6 +342,7 @@ const MemberRowItem: React.FC<MemberRowItemProps> = ({
   onRemove,
   onLinkCharacter,
   onUnlink,
+  onEditSidekick,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [draftName, setDraftName] = useState(member.name);
@@ -328,6 +354,20 @@ const MemberRowItem: React.FC<MemberRowItemProps> = ({
   }, [member.editing]);
 
   const commit = () => onCommitName(draftName);
+
+  if (member.sidekick) {
+    const s = member.sidekick;
+    return (
+      <li className="member-row member-row--sidekick">
+        <span className="member-sidekick-badge">
+          Sidekick · {s.class} {s.level}
+        </span>
+        <span className="member-name-display">{member.name}</span>
+        <button className="btn-secondary" onClick={onEditSidekick}>Edit</button>
+        <button className="btn-remove-member" onClick={onRemove} title="Remove sidekick">×</button>
+      </li>
+    );
+  }
 
   return (
     <li className="member-row">

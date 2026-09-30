@@ -12,6 +12,7 @@ import ViewCreature from "./pages/bestiaries/ViewCreature";
 import EditBestiary from "./pages/bestiaries/EditBestiary";
 import ListParties from './pages/parties/ListParties';
 import EditParty from './pages/parties/EditParty';
+import SidekickWizard from './pages/parties/sidekicks/SidekickWizard';
 import SettingsPage from './pages/SettingsPage';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -43,6 +44,8 @@ const App: React.FC = () => {
                 <Route path="/parties" element={<ListParties />} />
                 <Route path="/parties/new" element={<EditParty />} />
                 <Route path="/parties/:partyId/edit" element={<EditParty />} />
+                <Route path="/parties/:partyId/sidekicks/new" element={<SidekickWizard />} />
+                <Route path="/parties/:partyId/sidekicks/:memberId/edit" element={<SidekickWizard />} />
                 <Route path="/settings" element={<SettingsPage />} />
               </Route>
             </Routes>

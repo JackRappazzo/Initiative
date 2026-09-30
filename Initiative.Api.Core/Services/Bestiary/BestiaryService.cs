@@ -25,6 +25,7 @@ namespace Initiative.Api.Core.Services.Bestiary
                 NameSearch = query.NameSearch,
                 CreatureType = query.CreatureType,
                 ChallengeRating = query.ChallengeRating,
+                MaxChallengeRating = query.MaxChallengeRating,
                 IsLegendary = query.IsLegendary,
                 OwnerId = query.OwnerId,
             };

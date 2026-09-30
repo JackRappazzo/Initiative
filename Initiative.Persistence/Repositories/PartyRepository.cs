@@ -42,6 +42,17 @@ namespace Initiative.Persistence.Repositories
             return await collection.Find(filter).ToListAsync(cancellationToken);
         }
 
+        public async Task<bool> UpdatePartyMembers(string partyId, string ownerId, IEnumerable<PartyMember> members, CancellationToken cancellationToken)
+        {
+            var collection = GetMongoDatabase().GetCollection<PartyDocument>(TableName);
+            var update = Builders<PartyDocument>.Update.Set(p => p.Members, members);
+            var result = await collection.UpdateOneAsync(
+                p => p.Id == partyId && p.OwnerId == ownerId,
+                update,
+                cancellationToken: cancellationToken);
+            return result.MatchedCount > 0;
+        }
+
         public async Task<bool> DeleteParty(string partyId, string ownerId, CancellationToken cancellationToken)
         {
             var collection = GetMongoDatabase().GetCollection<PartyDocument>(TableName);

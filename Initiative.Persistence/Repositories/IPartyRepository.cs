@@ -7,6 +7,7 @@ namespace Initiative.Persistence.Repositories
         Task<string> CreateParty(string ownerId, string name, IEnumerable<PartyMember> members, CancellationToken cancellationToken);
         Task<PartyDocument?> FetchPartyById(string partyId, string ownerId, CancellationToken cancellationToken);
         Task<IEnumerable<PartyDocument>> FetchPartiesByOwnerId(string ownerId, CancellationToken cancellationToken);
+        Task<bool> UpdatePartyMembers(string partyId, string ownerId, IEnumerable<PartyMember> members, CancellationToken cancellationToken);
         Task<bool> DeleteParty(string partyId, string ownerId, CancellationToken cancellationToken);
     }
 }

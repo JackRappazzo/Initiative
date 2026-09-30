@@ -23,6 +23,9 @@ export interface SearchCreaturesParams {
   bestiaryIds?: string[];
   name?: string;
   creatureType?: string;
+  challengeRating?: string;
+  maxChallengeRating?: string;
+  isLegendary?: boolean;
   sortBy?: CreatureSortBy;
   sortDescending?: boolean;
   pageSize?: number;
@@ -270,6 +273,9 @@ export class BestiaryClient {
     if (params.bestiaryIds !== undefined) result["bestiaryIds"] = params.bestiaryIds;
     if (params.name) result["name"] = params.name;
     if (params.creatureType) result["creatureType"] = params.creatureType;
+    if (params.challengeRating) result["challengeRating"] = params.challengeRating;
+    if (params.maxChallengeRating) result["maxChallengeRating"] = params.maxChallengeRating;
+    if (params.isLegendary !== undefined) result["isLegendary"] = params.isLegendary;
     if (params.sortBy) result["sortBy"] = params.sortBy;
     if (params.sortDescending) result["sortDescending"] = params.sortDescending;
     if (params.pageSize !== undefined) result["pageSize"] = params.pageSize;

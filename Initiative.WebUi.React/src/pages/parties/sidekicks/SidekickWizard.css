@@ -1,0 +1,105 @@
+.sidekick-wizard {
+  padding: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.sidekick-wizard h1 {
+  margin-bottom: 1rem;
+}
+
+.sidekick-wizard-start {
+  padding: 2rem;
+  text-align: center;
+}
+
+.sidekick-wizard-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .sidekick-wizard-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sidekick-wizard-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sidekick-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sidekick-field label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.sidekick-field input,
+.sidekick-field select,
+.sidekick-field textarea {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.sidekick-hp-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sidekick-hp-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sidekick-hp-total {
+  font-weight: 700;
+}
+
+.sidekick-hp-rolls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sidekick-hp-roll {
+  background: #f0f0f0;
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.sidekick-asi-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 0.75rem;
+}
+
+.sidekick-asi-section h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.sidekick-wizard-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.sidekick-wizard-preview h3 {
+  margin-top: 0;
+}

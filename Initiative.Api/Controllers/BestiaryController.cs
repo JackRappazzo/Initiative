@@ -47,6 +47,7 @@ namespace Initiative.Api.Controllers
                 NameSearch = request.Name,
                 CreatureType = request.CreatureType,
                 ChallengeRating = request.ChallengeRating,
+                MaxChallengeRating = request.MaxChallengeRating,
                 IsLegendary = request.IsLegendary,
                 SortBy = request.SortBy,
                 SortDescending = request.SortDescending,

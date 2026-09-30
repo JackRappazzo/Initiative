@@ -27,6 +27,12 @@ namespace Initiative.Persistence.Models.Bestiary
         public string? ChallengeRating { get; set; }
 
         /// <summary>
+        /// Inclusive upper bound on challenge rating, e.g. "1/2" matches CR 0, 1/8, 1/4 and 1/2.
+        /// Null means no maximum CR filter.
+        /// </summary>
+        public string? MaxChallengeRating { get; set; }
+
+        /// <summary>
         /// When true, restrict to legendary creatures only.
         /// When false, restrict to non-legendary creatures only.
         /// Null means no legendary filter.

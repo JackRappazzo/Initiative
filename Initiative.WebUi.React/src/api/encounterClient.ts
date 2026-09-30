@@ -7,6 +7,8 @@ export interface EncounterCreatureJsonModel {
   creatureId?: string;
   dndBeyondCharacterId?: string;
   isHpLinkedToDndBeyond?: boolean;
+  sidekickId?: string;
+  rawData?: import('./bestiaryClient').FiveEToolsRawData;
   statuses?: string[];
   isHidden?: boolean;
   initiative: number;

@@ -5,6 +5,7 @@ using Initiative.Api.Messages;
 using Initiative.Persistence.Models.Encounters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using System.Security.Principal;
 
 namespace Initiative.Api.Controllers
@@ -65,9 +66,12 @@ namespace Initiative.Api.Controllers
                     CreatureId = c.CreatureId,
                     DndBeyondCharacterId = c.DndBeyondCharacterId,
                     IsHpLinkedToDndBeyond = c.IsHpLinkedToDndBeyond,
+                    SidekickId = c.SidekickId,
+                    RawData = c.RawData == null ? null : BsonTypeMapper.MapToDotNetValue(c.RawData),
                     Statuses = c.Statuses,
                     IsHidden = c.IsHidden,
                     Initiative = c.Initiative,
+                    InitiativeModifier = c.InitiativeModifier,
                     MaxHP = c.MaxHP,
                     CurrentHP = c.CurrentHP,
                     AC = c.AC
@@ -92,9 +96,12 @@ namespace Initiative.Api.Controllers
                     CreatureId = c.CreatureId,
                     DndBeyondCharacterId = c.DndBeyondCharacterId,
                     IsHpLinkedToDndBeyond = c.IsHpLinkedToDndBeyond,
+                    SidekickId = c.SidekickId,
+                    RawData = c.RawData == null ? null : BsonDocument.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(c.RawData)),
                     Statuses = c.Statuses,
                     IsHidden = c.IsHidden,
                     Initiative = c.Initiative,
+                    InitiativeModifier = c.InitiativeModifier,
                     MaxHP = c.MaxHP,
                     CurrentHP = c.CurrentHP,
                     AC = c.AC
