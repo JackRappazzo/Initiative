@@ -210,6 +210,7 @@ export function renderEntriesAsNodes(
               <li key={j}>
                 {item.name && <strong>{item.name}. </strong>}
                 {item.entries && renderEntriesAsNodes(item.entries, onRoll, `${keyPrefix}-${i}-${j}`)}
+                {item.entry != null && renderLooseEntryNodes(item.entry, onRoll, `${keyPrefix}-${i}-${j}`)}
               </li>
             );
           })}

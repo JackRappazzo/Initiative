@@ -37,6 +37,7 @@ export interface SearchCreaturesParams {
 export interface FiveEToolsEntry {
   type?: string;
   name?: string;
+  entry?: string | FiveEToolsEntry;
   entries?: (string | FiveEToolsEntry)[];
   items?: (string | FiveEToolsEntry)[];
   style?: string;
