@@ -4,6 +4,7 @@ using Initiative.Api.Core.Utilities;
 using Initiative.Persistence.Models;
 using Initiative.Persistence.Repositories;
 using Microsoft.AspNetCore.Identity;
+using System.Linq;
 
 namespace Initiative.Api.Core.Services.Users
 {
@@ -37,11 +38,11 @@ namespace Initiative.Api.Core.Services.Users
                 return (false, "Email exists");
             }
 
-            var (identityCreated, userId) = await CreateIdentity(displayName, email, password, cancellationToken);
+            var (identityResult, userId) = await CreateIdentity(displayName, email, password, cancellationToken);
 
-            if (!identityCreated)
+            if (!identityResult.Succeeded)
             {
-                return (false, "Failed to create identity");
+                return (false, string.Join(" ", identityResult.Errors.Select(e => e.Description)));
             }
             else
             {
@@ -59,7 +60,7 @@ namespace Initiative.Api.Core.Services.Users
             }
         }
 
-        private async Task<(bool, string)> CreateIdentity(string displayName, string email, string password, CancellationToken cancellationToken)
+        private async Task<(IdentityResult, string)> CreateIdentity(string displayName, string email, string password, CancellationToken cancellationToken)
         {
             var user = new Core.Identity.ApplicationIdentity()
             {
@@ -67,7 +68,7 @@ namespace Initiative.Api.Core.Services.Users
                 UserName = email
             };
             var result = await userManager.CreateAsync(user, password);
-            return (result.Succeeded, user.Id.ToString());
+            return (result, user.Id.ToString());
         }
 
         private async Task<bool> DeleteIdentity(string userId, CancellationToken cancellationToken)

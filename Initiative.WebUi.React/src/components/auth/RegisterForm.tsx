@@ -1,4 +1,5 @@
 import { useState, FormEvent } from "react";
+import { AxiosError } from "axios";
 import { AdminClient } from "../../api/adminClient";
 import "./RegisterForm.css";
 
@@ -26,7 +27,8 @@ const RegisterForm = () => {
       setPassword("");
     } catch (err) {
       console.error(err);
-      setError("Registration failed. Please try again.");
+      const data = (err as AxiosError).response?.data;
+      setError(typeof data === "string" && data ? data : "Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
